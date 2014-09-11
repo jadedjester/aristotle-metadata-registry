@@ -1,0 +1,60 @@
+{% extends "aristotle_mdr/user/userHome.html" %}
+{% load inplace_edit %}
+
+{% block collapse-link %}
+    <i class="fa fa-institution fa-fw"></i> Registrar tools </a>
+{% endblock %}
+
+{% block sidebar %}
+    {% include "aristotle_mdr/user/userSideBar.html" with activeTab='registrarTools' %}
+{% endblock %}
+
+{% block page %}
+<h1>{% block title %}Review list{% endblock %}</h1>
+<p>
+    The following items have been marked as "ready to review" by the editors in their workgroup,
+    and are ready to begin the standarisation process.
+</p>
+<table class='table'>
+    <thead>
+        <tr>
+        <th>Item</th>
+        <th>Registration Authorities</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if items %}
+        {% for item in items %}
+            <tr>
+                <td>
+                    {% include "aristotle_mdr/helpers/itemLink.html" with item=item.item showType=True %}
+                    <br>
+                    {{ item.description|striptags|truncatewords:20 }}
+                </td>
+                <td>
+                    <ul>
+                        {% for r in item.workgroup.registrationAuthorities.all %}
+                            <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=r %}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+        <th>Item</th>
+        <th>Registration Authorities</th>
+        </tr>
+    </tfoot>
+</table>
+    {% else %}
+</table>
+<div class="well text-center">
+    No items.
+</div>
+
+    {% endif %}
+
+
+{% endblock %}

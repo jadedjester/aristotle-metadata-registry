@@ -1,0 +1,20 @@
+{% extends "aristotle_mdr/pdf/managedContent.html" %}
+
+{% block title %}{{ item.name }} ({{item.status}}){% endblock %}
+{% block objSpecific %}
+    <h2>Representational attributes</h2>
+    {% include "aristotle_mdr/concepts/valueDomainRepresentation.html" %}
+
+    <h2>Relational attributes</h2>
+    {% if item.dataelement_set.all %}
+        <h3>Data Elements implementing this Value Domain</h3>
+        <ul>
+        {% for de in item.dataelement_set.all %}
+            <li>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=de %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

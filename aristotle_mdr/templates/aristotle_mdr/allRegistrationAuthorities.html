@@ -1,0 +1,35 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% block title %}All registration authorities{% endblock %}
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        <i class="fa fa fa-university "></i>
+        <a href="#">Current registration authorities</a>
+    </h1>
+</header>
+<section class="row">
+
+{% if registrationAuthorities.count > 0 %}
+<p>
+    Below is a complete listing of the <a href="{% url 'aristotle:about' 'registration_authority' %}">registration authorities</a>
+    partcipating in the registry mainitained in this site - <a href="{% url 'aristotle:aboutThisSite' %}"><em>{{ config.SITE_NAME }}</em></a>
+</p>
+    <ul>
+        {% for ra in registrationAuthorities %}
+        <li>
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=ra %}
+        <div>
+            {{ ra.description | striptags |truncatewords:50 }}
+        </div>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <strong>
+        <em>This registry has no registration authorities!</em>
+    </strong>
+{% endif %}
+
+</section>
+{% endblock %}

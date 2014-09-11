@@ -1,0 +1,20 @@
+{% extends "aristotle_mdr/create/managedObject.html" %}
+
+{% block title %}New Data Element Concept{% endblock %}
+{% block type %}dataelementconcept{% endblock %}
+
+{% block form_details %}
+
+{{ form.as_p }}
+
+{% endblock %}
+
+{% block creationTips %}
+<header>Tips for creating good Data Element Concepts:</header>
+Object classes are <em>things</em> we wish to collect information about.
+Good names for object classes are short, descriptive nouns.
+<ul>
+  <li><strong>Reuse:</strong>Reuse is good.
+  </li>
+</ul>
+{% endblock %}

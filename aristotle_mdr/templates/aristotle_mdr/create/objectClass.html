@@ -1,0 +1,33 @@
+{% extends "aristotle_mdr/create/managedObject.html" %}
+
+{% block title %}New Object Class{% endblock %}
+{% block type %}objectclass{% endblock %}
+
+{% block form_details %}
+
+{{ form.as_p }}
+
+{% endblock %}
+
+{% block creationTips %}
+<header>Tips for creating good Object Classes:</header>
+Object classes are <em>things</em> we wish to collect information about.
+Good names for object classes are short, descriptive nouns.
+<ul>
+  <li><strong>Be generic:</strong>An object class should apply to the widest group possible.
+  Only make more specific classes, if there are particular attributes only found on the specialisation.
+  e.g. Person, not Australian Citizens</li>
+  <li><strong>Use singlar forms:</strong>When discusing individuals, use singular terms to ensure unambiguity. For example, a <em>Person</em> can have an age, but a <em>Group of people</em> has an average age.</li>
+  <!--  <li><strong>:</strong></li> -->
+</ul>
+
+<!--
+If you are unsure, use the name of your object class in the contexts below.
+<ul>
+  <li>Measure of the age of <em>noun.</em></li>
+  <li>Comparing the yearly income of <em>nouns</em> and private companies</li>
+</ul>
+In these examples, <q>Comparing the yearly income of <em>Persons</em> and private companies</q> makes sense,
+but <q>Measure of the age of <em>Wages.</em></q> does not - wages is an attribute of people or businesses.-->
+
+{% endblock %}

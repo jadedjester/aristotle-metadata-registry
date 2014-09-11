@@ -1,0 +1,52 @@
+{% block content %}
+<section>
+    <header>
+    <h2 id="objectTitle">
+        {{ item.name }}
+    </h2>
+</header>
+<div class="description">
+    {{ item.description | safe }}
+</div>
+<div class="status">
+    {% include "aristotle_mdr/statuses.html" with statuses=item.statuses only %}
+</div>
+<table id="supersedes">
+    <tr>
+    <td>Supersedes:
+          <ul>
+          {% for sup in item.supersedes.all %}
+            <li>
+            <a href="/item/{{ sup.id }}/">{{ sup }}</a>
+            <span>(id {{ sup.id }})</span>
+            </li>
+          {% empty %}
+            <li>-</li>
+          {% endfor %}
+          </ul>
+    </td>
+    <td>Superseded by:
+        <ul><li>
+        {% if item.superseded_by %}
+            <a href="/item/{{ item.superseded_by.id }}/">{{ item.superseded_by }}</a>
+        {% else %}
+            -
+        {% endif %}
+        </li></ul>
+    </td>
+    </tr>
+</table>
+<div class="objectSpecific">
+    {% block objSpecific %}
+    {% endblock %}
+</div>
+<div id="registryDetails">
+    <strong>Registry Details</strong>
+    <dl>
+        <dt>Last updated:</dt><dd>{{item.modified}}</dd>
+        <dt>Created:</dt><dd>{{item.created}}</dd>
+    </dl>
+</div>
+</section>
+
+{% endblock %}

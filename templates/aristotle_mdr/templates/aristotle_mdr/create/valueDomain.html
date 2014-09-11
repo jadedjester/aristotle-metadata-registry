@@ -1,0 +1,21 @@
+{% extends "aristotle_mdr/create/managedObject.html" %}
+
+{% block title %}New Value Domain{% endblock %}
+{% block type %}valuedomain{% endblock %}
+
+{% block form_details %}
+
+{{ form.as_p }}
+
+{% endblock %}
+
+{% block creationTips %}
+<header>Tips for creating good Value Domains:</header>
+Value Domains are <em>how</em> we record information we have collected.
+Good names for value domains are short, descriptive nouns.
+<ul>
+    <li><strong>Lorum:</strong>Ipsum</li>
+    <!--  <li><strong>:</strong></li> -->
+</ul>
+{% endblock %}
+

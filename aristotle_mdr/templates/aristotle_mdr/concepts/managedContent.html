@@ -1,0 +1,185 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% load inplace_edit %}
+{% load aristotle_tags %}
+
+{% block title %}{{ item.name }} ({{ item.get_verbose_name }}){% endblock %}
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        {% if user.is_authenticated %}
+        <a href="/account/toggleFavourite/{{item.id}}"
+            title="{% ternary isFavourite 'Remove from my favourite items' 'Add to my favourite items' %}"
+            id="favourite">
+            {% if isFavourite %}
+                <i class="fa fa-bookmark "></i>
+            {% else %}
+                <i class="fa fa-bookmark-o "></i>
+            {% endif %}
+        </a>
+        {% endif %}
+        <a href="#">{% inplace_edit 'item.name' %}</a>
+        <small>({{ item.get_verbose_name }})</small>
+    </h1>
+    <div class="btn-group pull-right" >
+        {% if user_can_edit %}
+        <a id="ActivateInplaceEdit" class="btn btn-default"></a>
+        {% endif %}
+        {% if view == "technical" and user.is_active %}
+        <a class="btn btn-default hidden-xs" href="{% adminEdit item %}">
+            <i class="fa fa-sliders"></i> Advanced editor
+        </a>
+        <a class="btn btn-default hidden-xs" href="{% clone item %}">
+            <i class="fa fa-code-fork"></i> Clone
+        </a>
+        {% endif %}
+        {% if view == "technical" %}
+            <a href="?view=simple" id="viewChange" class="btn btn-default"><i class="fa fa-minus-square"></i> Simple View</a>
+        {% else %}
+            <a href="?view=technical" id="viewChange" class="btn btn-default"><i class="fa fa-graduation-cap"></i> Technical View</a>
+        {% endif %}
+        <div class="btn-group">
+            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-download"></i> Download
+            </button>
+            {% downloadMenu item.id %}
+        </div>
+    </div>
+</header>
+<section class="managed row">
+<aside id="infobox-wrap" class="col-xs-12 col-sm-4 pull-right navbar navbar-default">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#infobox">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="#" class="navbar-brand visible-xs" style="float:none;">
+        {% block collapse-link %}
+        <i class="fa fa-info-circle fa-fw"></i>More details...
+        {% endblock %}
+      </a>
+    </div>
+    <div id="infobox" class="collapse navbar-collapse" >
+        <header class="hidden-xs">{{ item.name }}</header>
+        <dl>
+            <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
+            <dt>Aristotle ID</dt><dd>{{ item.id }}</dd>
+            {% if item.shortName %}
+            <dt>Short name</dt><dd>{{ item.shortName }}</dd>
+            {% endif %}
+            {% if item.synonyms %}
+            <dt>Synonyms</dt><dd>{{ item.synonyms }}</dd>
+            {% endif %}
+            <dt>Included in</dt>
+            <dd>
+                {% with total=item.packages.count %}
+                {% if total > 0 %}<a href="{{ request.path }}/packages">{% endif %}
+                {{ total }} Package{{ total|pluralize }}
+                {% if total > 0 %}</a>{% endif %}
+                {% endwith %}
+            </dd>
+            {% block includes %}{% endblock %}
+
+            {% include "aristotle_mdr/statuses.html" with statuses=item.statuses infoBox=True %}
+            <dt>Last updated</dt>
+            <dd>
+                <a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a>
+                {% if request.user.is_active %}<span>By {{ last_edit.revision.user.get_username }}</span>{% endif %}
+            </dd>
+            <dt>Created</dt><dd>{{item.created}}</dd>
+        </dl>
+        {% block asideContent %}{% endblock %}
+
+        {% with total=item.supersedes.count %}
+            <dt class="large">Supersedes
+            {% if user.is_active %}
+                <a class="inline_action" href="{% url 'aristotle:deprecate' iid=item.id %}"
+                    data-toggle="modal" data-target="#supersede">{% ternary total 'Change' 'Add'%}</a>
+            {% endif %}</dt>
+            <dd class="large">
+            <ul>
+                <li>{{ total }} {% pluralmodel item total %}</li>
+                {% for sup in item.supersedes.all %}
+                    {% if user|can_view_item:sup %}
+                    <li>
+                      <a href="{% url 'aristotle:item' item_id=sup.id %}/">
+                        {{ sup }}
+                      </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            </dd>
+        {% endwith %}
+            <dt class="large">Superseded by
+                {% if user.is_active %}
+                    <a class="inline_action" href="{% url 'aristotle:supersede' iid=item.id %}"
+                       data-toggle="modal" data-target="#supersede">{% ternary item.superseded_by 'Change' 'Add'%}</a>
+                {% endif %}</dt>
+            <dd class="large">
+            <ul><li>
+                {% if item.superseded_by %}
+                    <a href="{% url 'aristotle:item' item_id=item.superseded_by.id %}">{{ item.superseded_by }}</a>
+                {% else %}
+                    -
+                {% endif %}
+            </li></ul>
+            </dd>
+        </dl>
+        <div id="supersede" class="modal fade">
+          <div class="modal-dialog">
+              <div class="modal-content">
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+</aside>
+<div> {# removed class="col-xs-12 col-sm-8" to ensure sections float around aside #}
+    {% if item.is_public %}
+        {# split the if condition as if its public and not technical, we want nothing not one of the lower alerts #}
+        <div id="progress" class='alert alert-success {% if view != "technical" %}hidden{% endif %}'>
+            This item is currently public.
+        </div>
+    {% elif item.is_locked %}
+    <div id="progress" class=" alert alert-info">
+        This item is currently under development.
+    </div>
+    {% else %}
+    <div id="progress" class=" alert alert-warning">
+        This item is under review and active development. Content may change frequently.
+    </div>
+    {% endif %}
+    {% if not item.is_registered %}
+    <div id="review" class=" alert alert-info">
+        <strong>{% if item.readyToReview %}
+        This item has been marked as ready to review, but has not yet been registered in an authority.
+        {% else %}
+        The visibility of this item is still restricted to your current workgroup.
+        {% endif %}</strong><br>
+
+        <p>You can control the visibility of this item by indicating its review status.
+        If an item is marked "ready for review", registrars will be able to see this
+        item and begin the standardisation process according to their registration authority.
+
+        <p><label>Is this item {% ternary item.readyToReview "" "still" %} ready for review?</label>
+        {% inplace_edit 'item.readyToReview' adaptor='booleanYesNo' %}
+    </div>
+    {% endif %}
+    <div id="description" class="description">
+        <h2 class="sr-only">Description</h2>
+        {% inplace_edit 'item.description' adaptor='aristotle' %}
+    </div>
+    {% block objSpecific %}
+    {% endblock %}
+    {% if item.references or view == "technical" %}
+    <div>
+    <h2>References</h2>
+        {% inplace_edit 'item.references' adaptor='aristotle' %}
+    </div>
+    {% endif %}
+</div>
+
+</section>
+{% endblock %}

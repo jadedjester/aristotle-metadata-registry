@@ -1,0 +1,93 @@
+{% extends "aristotle_mdr/concepts/managedContent.html" %}
+{% load aristotle_tags %}
+
+{% block includes %}
+<dd>
+    {% with total=item.dssInclusions.count %}
+        {% if total > 0 %}<a href="#DSSInclusions">{% endif %}
+        {{ total }} Dataset Specification{{ total|pluralize }}
+        {% if total > 0 %}</a>{% endif %}
+    {% endwith %}
+</dd>
+{% endblock %}
+
+{% block objSpecific %}
+<h2>Components</h2>
+{% if view == "technical" %}
+
+    <h3 >Data Element Concept -
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept %}</h3>
+        {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept name=False %}
+
+        <dl class="additionaldetails">
+            <dt>Object Class - {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept.objectClass %}</dt>
+            <dd>{% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept.objectClass name=False %}</dd>
+            <dt>Property - {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept.property %}</dt>
+            <dd>{% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept.property name=False %}</dd>
+        </dl>
+
+    <h3>Value Domain -
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=item.valueDomain %}</h3>
+        {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.valueDomain name=False %}
+        <h4>Representation</h4>
+        {% include "aristotle_mdr/concepts/valueDomainRepresentation.html" with item=item.valueDomain %}
+{% else %}
+    {# Use &nbsp; to easily force the headers to be as wide as needed #}
+    <section class="makeup">
+        <header class="panel panel-primary">
+            <div class="panel-heading">Data&nbsp;Element <small>(this item)</small></div>
+            <div class="panel-body">
+                <a class="name" href="#">{{ item.name }}</a>
+            </div>
+        </header>
+        <ul class="split">
+            <li style="width:60%;">
+                <header class="panel panel-info">
+                    <div class="panel-heading arrow">Data&nbsp;Element Concept</div>
+                    <span class="panel-body name">
+                        {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept space=True %}
+                    </span>
+                </header>
+                <ul class="split">
+                    <li  class="panel panel-info" >
+                        <div class="panel-heading arrow">Object&nbsp;Class</div>
+                        <span class="panel-body name">
+                            {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept.objectClass %}
+                        </span>
+                    </li>
+                    <li  class="panel panel-info" >
+                        <div class="panel-heading arrow">Property</div>
+                        <span class="panel-body name">
+                            {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept.property %}
+                        </span>
+                    </li>
+                </ul>
+            </li>
+            <li style="width:40%;">
+                <header class="panel panel-info">
+                <div class="panel-heading arrow">Value Domain</div>
+                <span class="panel-body name">{% include "aristotle_mdr/helpers/itemLink.html" with item=item.valueDomain %}</span>
+                </header>
+            </li>
+        </ul>
+    </section>
+
+    {% if item.valueDomain %}
+        <h2>Representation</h2>
+        This representation is based on the value domain for this data element, more information is
+        available at "{% include "aristotle_mdr/helpers/itemLink.html" with item=item.valueDomain %}".
+            {% include "aristotle_mdr/concepts/valueDomainRepresentation.html" with item=item.valueDomain %}
+    {% endif %}
+{% endif %}
+
+<h2>Relationships</h2>
+<h3 id="DSSInclusions">Dataset specifications</h3>
+This data element is included in the following Dataset specifications, some datasets may be hidden based on your current permissions.
+<ul>
+    {% for inclusion in item.dssInclusions.all %} {#|can_view_iter:request.user %#}
+        <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=inclusion.dss %} ({{ inclusion.cardinality }})</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+

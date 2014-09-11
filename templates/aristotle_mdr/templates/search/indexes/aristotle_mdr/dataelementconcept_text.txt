@@ -1,0 +1,4 @@
+{% include "search/indexes/aristotle_mdr/managedobject_text.txt" %}
+{% include "search/indexes/aristotle_mdr/objectclass_text.txt" with object=object.objectClass only %}
+{% include "search/indexes/aristotle_mdr/property_text.txt" with object=object.property only %}
+

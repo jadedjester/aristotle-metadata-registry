@@ -1,0 +1,35 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %}
+
+{% block title %}About: Object Class{% endblock %}
+{% block item_name %}Object Class{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'aristotle:about' 'objectclass' %}">Object Class</a></li>
+{% endblock %}
+
+{% block iso_quote %}
+a set of ideas, abstractions, or things in the real world that are identified with explicit boundaries and meaning
+and whose properties and behaviour follow the same rules
+{% endblock %}
+
+{% block description %}
+    <p>An object class represents a person, organisation, structure or event that
+    is of interest and needs to be described.  Examples of object classes include
+    <em>Person, Dwelling</em> and <em>Family</em>.</p>
+
+    <p>The union of a specific object class with a specific property creates a data
+    element concept. For example, some of the above mentioned object classes can be
+    combined with an <em>Religious affiliation</em> property to create the data
+    element concepts: <em>Person &mdash; religious affiliation</em> and <em>Family
+    &mdash; religious affiliation</em>.</p>
+
+    <p>Object classes can be specialisations of other object classes.  For example,
+    <em>Adult</em> is an age group related specialisation of <em>Person</em>.</p>
+
+    <p>Specialisations allow object classes to be grouped and subtyped in a
+    meaningful manner and help users in browsing and locating relevant object
+    classes. In a specialisation tree an object class can only be associated with a
+    single parent object class but may have more than one child object classes. A
+    child object class inherits all characteristics of its parent object class, but
+    a child object class may have unique characteristics.</p>
+{% endblock %}

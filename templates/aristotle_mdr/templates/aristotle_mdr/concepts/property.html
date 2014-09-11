@@ -1,0 +1,17 @@
+{% extends "aristotle_mdr/concepts/managedContent.html" %}
+{% load inplace_edit %}
+
+{% block objSpecific %}
+    <h2>Relational attributes</h2>
+    {% if item.dataelementconcept_set.all %}
+        <h3>Data Element Concepts implementing this Property</h3>
+        <ul>
+        {% for dec in item.dataelementconcept_set.all %}
+            <li>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

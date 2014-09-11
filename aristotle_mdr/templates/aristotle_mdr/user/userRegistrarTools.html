@@ -1,0 +1,45 @@
+{% extends "aristotle_mdr/user/userHome.html" %}
+{% load inplace_edit %}
+
+{% block collapse-link %}
+    <i class="fa fa-institution fa-fw"></i> Registrar tools </a>
+{% endblock %}
+
+{% block sidebar %}
+    {% include "aristotle_mdr/user/userSideBar.html" with activeTab='registrarTools' %}
+{% endblock %}
+
+{% block page %}
+<h1>{% block title %}Registrar tools{% endblock %}</h1>
+    <section id="workgroups">
+        <header>Recent Workgroups</header>
+        <ul>
+        {% for item in user.profile.myWorkgroups.all %}
+          <li><a href="{% url 'aristotle:workgroup' item.id %}">{{ item }}</a> -
+            <span>{{ item.description }}</span>
+            </li>
+        {% empty %}
+            <li> No workgroups </li>
+        {% endfor %}
+        </ul>
+    </section>
+
+<h2>Recent conversations</h2>
+<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
+<table>
+    <thead>
+        <tr>
+            <td>Title</td>
+            <td>Author</td>
+            <td>Last comment</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

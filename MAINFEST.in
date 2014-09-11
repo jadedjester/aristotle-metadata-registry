@@ -1,0 +1,4 @@
+include LICENSE
+include README.rst
+recursive-include aristotle_mdr/static *
+recursive-include aristotle_mdr/templates *

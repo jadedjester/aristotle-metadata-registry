@@ -1,0 +1,3 @@
+{% include "search/indexes/aristotle_mdr/managedobject_text.txt" %}
+{% include "search/indexes/aristotle_mdr/dataelementconcept_text.txt" with object=object.dataElementConcept only %}
+{% include "search/indexes/aristotle_mdr/valuedomain_text.txt" with object=object.valueDomain only %}

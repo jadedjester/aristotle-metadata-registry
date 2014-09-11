@@ -1,0 +1,66 @@
+{% extends "aristotle_mdr/workgroup.html" %}
+{% url 'aristotle:item' item.id %}
+{% block title %}{{ workgroup.name }} Membership list{% endblock %}
+{% block page %}
+<header>Details</header>
+
+<dl>
+<dt>Managers {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Manager" class="inline_action">Add</a>{% endif %}</dt>
+<dd>
+<ul>
+{% for member in workgroup.managers %}
+    {% if user_is_admin %}
+    <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
+        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Manager' userid=member.id %}" title="Remove from managers."><i class="text-danger fa fa-times"></i></a>
+    </li>
+    {% endif %}{% endfor %}
+</ul>
+</dd>
+<dt>Super-editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Super-Editor" class="inline_action">Add</a>{% endif %}</dt>
+<dd>
+<ul>
+{% for member in workgroup.super_editors %}
+    {% if user_is_admin %}
+    <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
+        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Super-Editor' userid=member.id %}" title="Remove from super editors."><i class="text-danger fa fa-times"></i></a>
+    </li>
+    {% endif %}{% endfor %}
+</ul>
+</dd>
+<dt>Editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Editor" class="inline_action">Add</a>{% endif %}</dt>
+<dd>
+<ul>
+{% for member in workgroup.editors %}
+    {% if user_is_admin %}
+    <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
+        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Editor' userid=member.id %}" title="Remove from editors."><i class="text-danger fa fa-times"></i></a>
+    </li>
+    {% endif %}
+{% endfor %}
+</ul>
+</dd>
+<dt>Viewers {% if user_is_admin %}
+    <a  data-toggle="modal" data-target="#addMember"
+        href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Viewer" class="inline_action">Add
+    </a>{% endif %}
+</dt>
+<dd>
+<ul>
+{% for member in workgroup.viewers %}
+    {% if user_is_admin %}
+    <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
+        <a href="/remove/WorkgroupRole/{{ workgroup.id }}/Viewer/{{ member.id }}" title="Remove from viewers."><i class="text-danger fa fa-times"></i></a>
+    </li>
+    {% endif %}{% endfor %}
+</ul>
+</dd>
+</dl>
+
+<div id="addMember" class="modal fade">
+  <div class="modal-dialog">
+      <div class="modal-content">
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{% endblock %}

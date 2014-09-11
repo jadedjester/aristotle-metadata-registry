@@ -1,0 +1,67 @@
+{% extends "aristotle_mdr/pdf/managedContent.html" %}
+
+{% block title %}{{ item.name }} ({{item.status}}){% endblock %}
+{% block objSpecific %}
+    <div style="page-break-after:always;">
+    <h2>Metadata items in this Data Set Specification</h2>
+    {% if item.dataElements.all %}
+        <p> Below is a list of all the components within this Dataset Specification.
+            <br> Each entry includes the item name, whether the item is <em>optional, mandatory or conditional</em> and the maximum times the item can occur in a dataset.
+            <br> If the items must occur in a particular order in the dataset, the sequence number is included before the item name.
+        </p>
+        <ul>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for deinc in item.dataElements.all %}
+                <tr>
+                    <td></td>
+                    <td>{% include "aristotle_mdr/helpers/itemLink.html" with item=deinc.dataElement %}</td>
+                    <td>{{ deinc.cardinality }}</td>
+                    <td>{{ deinc.maximumOccurances }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    </div>
+    <div style="page-break-after:always;">
+        <h1>Data Elements</h1>
+        {% for de in items.dataElements %}
+            <div>
+                {% include "aristotle_mdr/pdf/inline/dataElement.html" with item=de %}
+            </div>
+        {% endfor %}
+    </div>
+    <div style="page-break-after:always;">
+        <h1>Data Elements Concepts</h1>
+        {% for dec in items.dataElementConcepts %}
+            <div>
+                {% include "aristotle_mdr/pdf/inline/dataElementConcept.html" with item=dec %}
+            </div>
+        {% endfor %}
+    </div>
+    <div style="page-break-after:always;">
+        <h1>Object Classes</h1>
+        {% for oc in items.objectClasses %}
+            <div>
+                {% include "aristotle_mdr/pdf/inline/objectClass.html" with item=oc %}
+            </div>
+        {% endfor %}
+    </div>
+    <div style="page-break-after:always;">
+        <h1>Properties</h1>
+        {% for p in items.properties %}
+            <div>
+                {% include "aristotle_mdr/pdf/inline/property.html" with item=p %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% load inplace_edit %}
+
+{% block title %}Browsing Object Classes{% endblock %}
+{% block content %}
+<section class="unmanaged row">
+    <h1>
+        <a href="#">Browsing Object Classes</a>
+    </h1>
+
+{% if items %}
+<p>
+    This is a complete list of all publically visible object classes stored in the registry.
+    Click the name of any item below to see associated data element concepts.
+</p>
+    <dl class='browse'>
+    {% for i in items %}
+        <dt>
+            <a href="{% url 'aristotle:browse' oc_id=i.id %}-{{ i.name|slugify }}">{{ i.name }}</a>
+        </dt>
+        <dd>
+            {{ i.description|truncatewords:20|striptags }}
+        </dd>
+    {% endfor %}
+    </dl>
+{% else %}
+    <em>No object classes in this registry.</em>
+{% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "aristotle_mdr/base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block search %} {% endblock %}
+{% block content %}
+
+<div class="jumbotron">
+<p>{{ config.SITE_INTRO }}</p>
+<form id="homeSearch" action="{% url 'aristotle:search' %}" method="get" >
+        <input type="text" class="form-control" id="searchText" name="q" accesskey="q"></input>
+        <div class="text-center" style="margin-top:5px;">
+            <a href="/search" class="btn btn-default">More options...</a>
+            <button class="btn btn-primary" type="submit">
+                Search <i class="fa fa-search"></i>
+            </button>
+        </div>
+</form>
+</div>
+
+<div id="homeFaq" class="row">
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="about/metadata">What is metadata?</a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="about/11179">What is ISO/IEC 11179?</a>
+                <a href="{% url 'aristotle:about' 'aristotle_mdr' %}">What is <em>Aristotle</em>?</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="about/">About <em>{{ config.SITE_NAME }}</em></a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="{% url 'aristotle:allRegistrationAuthorities' %}">Current registration authorities</a>
+                <a href="{% url 'aristotle:browse' %}">Browse the registry</a>
+                {% if extensions %}
+                <a href="{% url 'aristotle:aboutExtensions' %}">View current extensions</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="about/getting_data">How can I get data?</a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="#">What is a data dictionary?</a>
+                <a href="#">Why are data standards important?</a>
+                <a href="#"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="">How can I add content?</a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="{% url 'aristotle:about' 'workgroup' %}">What is a workgroup?</a>
+                <a href="#">What is a registration authority?</a>
+                <a href="{% url 'aristotle:help' 'how_does_content_become_visible' %}">How does content become visible?</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="{% url 'aristotle:about' 'metadata_standards' %}">About metadata standards</a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="#">What makes metadata "standard"?</a>
+                <a href="{% url 'aristotle:help' 'versioning_content' %}">Versioning content</a>
+                <a href="#">Ipsum ipsum</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 ">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title"><a href="">Lorum Lorum?</a></h2>
+            </div>
+            <div class="panel-body">
+                <a href="#">Ipsum</a>
+                <a href="#">Ipsum</a>
+                <a href="#">Ipsum</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

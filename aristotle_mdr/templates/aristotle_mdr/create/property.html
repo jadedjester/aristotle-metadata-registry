@@ -1,0 +1,21 @@
+{% extends "aristotle_mdr/create/managedObject.html" %}
+
+{% block title %}New Property{% endblock %}
+{% block type %}property{% endblock %}
+
+{% block form_details %}
+
+{{ form.as_p }}
+
+{% endblock %}
+
+{% block creationTips %}
+<header>Tips for creating good Properties:</header>
+Properties are <em>attributes about things</em> to collect information about.
+Good names for properties are short, descriptive nouns.
+<ul>
+    <li><strong>Lorum:</strong>Ipsum</li>
+    <!--  <li><strong>:</strong></li> -->
+</ul>
+{% endblock %}
+

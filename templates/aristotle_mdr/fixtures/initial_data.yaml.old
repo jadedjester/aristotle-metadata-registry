@@ -1,0 +1,112 @@
+- model: aristotle_mdr.possumObject
+  pk: 1
+  fields:
+    name: Social
+    description: Social Progress
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.workgroup
+  pk: 1
+  fields: {}
+- model: aristotle_mdr.possumObject
+  pk: 2
+  fields:
+    name: Person
+    description: A person
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 2
+  fields:
+    status: Draft
+- model: aristotle_mdr.objectClass
+  pk: 2
+  fields:
+    workgroup: 1
+- model: aristotle_mdr.possumObject
+  pk: 3
+  fields:
+    name: Age
+    description: How old are they?
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 3
+  fields:
+    status: Draft
+- model: aristotle_mdr.Property
+  pk: 3
+  fields:
+    objectClass: 2
+
+- model: aristotle_mdr.possumObject
+  pk: 4
+  fields:
+    name: Economic
+    description: Economic Progress
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.workgroup
+  pk: 4
+  fields: {}
+- model: aristotle_mdr.possumObject
+  pk: 5
+  fields:
+    name: Business
+    description: A business
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 5
+  fields:
+    status: Standard
+- model: aristotle_mdr.objectClass
+  pk: 5
+  fields:
+    workgroup: 4
+- model: aristotle_mdr.possumObject
+  pk: 6
+  fields:
+    name: ABN
+    description: Australian Business Number
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 6
+  fields:
+    status: Standard
+- model: aristotle_mdr.Property
+  pk: 6
+  fields:
+    objectClass: 5
+- model: aristotle_mdr.possumObject
+  pk: 7
+  fields:
+    name: Age range, code NN
+    description: A grouping of age
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 7
+  fields:
+    status: Standard
+- model: aristotle_mdr.ValueDomain
+  pk: 7
+  fields: {}
+- model: aristotle_mdr.possumObject
+  pk: 8
+  fields:
+    name: Person-Age range code NN
+    description: The age range that best accommodates a person's completed age in years, at the time of data collection, as represented by a code.
+    created: !!timestamp '2013-12-07
+      13:16:11+00:00'
+- model: aristotle_mdr.trebleObject
+  pk: 8
+  fields:
+    status: Standard
+- model: aristotle_mdr.DataElement
+  pk: 8
+  fields:
+    workgroup: 1
+    valueDomain: 7
+    property: 3

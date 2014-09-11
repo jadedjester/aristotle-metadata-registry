@@ -1,0 +1,18 @@
+{% extends "aristotle_mdr/pdf/managedContent.html" %}
+
+{% block title %}{{ item.name }} ({{item.status}}){% endblock %}
+{% block objSpecific %}
+
+    <h2>Relational attributes</h2>
+    {% if item.dataelementconcept_set.all %}
+        <h3>Data Element Concepts implementing this Object Class</h3>
+        <ul>
+        {% for dec in item.dataelementconcept_set.all %}
+            <li>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}

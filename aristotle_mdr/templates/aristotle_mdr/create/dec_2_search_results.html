@@ -1,0 +1,31 @@
+{% extends "aristotle_mdr/create/dec_template_wrapper.html" %}
+{% block formarea %}
+
+    {% if form.oc_options %}
+    <div class="message warning">
+        <strong>The following public objects were found with a title similar to "<em>{{form.name.value}}</em>".
+        </strong>
+        <br>Reusing existing content makes comparing items in the future easier.
+        <br>Consider reviewing these similar items to see if an existing piece of content meets your needs.
+        <ul>
+            {{ form.oc_options }}
+        </ul>
+        <input type="checkbox" name="userSwearsTheyKnowWhatTheyAreDoing"/>
+        <label for="userSwearsTheyKnowWhatTheyAreDoing">
+            I've reviewed these items, and none of them meet my needs. Make me a new one.
+        </label>
+    </div>
+    {% else %}
+        <p>
+            No matching object classes were found for reuse, so a new one will be created.
+        </p> 
+    {% endif %}
+
+    {% if form.pr_options %}
+    {% else %}
+        <p>
+            No matching Properties were found for reuse, so a new one will be created.
+        </p> 
+    {% endif %}
+
+{% endblock %}

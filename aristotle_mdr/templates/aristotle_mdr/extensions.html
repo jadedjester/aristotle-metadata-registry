@@ -1,0 +1,23 @@
+{% extends "aristotle_mdr/base.html" %}
+
+{% block title %}Extensions{% endblock %}
+{% block content %}
+
+<div class="row">
+
+    {% if extensions %}
+    <dl>
+    {% for ext in extensions %}
+
+        {% with ext|add:'/about_extension.html' as ext_template %}
+            {% include ext_template %}
+        {% endwith %}
+
+    {% endfor %}
+    </dl>
+    {% else %}
+No extensions installed.
+    {% endif %}
+</div>
+
+{% endblock %}

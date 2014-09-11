@@ -1,0 +1,28 @@
+Django==1.6.6
+Django-Select2==4.2.2
+Pillow==2.4.0
+PyPDF2==1.22
+South==0.8.4
+Whoosh==2.6.0
+argparse==1.2.1
+diff-match-patch==20121119
+django-autocomplete-light==2.0.0a18
+django-bootstrap3==4.8.2
+django-bootstrap3-datetimepicker==2.2.3
+-e git://github.com/comoga/django-constance@72fb15495cff82c059e55b8350c3ea5a34e82ba1#egg=django_constance-dev
+django-grappelli==2.5.3
+django-haystack==2.2.0
+django-inplaceedit==1.3.0
+django-inplaceedit-extra-fields==0.5.0
+django-model-utils==2.0.3
+django-picklefield==0.3.1
+django-reversion==1.8.0
+-e git://github.com/jedie/django-reversion-compare@ce4558ab700707d70401b89c824016e2e2584952#egg=django_reversion_compare-dev
+django-tinymce==1.5.2
+html5lib==1.0b3
+lxml==3.3.5
+pytz==2014.2
+reportlab==3.1.8
+six==1.6.1
+wsgiref==0.1.2
+xhtml2pdf==0.0.6

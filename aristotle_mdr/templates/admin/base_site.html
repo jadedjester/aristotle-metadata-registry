@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} - {{ config.SITE_NAME }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{{ site_header }}
+
+    <a href="{% url 'aristotle:home' %}" id="logo">
+            <img height="48px" src="{{ config.SITE_BRAND }}" alt="{{ config.SITE_NAME }}" title="{{ config.SITE_NAME }}">
+          </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

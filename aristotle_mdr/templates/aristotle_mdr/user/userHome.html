@@ -1,0 +1,95 @@
+{% extends "aristotle_mdr/base.html" %}
+{% load inplace_edit %}
+
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+
+<nav class="col-sm-4 col-md-3 navbar navbar-default">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#dashboard-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="#" class="navbar-brand visible-xs" style="float:none;">
+        {% block collapse-link %}
+        <i class="fa fa-home fa-fw"></i>My Dashboard
+        {% endblock %}
+      </a>
+    </div>
+    <div class="collapse navbar-collapse" id="dashboard-nav">
+        {% block sidebar %}
+        {% include "aristotle_mdr/user/userSideBar.html" with activeTab='home' %}
+        {% endblock %}
+    </div>
+</nav>
+<div class="col-sm-8">
+    {% block page %}
+    <h1><a href="#">My Dashboard</a> <small>- {{ user.first_name }} {{ user.last_name }} ({{ user.username }})</small></h1>
+    <div class='row'>
+
+        <section class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-envelope fa-fw"></i> <a class="panel-title" href="{% url 'aristotle:userInbox' %}">Recent Notifications</a>
+                </div>
+                    <ul class="list-group">
+                    {% for item in user.notifications.unread|slice:':5' %}
+                      <li class="list-group-item">
+                        {{ item }}
+                      </a>
+                      </li>
+                    {% empty %}
+                        <li class="list-group-item"> No unread notifications </li>
+                    {% endfor %}
+                    </ul>
+                    <div class="panel-footer"><a href="{% url 'aristotle:userInbox' %}">See all...</a></div>
+            </div>
+        </section>
+
+        <section class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bookmark fa-fw"></i> <a class="panel-title" href="{% url 'aristotle:userFavourites' %}">Recently Favourited Items</a>
+                </div>
+
+                <div class="list-group">
+                    {% for item in user.profile.myFavourites.all|slice:':5' %}
+                      <a class="list-group-item" href="{% url 'aristotle:item' item.id %}">
+                        {{ item }}
+                        <small>({{ item.get_verbose_name }})</small>
+                      </a>
+
+                    {% empty %}
+                        <a class="list-group-item"> No favourites </a>
+                    {% endfor %}
+                </div>
+                <div class="panel-footer"><a href="{% url 'aristotle:userFavourites' %}">See all favourites...</a></div>
+            </div>
+        </section>
+    </div>
+    <div class='row'>
+        <section class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-users fa-fw"></i> Recent Workgroups
+            </div>
+            <ul class="list-group">
+            {% for item in user.profile.myWorkgroups.all %}
+              <li class="list-group-item" ><a href="{% url 'aristotle:workgroup' item.id %}/">{{ item }}</a>
+                </li>
+            {% empty %}
+                <li class="list-group-item"> No workgroups </li>
+            {% endfor %}
+            </ul>
+            <div class="panel-footer"><a href="{% url 'aristotle:userWorkgroups' %}">See all workgroups...</a></div>
+            </div>
+        </section>
+    </div>
+    {% endblock %}
+</div>
+</div>
+
+{% endblock %}

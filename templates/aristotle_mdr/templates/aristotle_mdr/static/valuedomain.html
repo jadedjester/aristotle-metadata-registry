@@ -1,0 +1,47 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %}
+{% load aristotle_tags %}
+
+{% block title %}About: Value Domain{% endblock %}
+{% block item_name %}Value Domain{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'aristotle:about' 'valuedomain' %}">Value Domain</a></li>
+{% endblock %}
+
+{% block iso_quote %}
+a set of Permissible Values
+{% endblock %}
+
+{% block description %}
+<p>A value domain provides a set of permissible values by which a data element can be implemented. Value domains can be enumerated (e.g. Total centimetres NNN) or non-enumerated (e.g. Sex code N).</p>
+
+    <p>The union of a specific value domain with a specific <a href='{% url "aristotle:about" template="dataelementconcept" %}'>data element concept</a>
+    creates a <a href='{% url "aristotle:about" template="dataelement" %}'>data element</a>. For example the data element concept <em>Person&mdash;body height</em> can be implemented through union with the <em>Total
+    centimetres NNN</em> value domain. </p>
+
+<h2>Permissable values</h2>
+{% include "aristotle_mdr/helpers/iso_quote.html" with quote="an expression of a Value Meaning allowed in a specific Value Domain" %}
+<h2>Enumerated vs non-enumerated value domains</h2>
+
+<p>ISO/IEC 11179 allows for 2 different types of Value Domains - enumerated vs non-enumerated.
+The distinction between these is that an enumerated value domain is <q>specified by a list of all its Value Meanings</q>,
+while a non-enumerated value domain is <q>specified by a description rather than a list of all Permissible Values</q>.
+</p>
+<ul>
+    <li>
+        <em>An example of a enumerated value domain</em> would be a list of 10-year cohorts for recording a persons age:
+        <ul>
+            <li> A code of A coresponsing to 0-15 years
+            <li> A code of B coresponsing to 15-30 years
+            <li> A code of C coresponsing to 30-45 years
+            <li> A code of D coresponsing to 45+ years
+        </ul>
+        Here, every possible value within the set has been explicitly enumerated.
+    </li>
+    <li>
+        <em>An example of a non-enumerated value domain</em> would be an numeric range for recording a persons age,
+        where the number could be any two digit number greater than zero. While there is an implied set of values, these have not been expressly enumerated.
+    </li>
+</ul>
+
+{% endblock %}

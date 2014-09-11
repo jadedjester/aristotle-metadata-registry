@@ -1,0 +1,64 @@
+{% extends "aristotle_mdr/base.html" %}
+
+{% block title %}New Item{% endblock %}
+{% block content %}
+
+<div class="help">
+    {{ helpText }}
+</div>
+<form method="post">{% csrf_token %}
+    {% if similarObjects %}
+    <div class="message warning">
+        <strong>The following public objects were found with a title similar to "<em>{{form.name.value}}</em>".
+        </strong>
+        <br>Reusing existing metadata makes comparing data easier.
+        <br>Consider reviewing these similar items to see if an existing piece of content meets your needs. 
+        <ul>
+            {% for obj in similarObjects %}
+            <li>
+            <a href="/item/{{ obj.id }}">{{ obj.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <input type="hidden" name="supersede" value='{{ supersede }}'/>
+        <input type="hidden" name="clone" value='{{ clone }}'/>
+        <input type="checkbox" name="userSwearsTheyKnowWhatTheyAreDoing" value="on"/>
+        <label for="userSwearsTheyKnowWhatTheyAreDoing">
+            I've reviewed these items, and none of them meet my needs. Make me a new one.
+        </label>
+    </div>
+    {% endif %}
+    {% if clone %}
+    <div class="message info">
+        <strong>You are cloning the {{ clone.get_verbose_name }} <a href="/{{ clone.url_name }}/{{ clone.id }}">{{ clone.name }}</a>.
+        </strong>
+        <br>Reusing existing metadata makes comparing data easier.
+        <br>If you want to make a new version of this item, consider <a href="/create/{{ clone.get_verbose_name }}/?supercede={{ clone.id }}">superceding this item</a> instead.
+        <br>Cloning metadata is only useful when making alterations that <em>drastically change the semantics of the object.</em>
+        <br>Consider reviewing these similar items to see if an existing piece of content meets your needs. 
+        <div>
+        <input type="checkbox" name="userSwearsTheyKnowWhatTheyAreDoing" value="on"/>
+        <label for="userSwearsTheyKnowWhatTheyAreDoing" class="{{ prompt }}">
+            I would like to clone this item.
+            {% if prompt %}
+                - <strong>
+                You must select this to save your cloned item.
+                </strong>
+            {% endif %}
+        </label>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+    <div class="col-sm-8">
+    {% block form_details %}
+    {% endblock %}
+<input type="submit" value="Submit" onClick="this.disabled=true;this.form.submit();" />
+    </div>
+    <aside class="creationTips col-sm-4">
+        {% block creationTips %}{% endblock %}
+    </aside>
+    </div>
+</form>
+
+{% endblock %}

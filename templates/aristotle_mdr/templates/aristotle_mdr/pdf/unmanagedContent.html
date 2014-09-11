@@ -1,0 +1,36 @@
+{% extends "aristotle_mdr/base.html" %}
+{% load inplace_edit %}
+
+{% block title %}{{ item.name }}{% endblock %}
+{% block content %}
+<section>
+<h1 id="objectTitle">
+    <a href="#">{% inplace_edit 'item.name' %}</a>
+    <span>({{ item.get_verbose_name }})</span>
+</h1>
+<div class="description">
+    {% inplace_edit 'item.description' adaptor='tiny' %}
+</div>
+<div>
+    {% block objSpecific %}
+    {% endblock %}
+</div>
+<div id="registryDetails">
+    <h2>Registry Details</h2>
+    <dl>
+        <dt>Last updated:</dt><dd>{{item.modified}}</dd>
+        <dt>Created:</dt><dd>{{item.created}}</dd>
+    </dl>
+</div>
+</section>
+<section id="actionbar">
+{% block actionBar %}
+<ul>
+    <li>Lights</li>
+    <li>Camera</li>
+    <li>Action</li>
+</ul>
+{% endblock %}
+</section>
+
+{% endblock %}

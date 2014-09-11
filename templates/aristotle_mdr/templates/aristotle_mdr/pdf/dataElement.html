@@ -1,0 +1,33 @@
+{% extends "aristotle_mdr/pdf/managedContent.html" %}
+
+{% block title %}{{ item.name }} ({{item.status}}){% endblock %}
+{% block objSpecific %}
+
+<h2>Components</h2>
+<dl>
+    <dt>Data Element Concept -
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=item.dataElementConcept %}
+    </dt>
+    <dd>
+        {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept %}
+        {% if view == "technical" %}
+        <dl class="additionaldetails">
+            <dt>Object Class</dt>
+            <dd>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept.objectClass %}
+            </dd>
+            <dt>Property</dt>
+            <dd>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.dataElementConcept.property %}
+            </dd>
+        </dl>
+        {% endif %}
+    </dd>
+    <dt>Value Domain -
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=item.valueDomain %}
+    </dt>
+    <dd>
+        {% include "aristotle_mdr/helpers/inlineDetails.html" with item=item.valueDomain %}
+    </dd>
+</dl>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "aristotle_mdr/static/help/base_help.html" %}
+
+{% block title %}How does content become visible?{% endblock %}
+{% block heading %}How does content become visible?{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'aristotle:helpMain' %}">Help</a></li>
+    <li><a href="#">How does content become visible?</a></li>
+{% endblock %}
+
+{% block helpContent %}
+
+<h2>Before registration</h2>
+<p>Before an item has been registered, they are only visible to logged in members, and as
+such the visibilty of an item is a relatively straight forward process, and is explained in the steps below.
+It is important to note, that registration does not imply standardisation, just that the item can be given a status by a registration authority.</p>
+<p>In the below table <em>"the workgroup"</em> should be taken to mean <em>the workgroup the item resides in</em>.</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>Actor</th>
+            <th>Visibility</th>
+            <th>Example</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>A new workgroup is created and one or more Registration Authorities are associated with it.
+            </td>
+            <td>Any superuser</td>
+            <td> - (No item is created yet)
+            </td>
+            <td>The workgroup <em>"Housing assets"</em> is created for tracking economic housing factors,
+                and two registration authorities are attached - "Housing" and "Economic statistics".
+            </td>
+        </tr>
+        <tr>
+            <td>An item is created in a specific workgroup.
+            </td>
+            <td>Any editor in the workgroup.
+            </td>
+            <td>Only members of that workgroup.
+            </td>
+            <td>A new <em>"Household"</em> Object Class is created for tracking household spending, this
+                is only visible to members of the <em>"housing assets"</em> workgroup.
+            </td>
+        </tr>
+        <tr>
+            <td>An item is marked as "ready to review"
+            </td>
+            <td>Any editor in the workgroup.
+            </td>
+            <td>Any registrar for the registration authorities that are associated with a workgroup,
+                and members of the workgroup the item resides in.
+            </td>
+            <td>The "Household" Object Class is marked ready to review, and can be seen by
+                members of the "Housing assets" workgroup, as well as registrars of the
+                "Housing" and "Economic statistics" registration authorities.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>After registration</h2>
+
+<p>Once an item is registered it may become "publically visible" to non-members.
+In fact <strong>registration is the <em>only</em> way for an administered item to become publically visible.</strong></p>
+<p>Because of this, who can view an item becomes a more complex process to determine, however can be summed up as such:</p>
+<blockquote>An item is visible if, and only if, it has a been given a registration status that is marked as
+"publically viewable" by the registration authorities who are associated with its workgroup.</blockquote>
+<p>Using the example in the previous table, this can be explained like so:
+    <ul>
+        <li>The <em>"Household"</em> Object Class can be considered to be owned by the <em>"Housing assets"</em>
+            workgroup, under the authority of the "Housing" and "Economic statistics" registration authorities.</li>
+        <li>The "housing" registration authority considers items that are of status "Candidate" or above to be public.</li>
+        <li>If the "housing" registration authority registers the "Household" item with status "Candidate" it will be public, regardless of the rules set out by the "Economic statistics" registration authority</li>
+        <li>If neither the "Housing" or "Economic statistics" registration authorities have given the "Household" object class a "public" status it will remain visible according to the table above.</li>
+        <li>If due to these permissions are registrar in another authority can see the "Household" object class and registers it in a third registration authority, this will have <em>no</em> bearing on the items visibilty.</li>
+    </ul>
+</p>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %}
+
+{% block title %}About: ISO/IEC 11179{% endblock %}
+{% block item_name %}ISO/IEC 11179{% endblock %}
+
+{% block iso_quote %}
+The primary purpose of ISO/IEC 11179-3 is to specify the structure of a Metadata Registry.
+ISO/IEC 11179-3 also specifies basic attributes which are required to describe metadata items, and which
+may be used in situations where a complete metadata registry is not appropriate (e.g. in the specification of
+other International Standards).
+{% endblock %}
+
+{% block description %}
+<div class="description">
+    <object data="/static/aristotle_mdr/images/11179.svg" type="image/svg+xml"
+        width="800px"
+        height="360px">
+      <img src="yourfallback.jpg" />
+    </object>
+
+
+    <h2>ISO/IEC 11179 objects</h2>
+    <p>
+        Below is a list of items that feature prominently within the Aristotle MetaData Registry. The following definitions are from section 3.2 of the ISO/IEC 11179-3:2013 specification.
+        <a href="http://standards.iso.org/ittf/PubliclyAvailableStandards/index.html">Electronic copies of the ISO/IEC 11179 specification are made freely accessible on the ISO website.</a>
+    </p>
+    <dl class="treble_defintions">
+      <dt id="cs">Classification Scheme</dt>
+        <dd>
+          <p>descriptive information for an arrangement or division of <strong>objects</strong> into groups based on criteria such as <strong>characteristics</strong>, which the objects have in common.<p>
+          <a href="{% url 'aristotle:about' 'classificationscheme' %}">Learn more about Classification Schemes</a>
+          <a href="search?q=xxx">Search for Classification Schemes</a>
+        </dd>
+      <dt id="cd">Conceptual Domain</dt>
+        <dd>
+          <p><strong>concept</strong> that expresses its description or valid instance meanings<p>
+          <a href="{% url 'aristotle:about' 'conceptualdomain' %}">Learn more about Conceptual Domains</a>
+          <a href="search?q=xxx">Search for Conceptual Domain</a>
+        </dd>
+      <dt id="de">Data Element</dt>
+        <dd>
+          <p>unit of <strong>data</strong> that is considered in context to be indivisible</p>
+          <a href="{% url 'aristotle:about' 'dataelement' %}">Learn more about Data Elements</a>
+          <a href="search?q=xxx">Search for Data Elements</a>
+        </dd>
+      <dt id="dec">Data Element Concept</dt>
+        <dd>
+          <p><strong>concept</strong> that is an association of a <strong>property</strong> with an <strong>object class</strong> </p>
+          <a href="{% url 'aristotle:about' 'dataelementconcept' %}">Learn more about Data Element Concepts</a>
+          <a href="search?q=xxx">Search for Data Element Concepts</a>
+        </dd>
+      <dt id="dt">Data Type</dt>
+        <dd>
+          <p>set of distinct values, characterized by properties of those values and by operations on those values</p>
+          <a href="{% url 'aristotle:about' 'datatype' %}">Learn more about Data Type</a>
+          <a href="search?q=xxx">Search for Data Type</a>
+        </dd>
+      <dt id="oc">Object Class</dt>
+        <dd>
+            <p>set of ideas, abstractions or things in the real world that are identified with explicit boundaries and meaning and whose properties and behaviour follow the same rules</p>
+            <a href="{% url 'aristotle:about' 'objectclass' %}">Learn more about Object Classes</a>
+            <a href="search?q=xxx">Search for Object Classes</a>
+        </dd>
+      <dt id="prop">Property</dt>
+        <dd>
+            <p>quality common to all members of an <strong>object class</strong></p>
+            <a href="{% url 'aristotle:about' 'property' %}">Learn more about X</a>
+            <a href="search?q=xxx">Search for Properties</a>
+        </dd>
+      <dt id="vd">Value Domain</dt>
+        <dd>
+            <p>set of permissible values</p>
+            <a href="{% url 'aristotle:about' 'valuedomain' %}">Learn more about Value Domains</a>
+            <a href="search?q=xxx">Search for Value Domains</a>
+        </dd>
+    </dl>
+
+    <h2>Custom objects to support 11179 objects</h2>
+    <dl>
+      <dt id="">Data Set Specification</dt>
+        <dd>
+          <a href="search?q=xxx">Search for Data Set Specifications</a>
+        </dd>
+    </dl>
+    <dl>
+      <dt id="">Package</dt>
+        <dd>
+          <p>Package are untyped collections of objects use to ensure that objects can be transported in a wider context.
+          These are derived from the <a href="http://www.ddialliance.org">Resource Package object defined in the DDI XML specification.</a></p>
+          <a href="{% url 'aristotle:about' 'package' %}">Learn more about packages</a>
+        </dd>
+    </dl>
+</div>
+{% endblock %}

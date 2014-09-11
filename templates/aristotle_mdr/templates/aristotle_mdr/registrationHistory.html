@@ -1,0 +1,44 @@
+{% extends 'aristotle_mdr/base.html' %}
+{% load aristotle_tags %}
+{% block title %}Registration History of {{ item.name }}{% endblock %}
+
+{% block content %}
+<h1>
+    Registration History of
+    <a href="#">{{ item.name }}</a>
+    ({{ item.get_verbose_name }})
+</h1>
+<ol class="breadcrumb">
+    <li><a href="#">{{ item.name }}</a></li>
+    <li><a href="#">Registration History</a></li>
+</ol>
+
+{% for stat, action_list in history %}
+<div>
+    <h2>History for <em>{{ stat.registrationAuthority }}</em> authority</h2>
+    <table class="table">
+    <thead>
+        <th>Date</th>
+        <th>State</th>
+        <th>RA meaning</th>
+        <th>In dictionary</th>
+        {#<th>Comments</th>#}
+        {#<th>Who</th>#}
+    </thead>
+    <tbody>
+    {% for action in action_list %}
+        <tr>
+            <td>{{ action.field_dict.registrationDate }}</td>
+            <td>{{ action.field_dict.state|stateToText }}</td>
+            <td>{{ action.field_dict.meaning }}</td>
+            <td>{{ action.field_dict.inDictionary }}</td>
+            {#<td>{{ action.field_dict.changeDetails }}</td>#}
+            {#<td>{{ action.field_dict.user.get_username }}</td>#}
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endfor %}
+
+{% endblock %}

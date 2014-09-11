@@ -1,0 +1,88 @@
+{% extends "aristotle_mdr/user/userHome.html" %}
+{% load inplace_edit %}
+
+{% block collapse-link%}
+    <i class="fa fa-users fa-fw"></i> {{ workgroup.name }}</a>
+{% endblock %}
+{% block workgroupSub %}
+<ul class="nav nav-pills nav-stacked nav-collapse">
+    <li class="active">
+        <a href="#">
+        <i class="fa fa-home fa-fw"></i> {{ workgroup.name }}</a>
+    </li>
+</ul>
+{% endblock %}
+{% block sidebar %}
+    {% include "aristotle_mdr/user/userSideBar.html" with subWorkgroup=item %}
+{% endblock %}
+
+{% block page %}
+<h1>{% block title %}{{ workgroup.name }}{% endblock %}</h1>
+<aside id="infoBox" class="col-xs-12 col-sm-4 pull-right">
+<section id="items">
+<header>Recently changed items</header>
+    <ul>
+        {% for item in recent %}
+        <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %} ({{ item.get_verbose_name }})</li>
+        {% endfor %}
+    </ul>
+</section>
+</aside>
+<header>Details</header>
+<dl>
+<dt>Managers</dt>
+<dd>
+{% for member in workgroup.managers %}
+    {{ member.first_name }} {{ member.last_name }}
+    {% if member.profile.is_registrar %}*{% endif %}
+    {% if not forloop.last %},{% endif %}
+{% endfor %}
+{% if user_is_admin %}
+    <a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}" class="inline_action">Add</a>
+{% endif %}
+</dd>
+<dt>Members</dt>
+<dd>
+<a href="{% url 'aristotle:workgroupMembers' item.id %}">
+    {% with total=workgroup.members.count %}
+        {% comment %} Cache the count then reuse for performance.{% endcomment %}
+        {{ total }} current member{{ total|pluralize }}
+    {% endwith %}
+</a>
+</dd>
+<dt>Items</dt>
+<dd>
+<a href="{% url 'aristotle:workgroup' iid=item.id subpage='items' %}">
+    {% with total=workgroup.items.count %}
+        {% comment %} Cache the count then reuse for performance.{% endcomment %}
+        {{ total }} current item{{ total|pluralize }}
+    {% endwith %}
+</a>
+</dd>
+</dl>
+
+<h2>Recent conversations</h2>
+<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
+<table>
+    <thead>
+        <tr>
+            <td>Title</td>
+            <td>Author</td>
+            <td>Last comment</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="addMember" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+</div>
+{% endblock %}

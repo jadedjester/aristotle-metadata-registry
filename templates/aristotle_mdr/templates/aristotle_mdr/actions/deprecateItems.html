@@ -1,0 +1,29 @@
+{% extends request.is_ajax|yesno:"aristotle_mdr/base_ajax.html,aristotle_mdr/base.html" %}
+
+{% block title %}Supersede other items with <strong>{{ item.name }}</strong>{% endblock %}
+
+{% block content %}
+
+<form method="post" action="{% url 'aristotle:deprecate' iid=item.id %}">{% csrf_token %}
+<div class="modal-body">
+<header>This form allows you to deprecate older items item, by indicating a new version exists.
+        This will state the newest version of the selected items is <em>{{ item.name }}</em>
+</header>
+<section style="height:50%;" id='deprecate'>
+{{ form }}
+
+{% block save %}
+{% endblock %}
+
+</section>
+    <div class="modal-footer">
+    {% if request.is_ajax %}
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    {% else %}
+        <a class="btn btn-default" href="{% url 'aristotle:item' item_id=item.id%}">Cancel</a>
+    {% endif %}
+        <input type="submit" class="btn btn-primary" value="Deprecate" />
+    </div>
+</form>
+{% include 'autocomplete_light/static.html' %}
+{% endblock %}

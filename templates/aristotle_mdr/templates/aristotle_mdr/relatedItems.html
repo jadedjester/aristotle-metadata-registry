@@ -1,0 +1,39 @@
+{% extends 'aristotle_mdr/base.html' %}
+{% block title %}Related items for {{ item.name }} ({{ item.get_verbose_name }}){% endblock %}
+{% block content %}
+<section class="managed container">
+    <div class="navbar">
+        <h1 id="objectTitle">
+            <a href="#">Related items for {{ item.name }}</a>
+            <span>({{ item.get_verbose_name }})</span>
+        </h1>
+        </div>
+    The number of displayed items below, and the number of related items reported may differ based on your permission to view items.
+
+    <ul class="relatedItems">
+        {% for relatedItem in relatedItems %}
+        <li>
+            {% include "aristotle_mdr/helpers/inlineDetails.html" with item=relatedItem %}
+        </li>
+        {% endfor %}
+    </ul>
+
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if relatedItems.has_previous %}
+                <a href="?page={{ relatedItems.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ relatedItems.number }} of {{ relatedItems.paginator.num_pages }}.
+            </span>
+
+            {% if relatedItems.has_next %}
+                <a href="?page={{ relatedItems.next_page_number }}">next</a>
+            {% endif %}
+        </span>
+    </div>
+
+</section>
+{% endblock %}

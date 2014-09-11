@@ -1,0 +1,304 @@
+{% load inplace_edit %}
+{% load i18n %}
+{% load bootstrap3 %}
+
+<!doctype html>
+<html lang="en">
+   <head>
+      <title>{% block title %}{% endblock %} - {{ config.SITE_NAME }}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+      <!-- load the jQuery and require.js libraries -->
+      {% load staticfiles %}
+      <!-- script src="{% static 'aristotle_mdr/jquery.min.js' %}" type="text/javascript"></script -->
+      <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+      <script src="{% static 'aristotle_mdr/possum.js' %}" type="text/javascript"></script>
+      <script src="{% static 'aristotle_mdr/dropit/dropit.js' %}" type="text/javascript"></script>
+
+      <!-- link href="{% static 'aristotle_mdr/possum.css' %}" rel="stylesheet" type="text/css"/- ->
+      <link href="{% static 'aristotle_mdr/dropit/dropit.css' %}" rel="stylesheet" type="text/css"/>
+      <!- -
+      -->
+    {{ form.media }}
+
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/possum.less' %}" />
+
+    {% block headScripts %}
+        {% comment %}
+            Only for scripts that need to be inserted for other special templates
+            For example: look ups in supersedes
+        {% endcomment %}
+    {% endblock %}
+    <script src="{% static 'aristotle_mdr/less.min.js' %}" type="text/javascript"></script>
+
+
+<script src="/static/js/jquery.json.js" type="text/javascript"></script>
+{% if user_can_edit %}
+{# This block is copied from django-inplaceedit with minor tweaks #}
+<script src="/static/js/jquery.inplaceeditform.js" type="text/javascript"></script>
+<script src="/static/js/jquery.inplaceeditform.hooks.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var isIE = function () {
+            if(typeof jQuery!== typeof undefined && jQuery.browser === undefined){
+                jQuery.browser = { msie : true};
+        }};
+    </script>
+    <!- -[if IE]>
+        <script type="text/javascript">
+            isIE(); /* IE <= 9*/
+        </script>
+    <![endif]-->
+    <!--[if !IE]><!-->
+        <script>
+            if (/*@cc_on!@*/false) {
+                isIE(); /* IE 10*/
+            }
+        </script>
+    <!--<![endif]-->
+
+    <script type="text/javascript">
+        var csrf_token = "{{ csrf_token }}";
+        (function($){
+            $(document).ready(function () {
+                var options = {"getFieldUrl": "/inplaceeditform/get_field/",
+                               "saveURL": "/inplaceeditform/save/",
+                               "successText": "Successfully saved",
+                               "eventInplaceEdit": "dblclick",
+                               "disableClick": true,
+                               "autoSave": false,
+                               "unsavedChanges": "You have unsaved changes",
+                               "enableClass": "enable",
+                               "fieldTypes": "input, select, textarea",
+                               "focusWhenEditing": true};
+                var inplaceManager = $(".inplaceedit").inplaceeditform(options);
+
+                    if ($(".inplaceedit").size()) {
+
+var enabledEditText = "<i class='fa fa-edit'></i> Edit";
+var disabledEditText = "<i class='fa fa-power-off'></i> Editing...";
+var toggleInplaceEdit = function () {
+    var trigger = $(this);
+    if (trigger.hasClass('active')) {
+        inplaceManager.disable();
+        trigger.removeClass('active');
+        trigger.html(enabledEditText);
+        $('.inline_action').removeClass('enable');
+        trigger.parent().removeClass('active');
+        $('#progress.alert').slideToggle()
+        $('#progress.alert').addClass('alert-success').removeClass('alert-warning');
+    } else {
+        inplaceManager.enable();
+        trigger.addClass('active');
+        trigger.html(disabledEditText);
+        $('.inline_action').addClass('enable');
+        trigger.parent().addClass('active');
+        $('#progress.alert').removeClass('hidden').hide()
+        $('#progress.alert').addClass('alert-danger').removeClass('alert-success');
+        $('#progress.alert').slideToggle();
+    }
+};
+
+var toolbar = $("#ActivateInplaceEdit");
+var actions = toolbar.find(".toolbarActions");
+toolbar.replaceWith("<a class='toolbarAction btn btn-default' href='#' id=\"ActivateInplaceEdit\" accesskey='e'>" + enabledEditText + "</a>");
+$("#ActivateInplaceEdit").click(toggleInplaceEdit);
+                    }
+        });
+    })(jQuery);
+</script>
+{% endif %}
+<link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" />
+<link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" />
+
+<script type="text/javascript" src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+
+<script>
+    // Scrap modals if they lose focus so they can be loaded with new content
+    $(document).on('hidden.bs.modal', function (e) {
+        $(e.target).removeData('bs.modal');
+    });
+</script>
+
+   </head>
+
+   <body>
+   <a class="sr-only" href="#main">Skip to content</a>
+    <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="{% url 'aristotle:home' %}" id="logo">
+            <img height="48px" src="{{ config.SITE_BRAND }}" alt="{{ config.SITE_NAME }}" title="{{ config.SITE_NAME }}">
+          </a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            {% block search %}
+                {% comment %}
+                The search block is defined to allow some pages
+                (SPECIFICALLY the home page) to override or hide the search bar
+                DO NOT OVERRIDE THIS UNLESS YOU ARE CERTAIN OF WHAT YOU ARE DOING!
+                {% endcomment %}
+                <form id="quickSearch" action="/search" method="get"
+                class="navbar-form navbar-left" role="search">
+                    <label style="display:none;" for="searchText">Search:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchText" name="q" accesskey="q"></input>
+                        <span class="input-group-btn">
+                        <button class="btn btn-primary" type="submit">
+                            {% bootstrap_icon "search" %}&nbsp;
+                        </button>
+                    </div>
+                </form>
+            {% endblock %}
+
+            <ul class="nav navbar-nav navbar-right">
+            {% if user.is_active %}
+                <li class="dropdown">
+                    <a href="{% url 'aristotle:createList'" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
+                            <i class="fa fa-angle-down fa-lg"></i>
+                    Create
+                    </a>
+                    <ul class="dropdown-menu" role="menu" >
+                        <li><a href="{% url 'admin:aristotle_mdr_objectclass_add' %}">Object Class</a></li>
+                        <li><a href="{% url 'admin:aristotle_mdr_property_add' %}">Property</a></li>
+                        <li><a href="{% url 'admin:aristotle_mdr_valuedomain_add' %}">Value Domain</a></li>
+
+                        <li><a href="{% url 'admin:aristotle_mdr_dataelementconcept_add' %}">Data Element Concept</a></li>
+                        <li><a href="{% url 'admin:aristotle_mdr_dataelement_add' %}">Data Element</a></li>
+                        {% comment %}
+                        <li><a href="{% url 'aristotle:createObjectClass'%}">Object Class</a></li>
+                        <li><a href="{% url 'aristotle:createProperty'%}">Property</a></li>
+                        <li><a href="{% url 'aristotle:createValueDomain'%}">Value Domain</a></li>
+                        <li><a href="{% url 'aristotle:createDataElementConcept'%}">Data Element Concept</a></li>
+                        <li><a href="{% url 'aristotle:createDataElement'%}">Data Element</a></li>
+                        {# <li><a href="{% url 'aristotle:createDataElement'%}"></a></li> #}
+                        {% endcomment %}
+
+                        {% if request.user.is_superuser %}
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation" class="dropdown-header"><i class="fa fa-user-md fa-2x fa-fw"></i> Admin only</li>
+                            <li>
+                                <a href="{% url 'admin:aristotle_mdr_workgroup_add'%}">Workgroup</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'admin:aristotle_mdr_registrationauthority_add'%}">Registration Authority</a>
+                            </li>
+                        {% endif %}
+                        <li role="presentation" class="divider"></li>
+                        <li>
+                            <a href="{% url 'aristotle:createList'%}">See all...</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
+                        {% if user.is_superuser %}
+                            <i class="fa fa-user-md fa-lg"></i>
+                        {% else %}
+                            <i class="fa fa-user fa-lg"></i>
+                        {% endif %}
+                        {% firstof user.get_short_name user.get_username %}
+                        {% if user.is_active %}
+                            {% if user.notifications.unread %}
+                            <i class="fa fa-envelope fa-fw" title="New notifications"></i>
+                            {% else %}
+                            <i class="fa fa-envelope-o fa-fw" title="No unread notifications"></i>
+                            {% endif %}
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'aristotle:userHome' %}">
+                            <i class="fa fa-home fa-fw"></i> {% trans 'My Dashboard'%}
+                        </a></li>
+                        <li><a href="{% url 'aristotle:userFavourites' %}">
+                            <i class="fa fa-bookmark fa-fw"></i> {% trans 'My Favourites'%}
+                            <span class="badge pull-right">{{ user.profile.favourites.count }}</span>
+                        </a></li>
+                        <li><a href="{% url 'aristotle:userInbox' %}">
+                            <i class="fa fa-envelope fa-fw"></i> {% trans 'Notifications'%}
+                            {% with notecount=user.notifications.unread.count %}
+                            <span class="badge pull-right" title="{{ notecount }} unread notifications">{{ notecount }}</span>
+                            {% endwith %}
+                        </a></li>
+                        {% if user.has_usable_password %}
+                            <li><a href="{% url 'admin:password_change' %}">
+                            <i class="fa fa-cog fa-fw"></i> {% trans 'Change password' %}
+                            </a></li>
+                        {% endif %}
+                        {% if user.profile.is_registrar %}
+                            <li role="presentation" class="divider"></li>
+                            <li><a href="{% url 'admin:index' %}">
+                            <i class="fa fa-university fa-fw"></i> {% trans 'Registrar tools' %}
+                            </a></li>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <li role="presentation" class="divider"></li>
+                            <li><a href="{% url 'admin:index' %}">
+                            <i class="fa fa-sliders fa-fw"></i> {% trans 'Management interface' %}
+                            </a></li>
+                            <li><a href="{% url 'aristotle:userAdminTools' %}">
+                            <i class="fa fa-user-md fa-fw"></i> {% trans 'Admin tools' %}
+                            </a></li>
+                        {% endif %}
+                        <li role="presentation" class="divider"></li>
+                        <li>
+                            <a href="/accounts/logout">
+                                <i class="fa fa-sign-out fa-fw"></i> {% trans 'Log out'%}
+                            </a>
+                        </li>
+                        <!-- li><a href="/item/"></a></li -->
+                    </ul>
+                </li>
+            {% else %}
+                <li>
+                <a href="/accounts/login?next={{request.path}}">
+                    <i class="fa fa-sign-in fa-lg"></i>  {% trans 'Log in'%}
+                </a>
+                </li>
+            {% endif %}
+            </ul>
+        </div>
+    </div>
+   </nav>
+   <div id='content' class="container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+    <footer class="footer">
+    <div class="container">
+    <div>
+        <a href="#">Accessibility</a>
+        <a href="#">Copyright</a>
+        <a href="#">Disclaimer</a>
+        <a href="#">Privacy</a>
+        <a href="#">Sitemap</a>
+    </div>
+    {# Removing or altering the following line may breach your licence #}
+    {# If you extend this file make sure the following link is retained in your footer #}
+    <span id="credit">
+        Powered by the <a href="http://github.com/LegoStormtroopr/aristotle-mdr">Aristotle MetaData Registry</a>
+    </span>
+    </div>
+    </footer>
+   </body>
+</html>
+

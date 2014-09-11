@@ -1,0 +1,17 @@
+{% extends "aristotle_mdr/base.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<h1>Help: {% block heading %}{% endblock %}</h1>
+
+<ol class="breadcrumb">
+    {% block breadcrumbs %}
+        <li><a href="{% url 'aristotle:helpMain' %}">Help</a></li>
+    {% endblock %}
+</ol>
+
+{% block helpContent %}
+{% endblock %}
+
+{% endblock %}
