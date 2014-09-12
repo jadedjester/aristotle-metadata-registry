@@ -2,7 +2,8 @@
 Aristotle MetaData Registry (Aristotle-MDR)
 =====
 
-Aristotle-MDR is an open-source metadata registry as laid out by the requirements of the ISO/IEC 11179:2013 specification.
+Aristotle-MDR is an open-source metadata registry as laid out by the requirements
+of the ISO/IEC 11179:2013 specification.
 
 Aristotle-MDR represents a new way to manage and federate content built on and extending
 the principles of leading metadata registry. The code of Aristotle is completely open-source,
@@ -32,7 +33,7 @@ Quick start
    If you want to take advantage of Aristotle's access-key shortcut improvements for the admin interface,
    make sure it is installed *before* `grappelli`.
 
-   Some Aristotle extensions (such as the Comet Health Indicator extensions) override aristotle templates
+   Some Aristotle extensions (such as the Comet Indicator Registry Plug-ins) override aristotle templates
    to add additional content to registry pages. For these overrides to be active extensions must be
    installed before aristotle like this::
 
@@ -44,7 +45,10 @@ Quick start
     )
 
 
-2. Include the polls URLconf in your project urls.py like this::
+2. Include the Aristotle-MDR URLconf in your project urls.py. Because Aristotle will
+   form the majority of the interactions with the site, and the Aristotle includes a
+   number of URLconfs for supporting apps its recommended to included it at the
+   server root, like this::
 
     url(r'^/', include('aristotle_mdr.urls')),
 
