@@ -62,10 +62,10 @@ Quick start
 For a complete example of how to successfully include Aristotle, see the `example_app` directory.
 
 
-.. |build-status| image:: https://travis-ci.org/aristotle/aristotle-metadata-registry.svg?branch=master
+.. |build-status| image:: https://travis-ci.org/LegoStormtroopr/aristotle-metadata-registry.svg?branch=master
     :alt: build status
     :scale: 100%
-    :target: https://travis-ci.org/aristotle/aristotle-metadata-registry
+    :target: https://travis-ci.org/LegoStormtroopr/aristotle-metadata-registry
 
 .. |docs| image:: https://readthedocs.org/projects/aristotle-metadata-registry/badge/?version=latest
     :alt: Documentation Status
