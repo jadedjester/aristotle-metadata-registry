@@ -38,7 +38,7 @@ class baseObjectIndex(indexes.SearchIndex):
     #
     #    return list(_access_iter(obj))
 
-class managedObjectIndex(baseObjectIndex):
+class conceptIndex(baseObjectIndex):
     statuses = indexes.MultiValueField()
     registrationAuthorities = indexes.MultiValueField()
     workgroup = indexes.CharField(model_attr="workgroup")
@@ -59,19 +59,19 @@ class managedObjectIndex(baseObjectIndex):
     def get_model(self):
         return models.managedObject
 
-class ObjectClassIndex(managedObjectIndex, indexes.Indexable):
+class ObjectClassIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.ObjectClass
 
-class PropertyIndex(managedObjectIndex, indexes.Indexable):
+class PropertyIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.Property
 
-class DataElementConceptIndex(managedObjectIndex, indexes.Indexable):
+class DataElementConceptIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.DataElementConcept
 
-class DataElementIndex(managedObjectIndex, indexes.Indexable):
+class DataElementIndex(conceptIndex, indexes.Indexable):
     # Trying to boost data elements to push them higher, but its not happening.
     def prepare(self, obj):
         data = super(DataElementIndex, self).prepare(obj)
@@ -81,10 +81,10 @@ class DataElementIndex(managedObjectIndex, indexes.Indexable):
     def get_model(self):
         return models.DataElement
 
-class ValueDomainIndex(managedObjectIndex, indexes.Indexable):
+class ValueDomainIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.ValueDomain
 
-class DataSetSpecificationIndex(managedObjectIndex, indexes.Indexable):
+class DataSetSpecificationIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.DataSetSpecification
