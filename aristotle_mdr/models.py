@@ -688,15 +688,16 @@ def defaultData():
             u,created = UnitOfMeasure.objects.get_or_create(name=name,description=desc,measure=m)
             print "   making unit of measure: {name}".format(name=name)
 
-    if not User.objects.filter(username__iexact='possum').first():
-        user = User.objects.create_superuser('possum','','pilches')
-        print "making superuser"
 
 
 # Loads test bed of data
 def testData():
     defaultData()
     print "configuring users"
+
+    if not User.objects.filter(username__iexact='possum').first():
+        user = User.objects.create_superuser('possum','','pilches')
+        print "making superuser"
 
     #Set up based workgroup and workers
     pw,c = Workgroup.objects.get_or_create(name="Possum Workgroup")

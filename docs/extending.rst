@@ -240,3 +240,12 @@ can arise from doing so.
   results from the subclassed ite. In short all searches restricted to ``DataElement``s
   would also return results for ``CountrySpecificDataElement``s, and they will
   be displayed in the list as ``DataElement`` *not* as ``CountrySpecificDataElement``.
+
+
+A complete example of an Aristotle Extension
+--------------------------------------------
+The first content extension for Aristotle that helped clarify a lot of the issues
+around inheritance was the
+`Comet Indicator Registry <https://github.com/LegoStormtroopr/comet-indicator-registry>`_.
+This adds 6 new content types along with admin pages, search indexes and templates and includes an override for the
+Aristotle ``DataElement`` template - which was all achieved with less than 600 lines of code.
