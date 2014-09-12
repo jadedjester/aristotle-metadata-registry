@@ -1,7 +1,0 @@
-{{ object.name }}
-{{ object.shortName }}
-{{ object.description }}
-{{ object.synonyms }}
-{% for state in object.statuses.all %}{{ state.state_name }} {% endfor %}
-{% comment %} May include this above if needed {{ state.registrationAuthority }} {% endcomment %}
-

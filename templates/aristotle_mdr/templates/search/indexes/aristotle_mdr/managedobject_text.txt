@@ -1,3 +1,0 @@
-{% include "search/indexes/aristotle_mdr/basepossumobject_text.txt" %}
-{{ object.name }}
-{{ object.description }}
