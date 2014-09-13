@@ -13,6 +13,8 @@ Contents:
 
    extending.rst
    features.rst
+   templates.rst
+   downloads.rst
 
 
 Indices and tables
