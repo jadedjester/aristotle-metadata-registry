@@ -12,15 +12,14 @@ from haystack.views import search_view_factory
 sqs = SearchQuerySet()
 
 urlpatterns = patterns('aristotle_mdr.views',
-    # Can't use below as we need to pass in extensions, must find better way.
-    #url(r'^/?$', TemplateView.as_view(template_name='aristotle_mdr/static/home.html'),name="home"),
-    url(r'^/?$', views.homePage,name="home"),
+    url(r'^/?$', TemplateView.as_view(template_name='aristotle_mdr/static/home.html'),name="home"),
     url(r'^unauthorised/(?P<path>)$', views.unauthorised, name='unauthorised'),
 
     # all the below take on the same form:
     # url(r'^itemType/(?P<iid>\d+)?/?
     # Allowing for a blank ItemId (iid) allows aristotle to redirect to /about/itemtype instead of 404ing
-    url(r'^objectclass/(?P<iid>\d+)?(?:/(?P<subpage>\w+))?/?$', views.objectclass, name='objectClass'),
+    url(r'^objectclass/(?P<iid>\d+)?/?$', views.objectclass, name='objectClass'),
+    #url(r'^objectclass/(?P<iid>\d+)?(?:/(?P<subpage>\w+))?/?$', views.objectclass, name='objectClass'),
     url(r'^property/(?P<iid>\d+)?/?$', views.property, name='property'),
     url(r'^valuedomain/(?P<iid>\d+)?/?$', views.valuedomain, name='valueDomain'),
     url(r'^dataelementconcept/(?P<iid>\d+)?/?$', views.dataelementconcept, name='dataElementConcept'),
@@ -76,7 +75,6 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^account/toggleFavourite/(?P<item_id>\d+)/?', views.toggleFavourite, name='toggleFavourite'),
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
-    url(r'^about/extensions/?$', views.aboutExtensions, name='aboutExtensions'),
 
     url(r'^about/site/?$', views.aboutThisSite, name="aboutThisSite"),
     url(r'^about/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),

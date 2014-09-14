@@ -1,13 +1,11 @@
 import autocomplete_light
 from aristotle_mdr import models as MDR
 
-# This will generate a PersonAutocomplete class
-autocomplete_light.register(MDR.DataElement,
+autocompleteTemplate = {
     # Just like in ModelAdmin.search_fields
-    name='AutocompleteDataElement',
-    #choice_html_format="aristotle_mdr/actions/autocompleteItem.html",
-    search_fields=['^name', 'description'],
-    attrs={
+    'name':'AutocompleteConcept',
+    'choice_template':"aristotle_mdr/actions/autocompleteItem.html",
+    'attr':{
         # This will set the input placeholder attribute:
         'placeholder': 'Other model name ?',
         # This will set the yourlabs.Autocomplete.minimumCharacters
@@ -18,10 +16,32 @@ autocomplete_light.register(MDR.DataElement,
     # widget container element, and will be set to
     # yourlabs.Widget.maximumValues (jQuery handles the naming
     # conversion).
-    widget_attrs={
+    'widget_attrs':{
         #'data-widget-maximum-values': 4,
         # Enable modern-style widget !
         #'class': 'modern-style',
     },
-)
+}
+
+class PermissionsAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+    search_fields=['name', 'description','id']
+
+    def choices_for_request(self):
+        self.choices = self.choices.editable_slow(self.request.user)
+        return super(PermissionsAutocomplete, self).choices_for_request()
+
+autocompletesToRegister = [
+        MDR.DataElement,
+        MDR.DataElementConcept,
+        MDR.ObjectClass,
+        MDR.Property,
+        MDR.ValueDomain,
+        MDR.DataElementConcept,
+        MDR.DataType,
+    ]
+for cls in autocompletesToRegister:
+    # This will generate a PersonAutocomplete class
+    x = autocompleteTemplate.copy()
+    x['name']='Autocomplete'+cls.__name__
+    autocomplete_light.register(cls,PermissionsAutocomplete,**x)
 

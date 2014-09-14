@@ -10,6 +10,8 @@ class MyAdaptorEditInline(object):
         return user_can_edit(user,obj)
 
 def user_can_view(user,item):
+    """Can the user view the item?"""
+
     #if user is None: return item.is_public()
     if user.is_superuser:
         return True
@@ -54,6 +56,8 @@ def user_is_workgroup_manager(user,workgroup):
     return user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=workgroup.name))
 
 def user_can_change_status(user,item):
+    """Can the user change the status of the item?"""
+
     # Cache if the user can view as we use it a few times.
     can_view = user_can_view(user,item)
     if not can_view:
@@ -68,6 +72,8 @@ def user_can_change_status(user,item):
     return False
 
 def user_can_edit(user,item):
+    """Can the user edit the item?"""
+
     #non-logged in users can't edit anything
     if not user.is_active:
         return False

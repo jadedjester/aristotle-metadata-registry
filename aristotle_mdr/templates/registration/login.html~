@@ -1,5 +1,0 @@
-{% extends "aristotle_mdr/base.html" %}
-{% block title %}Login{% endblock %}
-{% block content %}
-There should be code here.
-{% endblock %}

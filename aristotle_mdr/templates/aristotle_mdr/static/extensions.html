@@ -1,0 +1,29 @@
+{% extends "aristotle_mdr/base.html" %}
+
+{% block content %}
+<h1>{% block title %}Aristotle Extensions{% endblock %}</h1>
+<div class="row">
+
+{% if config.CONTENT_EXTENSIONS or config.DOWNLOAD_EXTENSIONS %}
+    <p>
+    Below is a complete listing of the extensions that are used in {{ config.SITE_NAME }},
+    click any of the headings below for more information.
+    </p>
+    {% if config.CONTENT_EXTENSIONS %}
+
+        <dl>
+        {% for ext in config.CONTENT_EXTENSIONS %}
+
+            {% with ext|add:'/about_extension.html' as ext_template %}
+                {% include ext_template %}
+            {% endwith %}
+
+        {% endfor %}
+        </dl>
+    {% else %}
+        No extensions extensions have been installed.
+    {% endif %}
+{% endif %}
+</div>
+
+{% endblock %}

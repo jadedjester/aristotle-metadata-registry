@@ -19,16 +19,12 @@
     {% if total > 0 %}
     <h2>Relational attributes</h2>
         <h3>Data Element Concepts implementing this Object Class</h3>
-            {% if total > 10 %}
-                Showing the first 10, <a href="{{ request.path }}/related">show all {{ total }} Data Element Concept{{ total|pluralize }}</a>.
-            {% endif %}
         <ul>
-        {% for dec in item.dataelementconcept_set.all|can_view_iter:user|islice:":5" %}
+        {% for dec in item.dataelementconcept_set.all|can_view_iter:user %}
             <li>
                 {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
             </li>
         {% endfor %}
-
         </ul>
     {% endif %}
 {% endwith %}

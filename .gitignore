@@ -46,3 +46,4 @@ whoosh_index/
 #migrations/
 src/
 /static/
+/docs/_build

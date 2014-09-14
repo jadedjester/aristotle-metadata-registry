@@ -8,24 +8,54 @@ from django.shortcuts import render
 
 register = template.Library()
 
+
 @register.filter
-def can_view_item(user,item):
+def can_view(item,user):
+    """
+    A filter that acts as a wrapper around ``aristotle_mdr.perms.can_view``.
+     For example::
+
+      {% if myItem|can_view:request.user %}
+        {{ item }}
+      {% endif %}
+    """
     try:
         return perms.user_can_view(user,item)
     except:
         return False
 
 @register.filter
-def can_edit_item(user,item):
+def can_edit(item,user):
+    """
+    A filter that acts as a wrapper around ``aristotle_mdr.perms.can_edit``.
+    For example::
+
+      {% if myItem|can_edit:request.user %}
+        {{ item }}
+      {% endif %}
+    """
+
     try:
         return perms.user_can_edit(user,item)
     except:
         return False
 
 @register.filter
-def can_view_iter(itera,user):
+def can_view_iter(qs,user):
+    """
+    A filter that is a simple wrapper that applies the ``aristotle_mdr.models.ConceptManager.visible(user)``
+    for use in templates. Filtering on a Django ``Queryset`` and passing in the current
+    user as the argument returns a list (not a ``Queryset`` at this stage) of only
+    the items from the ``Queryset`` the user can view.
+    For example::
+
+        {% for item in myItems|can_view_iter:request.user %}
+          {{ item }}
+        {% endfor %}
+    """
+
     try:
-        return [item for item in itera if perms.user_can_view(user,item)]
+        return qs.visible(user) #[item for item in itera if perms.user_can_view(user,item)]
     except:
         #Fail safely
         return []
@@ -48,10 +78,13 @@ def search(request, pageNumber):
 def ifeq(a, b, val):
     return val if a == b else ""
 
-# A simple ternary tag - it beats verbose if/else tags in templates for simple strings
-# If condition is 'truthy' return a otherwise return 'b'
 @register.simple_tag
 def ternary(condition, a, b):
+    """
+    A simple ternary tag - it beats verbose if/else tags in templates for simple strings
+    If condition is 'truthy' return a otherwise return 'b'
+    """
+
     if condition:
         return a
     else:
@@ -116,14 +149,3 @@ def downloadMenu(iid):
     return get_template("aristotle_mdr/helpers/downloadMenu.html").render(
         Context({'iid':iid,'downloadOptions':downloadOpts,})
         )
-
-@register.simple_tag
-def hasExtensions():
-    from django.conf import settings
-    return getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('CONTENT_EXTENSIONS',[])
-
-@register.simple_tag
-def aristotleSetting(setting=None):
-    from django.conf import settings
-    s = getattr(settings, 'ARISTOTLE_SETTINGS', {})
-    return s[setting]

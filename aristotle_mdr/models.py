@@ -55,13 +55,7 @@ class baseAristotleObject(TimeStampedModel):
     def get_verbose_name_plural(self):
         return self._meta.verbose_name_plural.title()
     def url_name(self):
-        s = "".join(self._meta.verbose_name.title().split())
-        s = s[:1].lower() + s[1:]
-        return s
-
-    @staticmethod
-    def autocomplete_search_fields():
-        return ("name__icontains",) # Is this right?
+        return "".join(self._meta.verbose_name.lower().split())
 
     # These are all overridden elsewhere, but we use them in permissions instead of inspecting objects to find type.
     @property
@@ -266,11 +260,26 @@ class Workgroup(registryGroup):
 #    object = models.ForeignKey(managedObject)
 
 class ConceptQuerySet(InheritanceQuerySet):
+    def editable(self,user):
+        return [i for i in self.all() if perms.user_can_edit(user,i)]
     def visible(self,user):
         return [i for i in self.all() if perms.user_can_view(user,i)]
     def public(self):
         return [i for i in self.all() if i.is_public()]
+
+    # The below return actual querysets, but are much slower
+    # They hit the database twice, once to get the item ids and again to get the matching objects
+    def editable_slow(self,user):
+        return self.filter(id__in=[i.id for i in self.all() if perms.user_can_edit(user,i)])
+    def visible_slow(self,user):
+        return self.filter(id__in=[i for i in self.all() if perms.user_can_view(user,i)])
+    def public_slow(self):
+        return self.filter(id__in=[i for i in self.all() if i.is_public()])
+
 class ConceptManager(InheritanceManager):
+    """A cool manager
+    """
+
     def get_query_set(self):
         return ConceptQuerySet(self.model)
     def get_queryset(self):
@@ -289,7 +298,6 @@ class _concept(baseAristotleObject):
         verbose_name = "item" # So the url_name works for items we can't determine
     @property
     def item(self):
-        print "|||"+ str(_concept.objects.get_subclass(pk=self.id))
         return _concept.objects.get_subclass(pk=self.id)
 
     def relatedItems(self,user=None):
@@ -299,6 +307,16 @@ class _concept(baseAristotleObject):
         for p in self.favourited_by.all():
             notify.send(p.user, recipient=p.user, verb="changed a favourited item", target=self)
         return obj
+
+    def get_autocomplete_name(self):
+        return 'Autocomplete'+"".join(self._meta.verbose_name.title().split())
+    """@staticmethod
+    def autocomplete_search_fields(self):
+        return ("name__icontains",) # Is this right?"""
+    def get_absolute_url(self):
+        from django.core.urlresolvers import reverse
+        return reverse("aristotle:item",args=[self.id])
+
     # This returns the items that can be registered along with the this item.
     # Reimplementations of this MUST return lists
     @property

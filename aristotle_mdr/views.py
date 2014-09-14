@@ -93,7 +93,7 @@ def download(request,downloadType,iid=None):
 def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
     if iid is None:
         app_name = objtype._meta.app_label
-        return redirect(reverse("%s:about"%app_name,args=["".join(objtype._meta.verbose_name.title().lower().split())]))
+        return redirect(reverse("%s:dynamic"%app_name,args=["".join(objtype._meta.verbose_name.title().lower().split())]))
     item = get_object_or_404(objtype,pk=iid)
     if not condition(request.user, item):
         if request.user.is_anonymous():
@@ -103,6 +103,7 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
 
     # We add a user_can_edit flag in addition to others as we have odd rules around who can edit objects.
     isFavourite = request.user.is_authenticated () and request.user.profile.isFavourite(item.id)
+    """
     if subpage=="related":
         from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
         related_items = item.relatedItems(request.user)
@@ -123,19 +124,22 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
              'relatedItems':related_items,}
             )
     else:
-        from reversion.revisions import default_revision_manager
-        last_edit = default_revision_manager.get_for_object_reference(
-                item.__class__,
-                item.pk,
-            ).first()
-        return render(request,item.template,
-            {'item':item,
-             'user_can_edit':user_can_edit(request.user,item),
-             'view':request.GET.get('view','').lower(),
-             'isFavourite': isFavourite,
-             'last_edit': last_edit
-                }
-            )
+    Lets disable the related page for the time being
+    Only a handful of Object classes will be impacted.
+    """
+    from reversion.revisions import default_revision_manager
+    last_edit = default_revision_manager.get_for_object_reference(
+            item.__class__,
+            item.pk,
+        ).first()
+    return render(request,item.template,
+        {'item':item,
+         'user_can_edit':user_can_edit(request.user,item),
+         'view':request.GET.get('view','').lower(),
+         'isFavourite': isFavourite,
+         'last_edit': last_edit
+            }
+        )
 
 def itemPackages(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
@@ -345,14 +349,7 @@ def glossaryById(request,iid):
 def aboutThisSite(request):
     return render(request,"aristotle_mdr/about_this_site.html")
 
-def homePage(request):
-    from django.conf import settings
-    extensions = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('CONTENT_EXTENSIONS',[])
-    return render(request,"aristotle_mdr/static/home.html",{'extensions':extensions})
-
 def aboutExtensions(request):
-    from django.conf import settings
-    extensions = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('CONTENT_EXTENSIONS',[])
     return render(request,"aristotle_mdr/extensions.html",{'extensions':extensions})
 
 # creation tools
@@ -620,16 +617,16 @@ def supersede(request, iid):
             )
 
 def deprecate(request, iid):
-    item = get_object_or_404(MDR.baseAristotleObject,pk=iid)
-    item = MDR.baseAristotleObject.objects.get_subclass(pk=iid)
+    item = get_object_or_404(MDR._concept,pk=iid).item
     if not (item and user_can_edit(request.user,item)):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
             return redirect('/unauthorised?page=%s' % request.path)
-    qs=(i for i in item.__class__.objects.all() if user_can_edit(request.user,i))
+    qs=item.__class__.objects.filter().editable_slow(request.user)
     if request.method == 'POST': # If the form has been submitted...
-        form = MDRForms.DeprecateForm(request.POST,item=item,qs=qs) # A form bound to the POST data
+        form = MDRForms.DeprecateForm(request.POST,user=request.user,item=item,qs=qs) # A form bound to the POST data
+        print request.POST
         if form.is_valid():
             # Check use the itemset as there are permissions issues and we want to remove some:
             #  Everything that was superseded, but isn't in the returned set
@@ -637,14 +634,14 @@ def deprecate(request, iid):
             #  Everything left over can stay the same, as its already superseded
             #    or wasn't superseded and is staying that way.
             for i in item.supersedes.all():
-                if user_can_edit(request.user,i) and i not in form.cleaned_data['olderItems']:
+                if i not in form.cleaned_data['olderItems'] and user_can_edit(request.user,i):
                     item.supersedes.remove(i)
             for i in form.cleaned_data['olderItems']:
                 if user_can_edit(request.user,i): #Would check item.supersedes but its a set
                     item.supersedes.add(i)
-            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
+            return HttpResponseRedirect(reverse("aristotle:item",args=str(item.id)))
     else:
-        form = MDRForms.DeprecateForm(item=item,qs=qs)
+        form = MDRForms.DeprecateForm(user=request.user,item=item,qs=qs)
     return render(request,"aristotle_mdr/actions/deprecateItems.html",
             {"item":item,
              "form":form,

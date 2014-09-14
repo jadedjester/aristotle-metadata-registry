@@ -16,6 +16,7 @@ from django.forms import model_to_dict
 
 class AdminConceptForm(forms.ModelForm):
     # Thanks: http://stackoverflow.com/questions/6034047/one-to-many-inline-select-with-django-admin
+    # Although concept is an abstract class, we still need this to have a reverse one-to-many edit field.
     class Meta:
         model = MDR._concept
 
@@ -122,14 +123,21 @@ class DeprecateForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.item = kwargs.pop('item')
         self.qs = kwargs.pop('qs')
+        self.user = kwargs.pop('user')
         super(DeprecateForm, self).__init__(*args, **kwargs)
         self.fields['olderItems']=forms.ModelMultipleChoiceField(
                 queryset=self.qs,
                 label="Deprecate items",
                 #widget=forms.CheckboxSelectMultiple,
                 initial=self.item.supersedes.all(),
-                widget=autocomplete_light.MultipleChoiceWidget('AutocompleteDataElement'))
+                widget=autocomplete_light.MultipleChoiceWidget(self.item.get_autocomplete_name()))
 
+    def clean_olderItems(self):
+        olderItems = self.cleaned_data['olderItems']
+        #items = [i for i in olderItems if user_can_edit(self.user,i)]
+        #self.choices.editable_slow(self.request.user)
+        cleaned = self.item.__class__.objects.filter(id__in=olderItems).editable_slow(self.user)
+        return cleaned
 
 # For superseding an item with a newer one.
 class SupersedeForm(forms.Form):

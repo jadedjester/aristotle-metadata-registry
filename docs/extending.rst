@@ -241,6 +241,14 @@ can arise from doing so.
   would also return results for ``CountrySpecificDataElement``s, and they will
   be displayed in the list as ``DataElement`` *not* as ``CountrySpecificDataElement``.
 
+* Items that inherit from non-abstract classes do not inherit the Django object Mangers,
+  this is one of the reasons for the decision to make ``concept`` an abstact class.
+  As such, its adviced that any items that inherit from concrete classes refine the
+  default object manager like so:
+
+    class CountrySpecificDataElement(aristotle.models.DataElement):
+        countries = models.ManyToManyField(Country)
+        objects = aristotle_mdr.models.ConceptManager()
 
 A complete example of an Aristotle Extension
 --------------------------------------------

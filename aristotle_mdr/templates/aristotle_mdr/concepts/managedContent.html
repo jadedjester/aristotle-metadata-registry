@@ -86,35 +86,38 @@
             <dt>Last updated</dt>
             <dd>
                 <a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a>
-                {% if request.user.is_active %}<span>By {{ last_edit.revision.user.get_username }}</span>{% endif %}
+                {% if request.user.is_active %}
+                <span style="display:inline-block">By {% with name=last_edit.revision.user.get_username %}
+                        {% if name %}name{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
+                        {% endwith %}
+                </span>
+                {% endif %}
             </dd>
             <dt>Created</dt><dd>{{item.created}}</dd>
-        </dl>
+
         {% block asideContent %}{% endblock %}
 
         {% with total=item.supersedes.count %}
             <dt class="large">Supersedes
-            {% if user.is_active %}
+            {% if item|can_edit:request.user %}
                 <a class="inline_action" href="{% url 'aristotle:deprecate' iid=item.id %}"
                     data-toggle="modal" data-target="#supersede">{% ternary total 'Change' 'Add'%}</a>
             {% endif %}</dt>
             <dd class="large">
             <ul>
                 <li>{{ total }} {% pluralmodel item total %}</li>
-                {% for sup in item.supersedes.all %}
-                    {% if user|can_view_item:sup %}
+                {% for sup in item.supersedes.all|can_view_iter:user %}
                     <li>
                       <a href="{% url 'aristotle:item' item_id=sup.id %}/">
                         {{ sup }}
                       </a>
                     </li>
-                    {% endif %}
                 {% endfor %}
             </ul>
             </dd>
         {% endwith %}
             <dt class="large">Superseded by
-                {% if user.is_active %}
+                {% if item|can_edit:request.user %}
                     <a class="inline_action" href="{% url 'aristotle:supersede' iid=item.id %}"
                        data-toggle="modal" data-target="#supersede">{% ternary item.superseded_by 'Change' 'Add'%}</a>
                 {% endif %}</dt>
@@ -123,7 +126,7 @@
                 {% if item.superseded_by %}
                     <a href="{% url 'aristotle:item' item_id=item.superseded_by.id %}">{{ item.superseded_by }}</a>
                 {% else %}
-                    -
+                    <em>None</em>
                 {% endif %}
             </li></ul>
             </dd>

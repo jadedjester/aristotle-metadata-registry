@@ -15,6 +15,7 @@ Contents:
    features.rst
    templates.rst
    downloads.rst
+   using_permissions.rst
 
 
 Indices and tables

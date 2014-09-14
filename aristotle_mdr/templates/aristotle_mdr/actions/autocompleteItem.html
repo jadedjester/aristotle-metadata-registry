@@ -1,4 +1,30 @@
-<span>
-<span>{{autocomplete}}</span>
-<span>{{autocomplete}}</span>
+{% load i18n l10n %}
+{% load static %}
+
+<span class="block" data-value="{{ choice.pk|unlocalize }}">
+    <span>
+    {{ choice }} <small>Aristotle id: {{ choice.id }}</small>
+    {% with choice.get_absolute_url as url %}
+        {% if url %}
+        <a href="{{ url }}" target="_blank" class="choice-detail" title="{% trans 'Open in a new window' %}"><i class="fa fa-angle-double-right"></i></a>
+        {% endif %}
+    {% endwith %}
+    </span>
+    <p style="margin-left:20px;">
+    <small>Statuses:
+    {% for s in choice.statuses.all %}
+        [{{ s.registrationAuthority }}: {{ s.state_name }}]
+    {% empty %}<strong>None</strong>
+    {% endfor %}</small>
+        <br>
+        {{ choice.description|truncatewords:20|striptags }}
+    </p>
+
+    {% with choice.get_absolute_update_url  as url %}
+        {% if url %}
+        <a href="{{ url }}" target="_blank" class="choice-update">
+            <img src="{% static 'admin/img/icon_changelink.gif' %}" />
+        </a>
+        {% endif %}
+    {% endwith %}
 </span>
