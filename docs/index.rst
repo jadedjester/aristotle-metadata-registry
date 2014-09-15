@@ -20,17 +20,16 @@ expose authoritative metadata and the governance processes behind its creation,
 and building upon known and open systems agencies, can build upon a stable platform
 or the sharing of 11179 metadata items.
 
-Contents:
+Table of Contents
+=================
 
 .. toctree::
    :maxdepth: 2
 
    quickstart.rst
+   installing.rst
    features.rst
    extending.rst
-   templates.rst
-   downloads.rst
-   using_permissions.rst
 
 
 Indices and tables

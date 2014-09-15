@@ -291,9 +291,16 @@ class ConceptManager(InheritanceManager):
             return getattr(self.__class__, attr, *args)
 
 """
-Managed objects is an abstract class for describing the necessary attributes for any content that is versioned and registered within a Registration Authority
+Managed objects is an abstract class for describing the necessary attributes for
+any content that is versioned and registered within a Registration Authority
 """
 class _concept(baseAristotleObject):
+    """
+    This is the base concrete class that `Status` items attach to, and to which
+    collection objects refer to. It is not marked abstract in the Django Meta class, and
+    **must not be inherited from**. It has relatively few fields and is a convenience
+    class to link with.
+    """
     objects = ConceptManager()
     template = "aristotle_mdr/concepts/managedContent.html"
     readyToReview = models.BooleanField(default=False)
@@ -303,6 +310,10 @@ class _concept(baseAristotleObject):
         verbose_name = "item" # So the url_name works for items we can't determine
     @property
     def item(self):
+        """
+        Performs a lookup using ``model_utils.managers.InheritanceManager`` to find the
+        subclassed item
+        """
         return _concept.objects.get_subclass(pk=self.id)
 
     def relatedItems(self,user=None):
@@ -352,6 +363,12 @@ class _concept(baseAristotleObject):
 "Concept" is the term for the 11179 abstract class for capturing all content shared by 11179 objects
 """
 class concept(_concept):
+    """
+    This is an abstract class that all items that should behave like 11179 Concept
+    **must be inherited from**. This model includes the definitions for many long and optional text
+    fields and the self-referential ``superseded_by`` field. It is not possible to include this
+    model in a ``ForeignKey`` or ``ManyToManyField``.
+    """
     shortName = models.CharField(max_length=100,blank=True)
     version = models.CharField(max_length=20,blank=True)
     synonyms = models.CharField(max_length=200, blank=True)
@@ -369,6 +386,9 @@ class concept(_concept):
 
     @property
     def item(self):
+        """
+        Return self, because we already have the correct item.
+        """
         return self
 
     @property
