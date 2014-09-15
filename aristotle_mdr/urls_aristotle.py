@@ -13,7 +13,6 @@ sqs = SearchQuerySet()
 
 urlpatterns = patterns('aristotle_mdr.views',
     url(r'^/?$', TemplateView.as_view(template_name='aristotle_mdr/static/home.html'),name="home"),
-    url(r'^unauthorised/(?P<path>)$', views.unauthorised, name='unauthorised'),
 
     # all the below take on the same form:
     # url(r'^itemType/(?P<iid>\d+)?/?

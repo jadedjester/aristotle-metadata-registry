@@ -21,3 +21,5 @@ urlpatterns = patterns('',
     url('^inbox/notifications/', include(notifications.urls)),
     url(r'^', include('aristotle_mdr.urls_aristotle',app_name="aristotle_mdr",namespace="aristotle")),
     )
+
+handler403 = 'aristotle_mdr.views.unauthorised'

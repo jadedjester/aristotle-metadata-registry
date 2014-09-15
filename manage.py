@@ -3,7 +3,10 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aristotle_mdr.settings")
+    if 'test' in sys.argv:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aristotle_mdr.tests_settings")
+    else:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aristotle_mdr.required_settings")
 
     from django.core.management import execute_from_command_line
 

@@ -5,7 +5,7 @@ One of the core features of the ISO/IEC 11179-3 information model is the ability
 to extend the models by subclassing from the included items. The core item that
 most 11179 objects are based on is the "Concept".
 
-Due to this encouragement of inheritance andenhancement, Aristotle-MDR follows
+Due to this encouragement of inheritance and enhancement, Aristotle-MDR follows
 similar principles and using the Object-Oriented approach of
 `Python <https://www.python.org/>`_ and `Django <https://www.djangoproject.com/>`_,
 provides a large capability to extend and improve
@@ -229,7 +229,7 @@ can arise from doing so.
      example.com/your_app_path/countryspecificdataelement/543210
 
   They would go to the correct page for a ``CountrySpecificDataElement``, however
-  if they browsed to
+  if they browsed to::
 
      example.com/dataelement/543210
 
@@ -244,7 +244,7 @@ can arise from doing so.
 * Items that inherit from non-abstract classes do not inherit the Django object Mangers,
   this is one of the reasons for the decision to make ``concept`` an abstact class.
   As such, its adviced that any items that inherit from concrete classes refine the
-  default object manager like so:
+  default object manager like so::
 
     class CountrySpecificDataElement(aristotle.models.DataElement):
         countries = models.ManyToManyField(Country)

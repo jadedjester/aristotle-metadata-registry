@@ -40,6 +40,7 @@ nosetests.xml
 *~
 .*.sw[mnop]
 *.db3
+*.db
 *.sqlite3
 whoosh_index/
 

@@ -1,4 +1,6 @@
 from django.db.models import signals
 import aristotle_mdr
+import sys
 
-signals.post_syncdb.connect(aristotle_mdr.models.defaultData(), sender=aristotle_mdr)
+if 'test' not in sys.argv:
+    signals.post_syncdb.connect(aristotle_mdr.models.defaultData(), sender=aristotle_mdr)

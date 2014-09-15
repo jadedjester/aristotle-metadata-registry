@@ -3,6 +3,7 @@ from aristotle_mdr import models, perms
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group, Permission
+from django.core.urlresolvers import reverse
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
@@ -324,7 +325,123 @@ class AnonymousUserViewingThePages(TestCase):
         home = self.client.get("/item/%s"%item.id)
         self.assertEqual(home.status_code,200)
 
-class CustomQuerySetTest(TestCase):
+class LoggedInViewPages(object):
+    def setUp(self):
+
+        self.client = Client()
+        self.wg1 = models.Workgroup.objects.create(name="Test WG 1") # Editor is member
+        self.wg2 = models.Workgroup.objects.create(name="Test WG 2")
+
+        self.su = User.objects.create_superuser('super','','user')
+        self.editor = User.objects.create_user('eddie','','editor')
+        self.viewer = User.objects.create_user('vicky','','viewer')
+
+        self.item1 = self.itemType.objects.create(name="OC1",workgroup=self.wg1)
+        self.item2 = self.itemType.objects.create(name="OC2",workgroup=self.wg2)
+        self.item3 = self.itemType.objects.create(name="OC2",workgroup=self.wg1)
+
+        self.wg1.addUser(self.editor)
+        self.wg1.giveRoleToUser('Editor',self.editor)
+        self.wg1.addUser(self.viewer)
+        self.wg1.giveRoleToUser('Viewer',self.viewer)
+        self.editor = User.objects.get(pk=self.editor.pk)
+        self.viewer = User.objects.get(pk=self.viewer.pk)
+
+    def get_page(self,item=None):
+        if item is None:
+            item = self.item1
+        return reverse('aristotle:%s'%self.url_name,args=[item.id])
+
+    def logout(self):
+        self.client.post(reverse('django.contrib.auth.views.logout'), {})
+
+    def login_superuser(self):
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'super', 'password': 'user'})
+        self.assertEqual(response.status_code,302)
+        return response
+    def login_viewer(self):
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'vicky', 'password': 'viewer'})
+        self.assertEqual(response.status_code,302)
+        return response
+    def login_editor(self):
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'eddie', 'password': 'editor'})
+        self.assertEqual(response.status_code,302)
+        return response
+
+    def test_logins(self):
+        # Failed logins reutrn 200, not 401
+        # See http://stackoverflow.com/questions/25839434/
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'super', 'password': 'the_wrong_password'})
+        self.assertEqual(response.status_code,200)
+        # Success redirects to the homepage, so its 302 not 200
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'super', 'password': 'user'})
+        self.assertEqual(response.status_code,302)
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'eddie', 'password': 'editor'})
+        self.assertEqual(response.status_code,302)
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'vicky', 'password': 'viewer'})
+        self.assertEqual(response.status_code,302)
+
+    def test_su_can_view(self):
+        self.login_superuser()
+        response = self.client.get(self.get_page(self.item1))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(self.get_page(self.item2))
+        self.assertEqual(response.status_code,200)
+
+    def test_editor_can_view(self):
+        self.login_editor()
+        response = self.client.get(self.get_page(self.item1))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(self.get_page(self.item2))
+        self.assertEqual(response.status_code,403)
+
+    def test_viewer_can_view(self):
+        self.login_viewer()
+        response = self.client.get(self.get_page(self.item1))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(self.get_page(self.item2))
+        self.assertEqual(response.status_code,403)
+
+    def test_viewer_cannot_view_supersede_page(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_editor_can_view_supersede_page(self):
+        self.login_editor()
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item3.id]))
+        self.assertEqual(response.status_code,200)
+
+class ObjectClassViewPage(LoggedInViewPages,TestCase):
+    url_name='objectClass'
+    itemType=models.ObjectClass
+
+class PropertyViewPage(LoggedInViewPages,TestCase):
+    url_name='property'
+    itemType=models.Property
+"""class ValueDomainViewPage(LoggedInViewPages,TestCase):
+    url_name='valueDomain'
+    itemType=models.ValueDomain
+    def setUp(self):
+        super(ValueDomainViewPage, self).setUp()
+        self.item1 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
+        self.item2 = models.Property.objects.create(name="OC2",workgroup=self.wg2)
+        self.item3 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
+"""
+
+
+class CustomConceptQuerySetTest(TestCase):
     def test_is_public(self):
         ra = models.RegistrationAuthority.objects.create(name="Test RA",public_state=models.STATES.standard)
         wg = models.Workgroup.objects.create(name="Setup WG")
@@ -350,8 +467,35 @@ class CustomQuerySetTest(TestCase):
         # Assert no public items
         self.assertEqual(len(models.ObjectClass.objects.all().public()),0)
 
+    def test_is_publicslow(self):
+        ra = models.RegistrationAuthority.objects.create(name="Test RA",public_state=models.STATES.standard)
+        wg = models.Workgroup.objects.create(name="Setup WG")
+        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg)
+        oc2 = models.ObjectClass.objects.create(name="Test OC2",workgroup=wg)
+        user = User.objects.create_superuser('super','','user')
+
+        # Assert no public items
+        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),0)
+
+        # Register OC1 only
+        ra.register(oc1,models.STATES.standard,user)
+
+        # Assert only OC1 is public
+        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),1)
+        self.assertEqual(models.ObjectClass.objects.public_slow().all().first(),oc1)
+        self.assertTrue(oc1 in models.ObjectClass.objects.public_slow().all())
+        self.assertTrue(oc2 not in models.ObjectClass.objects.public_slow().all())
+
+        # Deregister OC1
+        state=models.STATES.incomplete
+        ra.register(oc1,state,user)
+
+        # Assert no public items
+        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),0)
+
+
 class RegistryCascadeTest(TestCase):
-    def test_DataElementConceptCascade(self):
+    def test_superuser_DataElementConceptCascade(self):
         user = User.objects.create_superuser('super','','user')
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
         self.wg = models.Workgroup.objects.create(name="Setup WG")
@@ -383,7 +527,7 @@ class RegistryCascadeTest(TestCase):
         self.assertEqual(self.pr.statuses.all()[0].state,state)
         self.assertEqual(self.dec.statuses.all()[0].state,state)
 
-    def test_DataElementCascade(self):
+    def test_superuser_DataElementCascade(self):
         user = User.objects.create_superuser('super','','user')
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
         self.wg = models.Workgroup.objects.create(name="Setup WG")

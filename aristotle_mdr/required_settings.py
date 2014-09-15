@@ -1,4 +1,4 @@
-import os
+import os,sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
@@ -7,6 +7,7 @@ STATIC_ROOT =os.path.join(BASE_DIR, "static")
 
 # This MUST be overridden in a particular install of Aristotle in the projects own settings.py file.
 SECRET_KEY = '1cdd5u%@#z%eg8+tc(jd@i*nf=ae5d+c!2=irfs=)h%1b2&a&o'
+
 
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 # This provides for quick easy set up, but should be changed to a production
@@ -39,7 +40,7 @@ INSTALLED_APPS = (
     'inplaceeditform',
     'inplaceeditform_extra_fields',
     'tinymce',
-    'haystack',
+
     'bootstrap3',
     'bootstrap3_datetime',
     'reversion', # https://github.com/etianen/django-reversion
@@ -63,6 +64,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'django.core.context_processors.request',
   'aristotle_mdr.context_processors.settings',
 )
+
+ROOT_URLCONF = 'aristotle_mdr.urls'
+LOGIN_REDIRECT_URL = '/account/home'
 
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
@@ -103,7 +107,6 @@ ADAPTOR_INPLACEEDIT = {
     'booleanYesNo': 'aristotle_mdr.fields.booleanYesNo',
 }
 
-import os
 HAYSTACK_SIGNAL_PROCESSOR = 'aristotle_mdr.signals.AristotleSignalProcessor'
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 HAYSTACK_CONNECTIONS = {

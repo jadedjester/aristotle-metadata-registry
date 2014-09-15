@@ -18,6 +18,16 @@ of minutes - and includes everything you need to get a professional scalable met
 The only restriction with running Aristotle-MDR is that if you are running a public facing site,
 you keep a link to the Aristotle GitHub page in the footer, but even this can can be waived with permission.
 
+Easily extensible
+-----------------
+
+One of the core features of the ISO/IEC 11179-3 information model is the ability
+to extend the models by subclassing from the included items. Aristotle-MDR captures the
+core of the ISO/IEC 11179 as faithfully as possible, but provides a rich API to quickly
+and easily add new items for management using the Object-Oriented approach of
+`Python <https://www.python.org/>`_ and `Django <https://www.djangoproject.com/>`_.
+
+
 Cross-platform support
 ----------------------
 Built upon `Python <https://www.python.org/>`_ and `Django <https://www.djangoproject.com/>`_,

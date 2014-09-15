@@ -117,7 +117,7 @@ class RegistrationAuthority(registryGroup):
     # The below text fields allow for brief descriptions of the context of each
     # state for a particular Registration Authority
     # For example:
-    # For a particlular Registration Authority standard may mean"
+    # For a particular Registration Authority standard may mean"
     #   "Approved by a simple majority of the standing council of metadata standardisation"
     # While "Preferred Standard" may mean:
     #   "Approved by a two-thirds majority of the standing council of metadata standardisation"
@@ -270,20 +270,25 @@ class ConceptQuerySet(InheritanceQuerySet):
     # The below return actual querysets, but are much slower
     # They hit the database twice, once to get the item ids and again to get the matching objects
     def editable_slow(self,user):
-        return self.filter(id__in=[i.id for i in self.all() if perms.user_can_edit(user,i)])
+        return self.filter(id__in=[i.id for i in self.editable(user)])
     def visible_slow(self,user):
-        return self.filter(id__in=[i for i in self.all() if perms.user_can_view(user,i)])
+        return self.filter(id__in=[i.id for i in self.visible(user)])
     def public_slow(self):
-        return self.filter(id__in=[i for i in self.all() if i.is_public()])
+        return self.filter(id__in=[i.id for i in self.public()])
 
 class ConceptManager(InheritanceManager):
     """A cool manager
     """
-
     def get_query_set(self):
         return ConceptQuerySet(self.model)
     def get_queryset(self):
         return ConceptQuerySet(self.model)
+    def __getattr__(self, attr, *args):
+        # Only let the slow ones through to the queryset
+        if attr in ['editable_slow','visible_slow','public_slow']:
+            return getattr(self.get_queryset(), attr, *args)
+        else:
+            return getattr(self.__class__, attr, *args)
 
 """
 Managed objects is an abstract class for describing the necessary attributes for any content that is versioned and registered within a Registration Authority

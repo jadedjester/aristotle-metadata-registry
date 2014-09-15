@@ -3,7 +3,7 @@ from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -66,13 +66,13 @@ def render_if_user_can_edit(*args,**kwargs):
     return render_if_condition_met(user_can_edit,*args,**kwargs)
 
 def download(request,downloadType,iid=None):
-    item = MDR.baseAristotleObject.objects.get_subclass(pk=iid)
+    item = MDR._concept.objects.get_subclass(pk=iid)
     item = get_if_user_can_view(item.__class__,request.user, iid)
     if not item:
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     p,t = item.template.split("/",1)
     template = "%s/%s/%s"%(p,downloadType,t)
 
@@ -94,12 +94,12 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
     if iid is None:
         app_name = objtype._meta.app_label
         return redirect(reverse("%s:dynamic"%app_name,args=["".join(objtype._meta.verbose_name.title().lower().split())]))
-    item = get_object_or_404(objtype,pk=iid)
+    item = get_object_or_404(objtype,pk=iid).item
     if not condition(request.user, item):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
 
     # We add a user_can_edit flag in addition to others as we have odd rules around who can edit objects.
     isFavourite = request.user.is_authenticated () and request.user.profile.isFavourite(item.id)
@@ -174,14 +174,13 @@ def registrationHistory(request, item_id):
             )
 
 def item(request, item_id):
-    try:
-        item = MDR._concept.objects.get_subclass(pk=item_id)
-        return render_if_user_can_view(item.__class__,request,item_id)
-    except MDR._concept.DoesNotExist:
-        raise Http404
+    return render_if_user_can_view(MDR._concept,request,item_id)
 
-def unauthorised(request, path):
-    return render(request,"aristotle_mdr/unauthorised.html",{"path":path,"anon":request.user.is_anonymous(),})
+def unauthorised(request, path=''):
+    if request.user.is_anonymous():
+        return render(request,"401.html",{"path":path,"anon":True,},status=401)
+    else:
+        return render(request,"403.html",{"path":path,"anon":True,},status=403)
 
 def objectclass(*args,**kwargs):
     return render_if_user_can_view(MDR.ObjectClass,*args,**kwargs)
@@ -525,7 +524,7 @@ def removeWorkgroupRole(request,iid,rolename,userid):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     try:
         user = User.objects.get(id=userid)
         workgroup.removeRoleFromUser(rolename,user)
@@ -539,7 +538,7 @@ def addWorkgroupMembers(request,iid):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.AddWorkgroupMembers(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -567,7 +566,7 @@ def changeStatus(request, iid):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     # There would be an else here, but both branches above return,
     # so we've chopped it out to prevent an arrow anti-pattern.
     ras=request.user.profile.registrarAuthorities
@@ -594,13 +593,12 @@ def changeStatus(request, iid):
             )
 
 def supersede(request, iid):
-    item = get_object_or_404(MDR.baseAristotleObject,pk=iid)
-    item = MDR.baseAristotleObject.objects.get_subclass(pk=iid)
+    item = get_object_or_404(MDR._concept,pk=iid).item
     if not (item and user_can_edit(request.user,item)):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     qs=item.__class__.objects.all()
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.SupersedeForm(request.POST,item=item,qs=qs) # A form bound to the POST data
@@ -622,7 +620,7 @@ def deprecate(request, iid):
         if request.user.is_anonymous():
             return redirect('/accounts/login?next=%s' % request.path)
         else:
-            return redirect('/unauthorised?page=%s' % request.path)
+            raise PermissionDenied
     qs=item.__class__.objects.filter().editable_slow(request.user)
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.DeprecateForm(request.POST,user=request.user,item=item,qs=qs) # A form bound to the POST data

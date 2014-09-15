@@ -11,8 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   extending.rst
    features.rst
+   extending.rst
    templates.rst
    downloads.rst
    using_permissions.rst
