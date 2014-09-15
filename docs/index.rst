@@ -6,11 +6,14 @@
 Welcome to Aristotle MetaData Registry's documentation!
 =======================================================
 
+.. include:: ../README.rst
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   quickstart.rst
    features.rst
    extending.rst
    templates.rst
