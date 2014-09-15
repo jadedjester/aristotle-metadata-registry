@@ -6,7 +6,19 @@
 Welcome to Aristotle MetaData Registry's documentation!
 =======================================================
 
-.. include:: ../README.rst
+Aristotle-MDR is an open-source metadata registry as laid out by the requirements
+of the ISO/IEC 11179:2013 specification.
+
+Aristotle-MDR represents a new way to manage and federate content built on and extending
+the principles of leading metadata registry. The code of Aristotle is completely open-source,
+building on the Django web framework and the mature model of the 11179 standard,
+agencies can easily run their own metadata registries while also having the ability
+to extend the information model and tap into the permissions and roles of ISO 11179.
+
+By allowing organisations to run their own independant registries the are able to
+expose authoritative metadata and the governance processes behind its creation,
+and building upon known and open systems agencies, can build upon a stable platform
+or the sharing of 11179 metadata items.
 
 Contents:
 
