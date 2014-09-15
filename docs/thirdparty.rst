@@ -10,7 +10,7 @@ but there are few areas for customisation or tweaking.
 Django
 ------
 
-Every django setting can be overridden, butthe ones that will be most important are:
+Every django setting can be overridden, but the ones that will be most important are:
 
 * ```DATABASE`` - By default Aristotle will configure a SQLite file-based database.
   While this is fine fors very small low use registries, configuring Django to use a
@@ -33,7 +33,7 @@ as without search a registry is quite useless. However you can change some setti
   which is quite fast and because its a Pure-Python implementation reduces the complexity in getting it setup.
   `For more advanced usage, read the Haystack documentation <http://django-haystack.readthedocs.org/en/latest/tutorial.html#configuration>`_.
 * ``HAYSTACK_SIGNAL_PROCESSOR`` - Included for completion, this defaults to ``aristotle_mdr.signals.AristotleSignalProcessor``.
-  This is a custom signal processor that performs real-time, status-aware changes to the index. Read the warnings below for why you probably don't want to change this.
+  This is a custom signal processor that performs real-time, status-aware changes to the index. **Read the warnings below for why you probably don't want to change this.**
 
 Warnings about Haystack:
 ++++++++++++++++++++++++
@@ -42,7 +42,7 @@ Warnings about Haystack:
 * Make sure ``haystack`` is included in ``INSTALLED_APPS`` *before* ``aristotle_mdr``.
 * Be aware that Haystack will only update search indexes when told, Aristotle includes a
   ``SignalProcessor`` that performs registation status-aware real-time updates to the index.
-  Switching this for another processor may expose private information through search results,
+  **Switching this for another processor may expose private information** through search results,
   *but will not allow unauthorised users to access the complete item*.
 
 Grappelli
