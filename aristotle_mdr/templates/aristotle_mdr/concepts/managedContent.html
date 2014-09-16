@@ -42,7 +42,7 @@
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-download"></i> Download
             </button>
-            {% downloadMenu item.id %}
+            {% downloadMenu item %}
         </div>
     </div>
 </header>
@@ -88,7 +88,7 @@
                 <a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a>
                 {% if request.user.is_active %}
                 <span style="display:inline-block">By {% with name=last_edit.revision.user.get_username %}
-                        {% if name %}name{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
+                        {% if name %}{{ name }}{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
                         {% endwith %}
                 </span>
                 {% endif %}
@@ -182,6 +182,14 @@
         {% inplace_edit 'item.references' adaptor='aristotle' %}
     </div>
     {% endif %}
+    <h2>Relationships</h2>
+        {% block relationships %}{% endblock %}
+        {% for extension in config.CONTENT_EXTENSIONS %}
+            {% extra_content extension item %}
+        {% endfor %}
+    </div>
+
+
 </div>
 
 </section>

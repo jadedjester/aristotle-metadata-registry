@@ -11,6 +11,7 @@ from model_utils.managers import InheritanceManager, InheritanceQuerySet
 from model_utils.models import TimeStampedModel
 from model_utils import Choices, FieldTracker
 from notifications import notify
+from django.dispatch import receiver
 
 import datetime
 from tinymce.models import HTMLField
@@ -56,7 +57,10 @@ class baseAristotleObject(TimeStampedModel):
         return self._meta.verbose_name_plural.title()
     def url_name(self):
         return "".join(self._meta.verbose_name.lower().split())
-
+    def template_name(self):
+        s = "".join(self._meta.verbose_name.title().split())
+        s = s[0].lower() + s[1:]
+        return s
     # These are all overridden elsewhere, but we use them in permissions instead of inspecting objects to find type.
     @property
     def is_managed(self):
@@ -261,23 +265,117 @@ class Workgroup(registryGroup):
 
 class ConceptQuerySet(InheritanceQuerySet):
     def editable(self,user):
+        """
+        Returns a list of items from the queryset the user can edit.
+
+        This isn't actually a query set, as it returns a list of items instead of an actual
+        ``Queryset`` object. As such this is unchainable after this is called, and **must**
+        be the last call in a queryset chain. For example, this will work::
+
+            ObjectClass.objects.filter(name__contains="Person").editable()
+
+        But this will break::
+
+            ObjectClass.objects.editable().filter(name__contains="Person")
+
+        However, because querysets and lists are both iterable, in most cases this is safe to use.
+        If you need a queryset of `editable` items, use ``editable_slow``.
+        """
         return [i for i in self.all() if perms.user_can_edit(user,i)]
     def visible(self,user):
+        """
+        Returns a list of items from the queryset the user can view.
+
+        This isn't actually a query set, as it returns a list of items instead of an actual
+        ``Queryset`` object. As such this is unchainable after this is called, and **must**
+        be the last call in a queryset chain. For example, this will work::
+
+            ObjectClass.objects.filter(name__contains="Person").visible()
+
+        But this will break::
+
+            ObjectClass.objects.visible().filter(name__contains="Person")
+
+        However, because querysets and lists are both iterable, in most cases this is safe to use.
+        If you need a queryset of `visible` items, use ``visible_slow``.
+        """
         return [i for i in self.all() if perms.user_can_view(user,i)]
     def public(self):
+        """
+        Returns a list of public items from the queryset.
+
+        This isn't actually a query set, as it returns a list of items instead of an actual
+        ``Queryset`` object. As such this is unchainable after this is called, and **must**
+        be the last call in a queryset chain. For example, this will work::
+
+            ObjectClass.objects.filter(name__contains="Person").public()
+
+        But this will break::
+
+            ObjectClass.objects.public().filter(name__contains="Person")
+
+        However, because querysets and lists are both iterable, in most cases this is safe to use.
+        If you need a queryset of `public` items, use ``public_slow``.
+        """
         return [i for i in self.all() if i.is_public()]
 
     # The below return actual querysets, but are much slower
     # They hit the database twice, once to get the item ids and again to get the matching objects
     def editable_slow(self,user):
+        """
+        This is a slow wrapper around `editable` that queries for items a user can edit
+        and then requeries the database for items that match the ids of the initial
+        query.
+
+        It is **slow, but chainable**. It is recommended that this the very last query
+        after the querset in a chain so it is as small as possible, and is only used
+        where a `QuerySet`` is absolutely required.
+
+         For example, both of these will work::
+
+            ObjectClass.objects.filter(name__contains="Person").editable()
+            ObjectClass.objects.editable().filter(name__contains="Person")
+        """
         return self.filter(id__in=[i.id for i in self.editable(user)])
     def visible_slow(self,user):
+        """
+        This is a slow wrapper around `visible` that queries for items a user can view
+        and then requeries the database for items that match the ids of the initial
+        query.
+
+        It is **slow, but chainable**. It is recommended that this the very last query
+        after the querset in a chain so it is as small as possible, and is only used
+        where a `QuerySet`` is absolutely required.
+
+         For example, both of these will work::
+
+            ObjectClass.objects.filter(name__contains="Person").visible()
+            ObjectClass.objects.visible().filter(name__contains="Person")
+        """
         return self.filter(id__in=[i.id for i in self.visible(user)])
     def public_slow(self):
+        """
+        This is a slow wrapper around `public` that queries for items that are public
+        and then requeries the database for items that match the ids of the initial
+        query.
+
+        It is **very very slow, but chainable**. It is recommended that this the very last query
+        after the querset in a chain so it is as small as possible, and is only used
+        where a `QuerySet`` is absolutely required.
+
+         For example, both of these will work::
+
+            ObjectClass.objects.filter(name__contains="Person").public()
+            ObjectClass.objects.public().filter(name__contains="Person")
+        """
         return self.filter(id__in=[i.id for i in self.public()])
 
 class ConceptManager(InheritanceManager):
-    """A cool manager
+    """The ``ConceptManager`` is the default object manager for ``concept`` and
+    ``_concept`` items, and extends from the django-model-utils ``InheritanceManager``.
+
+    It provides access to the ``ConceptQuerySet`` to allow for easy permissions-based
+    filtering of ISO 11179 Concept-based items.
     """
     def get_query_set(self):
         return ConceptQuerySet(self.model)
@@ -290,16 +388,12 @@ class ConceptManager(InheritanceManager):
         else:
             return getattr(self.__class__, attr, *args)
 
-"""
-Managed objects is an abstract class for describing the necessary attributes for
-any content that is versioned and registered within a Registration Authority
-"""
 class _concept(baseAristotleObject):
     """
     This is the base concrete class that `Status` items attach to, and to which
     collection objects refer to. It is not marked abstract in the Django Meta class, and
     **must not be inherited from**. It has relatively few fields and is a convenience
-    class to link with.
+    class to link with in relationships.
     """
     objects = ConceptManager()
     template = "aristotle_mdr/concepts/managedContent.html"
@@ -318,11 +412,6 @@ class _concept(baseAristotleObject):
 
     def relatedItems(self,user=None):
         return []
-    def save(self, *args, **kwargs):
-        obj = super(_concept, self).save(*args, **kwargs)
-        for p in self.favourited_by.all():
-            notify.send(p.user, recipient=p.user, verb="changed a favourited item", target=self)
-        return obj
 
     def get_autocomplete_name(self):
         return 'Autocomplete'+"".join(self._meta.verbose_name.title().split())
@@ -359,9 +448,6 @@ class _concept(baseAristotleObject):
     is_locked.boolean = True
     is_locked.short_description = 'Locked'
 
-"""
-"Concept" is the term for the 11179 abstract class for capturing all content shared by 11179 objects
-"""
 class concept(_concept):
     """
     This is an abstract class that all items that should behave like 11179 Concept
@@ -428,9 +514,10 @@ class Status(TimeStampedModel):
         obj = super(Status, self).save(*args, **kwargs)
         if prev_state != self.state:
             for p in self.concept.favourited_by.all():
-                notify.send(p.user, recipient=p.user, verb="changed the status of a favourite item", target=self.concept,
-                description='The state has gone from %s to %s in Registration Authority "%s"'%(prev_state_name,self.state_name,self.registrationAuthority.name)
-                )
+                pass
+                #notify.send(p.user, recipient=p.user, verb="changed the status of a favourite item", target=self.concept,
+                #description='The state has gone from %s to %s in Registration Authority "%s"'%(prev_state_name,self.state_name,self.registrationAuthority.name)
+                #)
         return obj
 
     @property
@@ -731,6 +818,27 @@ def defaultData():
             u,created = UnitOfMeasure.objects.get_or_create(name=name,description=desc,measure=m)
             print "   making unit of measure: {name}".format(name=name)
 
+
+def favourite_updated(recipient,obj):
+    notify.send(recipient, recipient=recipient, verb="changed a favourited item", target=obj)
+def workgroup_item_updated(recipient,obj):
+    notify.send(recipient, recipient=recipient, verb="changed a item in the workgroup", target=obj)
+def workgroup_item_new(recipient,obj):
+    notify.send(recipient, recipient=recipient, verb="a new item in the workgroup", target=obj)
+@receiver(post_save)
+def concept_saved(sender, instance, created, **kwargs):
+    if not issubclass(sender, _concept):
+        return
+    for p in instance.favourited_by.all():
+        favourite_updated(recipient=p.user,obj=instance)
+    print"-"*100
+    print instance.workgroup.viewers
+    for user in instance.workgroup.viewers:
+        print p
+        if created:
+            workgroup_item_new(recipient=user,obj=instance)
+        else:
+            workgroup_item_updated(recipient=user,obj=instance)
 
 
 # Loads test bed of data

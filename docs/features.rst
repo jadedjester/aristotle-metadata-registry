@@ -27,6 +27,10 @@ core of the ISO/IEC 11179 as faithfully as possible, but provides a rich API to 
 and easily add new items for management using the Object-Oriented approach of
 `Python <https://www.python.org/>`_ and `Django <https://www.djangoproject.com/>`_.
 
+You can read more about the
+:doc:`content type API </extensions/new_content_type>` and
+:doc:`template overrides </extensions/templates>` in the
+:doc:`extensions documentation </extensions/index>`.
 
 Cross-platform support
 ----------------------

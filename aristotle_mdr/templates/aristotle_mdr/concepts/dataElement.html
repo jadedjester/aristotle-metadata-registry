@@ -79,8 +79,9 @@
             {% include "aristotle_mdr/concepts/valueDomainRepresentation.html" with item=item.valueDomain %}
     {% endif %}
 {% endif %}
+{% endblock %}
 
-<h2>Relationships</h2>
+{% block relationships %}
 <h3 id="DSSInclusions">Dataset specifications</h3>
 This data element is included in the following Dataset specifications, some datasets may be hidden based on your current permissions.
 <ul>

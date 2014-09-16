@@ -57,7 +57,7 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^remove/deFromDss/(?P<de_id>\d+)/(?P<dss_id>\d+)', views.removeDataElementFromDSS, name='removeDataElementFromDSS'),
     url(r'^changestatus/(?P<iid>\d+)$', views.changeStatus, name='changeStatus'),
     url(r'^addWorkgroupMembers/(?P<iid>\d+)$', views.addWorkgroupMembers, name='addWorkgroupMembers'),
-    url(r'^remove/WorkgroupRole/(?P<iid>\d+)/(?P<role>\w+)/(?P<userid>\d+)/?$', views.removeWorkgroupRole, name='removeWorkgroupRole'),
+    url(r'^remove/WorkgroupRole/(?P<iid>\d+)/(?P<role>[A-Za-z\-]+)/(?P<userid>\d+)/?$', views.removeWorkgroupRole, name='removeWorkgroupRole'),
     #url(r'^remove/WorkgroupUser/(?P<iid>\d+)/(?P<userid>\d+)$', views.removeWorkgroupUser, name='removeWorkgroupUser'),
 
     url(r'^account/home/?', views.userHome, name='userHome'),

@@ -14,19 +14,17 @@
 {% endblock %}
 
 {% block objSpecific %}
+{% endblock %}
 
-{% with total=item.dataelementconcept_set.count %}
-    {% if total > 0 %}
-    <h2>Relational attributes</h2>
-        <h3>Data Element Concepts implementing this Object Class</h3>
-        <ul>
-        {% for dec in item.dataelementconcept_set.all|can_view_iter:user %}
-            <li>
-                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
-
+{% block relationships %}
+    {% with total=item.dataelementconcept_set.count %}
+            <h3>Data Element Concepts implementing this Object Class</h3>
+            <ul>
+            {% for dec in item.dataelementconcept_set.all|can_view_iter:request.user %}
+                <li>
+                    {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
+                </li>
+            {% endfor %}
+            </ul>
+    {% endwith %}
 {% endblock %}

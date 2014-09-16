@@ -3,7 +3,7 @@
 {% load aristotle_tags %}
 
 {% block objSpecific %}
-{% with deCount=item.dataelement_set.count %}
+
 <h2>Components</h2>
 <div>
 {% if view == "technical" %}
@@ -18,7 +18,9 @@
     <header class="panel panel-info" style="width:80%;">
         <div class="panel-heading">Data Element</div>
         <div class="panel-body">
+        {% with deCount=item.dataelement_set.count %}
             <a class="name" href="#dataelements">Implemented in {{ deCount }} data element{{ deCount|pluralize }}</a>
+        {% endwith %}
         </div>
     </header>
     <ul class="split">
@@ -53,18 +55,17 @@
     </ul>
 </section>
 {% endif %}
+{% endblock %}
 
-    <h2 >Relational attributes</h2>
-    {% if item.dataelement_set.all %}
-        <h3 id="dataelements">Data Elements implementing this Data Element Concept</h3>
-        <ul>
-        {% for de in item.dataelement_set.all %}
-            <li>
-                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=de %}
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-</div>
-{% endwith %}
+
+
+{% block relationships %}
+    <h3 id="dataelements">Data Elements implementing this Data Element Concept</h3>
+    <ul>
+    {% for de in item.dataelement_set.all|can_view_iter:request.user %}
+        <li>
+            {% include "aristotle_mdr/helpers/inlineDetails.html" with item=de %}
+        </li>
+    {% endfor %}
+    </ul>
 {% endblock %}

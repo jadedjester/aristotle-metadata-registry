@@ -165,7 +165,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
             <ul class="nav navbar-nav navbar-right">
             {% if user.is_active %}
                 <li class="dropdown">
-                    <a href="{% url 'aristotle:createList'" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
+                    <a href="{% url 'aristotle:createList' %}" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
                             <i class="fa fa-angle-down fa-lg"></i>
                     Create
                     </a>
@@ -202,7 +202,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
+                    <a href="{% url 'aristotle:userHome' %}" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
                         {% if user.is_superuser %}
                             <i class="fa fa-user-md fa-lg"></i>
                         {% else %}

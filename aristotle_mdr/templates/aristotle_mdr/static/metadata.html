@@ -10,27 +10,55 @@
 </header>
 <section class="row">
 
-<p>Metadata is traditionally defined as "data about data", however in recent times this definition has broadened to mean "information that adds additional context to data".
+<blockquote>
+<p>
+Generally, descriptive data is known as metadata. That is, metadata is data that is used for describing other
+data. As the use of the term has evolved, metadata now refers, generally, to data that is used for describing
+some other objects. We limit the scope of the term as it is used here in ISO/IEC 11179 to descriptions of
+data - the more traditional use of the term.
+</p>
+<footer><cite title="Source Title">ISO/IEC 11179-1:2004 (version 2) documentation.</cite></footer>
+</blockquote>
+
+<p><strong>To examime this further, lets explore an example:</strong></p>
+
+<p>Consider a record in a database that contains the number 7. Without context this number
+is meaningless and incomparable. If we know that this number is an Age, we are still unable
+to draw any new knowledge. For a person, 7 is quite young, for a dog, quite old, and even
+still this only if 7 is years and not months or weeks.
 </p>
 
-Lets explore an example:
-
-Consider a record in a database that contains the number 7. Without context this number is meaningless and incomparable. If we know that this number is an Age, we are still unable to draw any new knowledge. For a person, 7 is quite young, for a dog, quite old, and even still this only if 7 is years and not months or weeks.
-
-<p>What is a clearer understanding of what this number means. The ISO/IEC 11179 standard defines basic concepts that are needed to define this information clearly and unambiguously and can be broken down like so:
+<p>What is required is a clearer understanding of what this number means.
+The ISO/IEC 11179 standard defines basic concepts that are needed to define
+this information clearly and unambiguously and can be broken down like so:
 </p>
 
- "who", "what" and "how".
 
-Who: An Object Class is a definition of a thing we are interested in gathering information about. Object Classes can be physical - such as people, animals, buildings - conceptual - such as businesses, or events - such as an accident or appointment.
+<h2>Who are we getting information about?</h2>
+An Object Class is a definition of a thing we are interested in gathering information about. Object Classes can be physical - such as people, animals, buildings - conceptual - such as businesses, or events - such as an accident or appointment.
 
-What: A property is the description of a particular attribute about an entity we are interested in measuring. A property can be gathered from all object classes it relates to, and examples include the Age of a person, the height of a building, the time of an appointment, or the name of the director of a business.
+<h2>What information are getting about them?</h2>
+A property is the description of a particular attribute about an entity we are interested in measuring. A property can be gathered from all object classes it relates to, and examples include the Age of a person, the height of a building, the time of an appointment, or the name of the director of a business.
 
-Combining an Object Class and Property gives a Data Element Concept, and this gives an abstract definition of something that can be recorded about a person - regardless of how it is physically stored.
+<p><strong>Combining an Object Class and Property gives a Data Element Concept</strong>,
+and this gives an abstract definition of something that can be recorded about a person
+- regardless of how it is physically stored.</p>
 
-How: A value domain is how a record may be stored. For example, Age can be recorded in days, months, years or even coded cohorts; a height in inches or meters; and names as strings in various encodings.
-
-Combining a Data Element Concept with a Value Domain produces a Data Element which is a fully qualified definition of a data recording. As with our prior example, if 7 is the "Person-Age, in whole years" we know exactly what this number means, and can compare it with other values, transform it into other value domains - such as months - and aggregate values to produce statistics.
+<h2>How will we record the information we have gathered?</h2>
+<p>A value domain is a description of how a record may be stored in a system.
+</p>
+<p>For example, Age can be recorded in days,
+months, years or even coded cohorts; a height in inches or meters; and names as strings
+in various encodings.
+</p>
+<p><strong>Combining a Data Element Concept with a Value Domain produces a Data Element</strong>,
+which is a fully qualified definition of a data recording.
+</p>
+<p>As with our prior example, if 7 is the "Person-Age, in whole years"
+we know exactly what this number means, and can compare it with other values,
+transform it into other value domains - such as months - or aggregate these values
+to produce statistics.
+</p>
 
 </section>
 {% endblock %}

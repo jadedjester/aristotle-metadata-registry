@@ -1,17 +1,19 @@
 {% extends "aristotle_mdr/concepts/managedContent.html" %}
 {% load inplace_edit %}
+{% load aristotle_tags %}
 
 {% block objSpecific %}
-    <h2>Relational attributes</h2>
+{% endblock %}
+
+{% block relationships %}
     {% if item.dataelementconcept_set.all %}
         <h3>Data Element Concepts implementing this Property</h3>
         <ul>
-        {% for dec in item.dataelementconcept_set.all %}
+        {% for dec in item.dataelementconcept_set.all|can_view_iter:request.user %}
             <li>
                 {% include "aristotle_mdr/helpers/inlineDetails.html" with item=dec %}
             </li>
         {% endfor %}
         </ul>
     {% endif %}
-
 {% endblock %}

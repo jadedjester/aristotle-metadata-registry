@@ -14,12 +14,20 @@ Permissions in ``perms.py``
 Permissions-based ``ConceptManager``
 ------------------------------------
 
-The ``concept`` abstract class defines a  In ``aristotle.models``
+All correctly derived ``concept`` items should have their default manager set to
+the ``aristotle.models.ConceptManager``. For more information on how this works
+see the full documentation on the
+:doc:`ConceptManager and ConceptQuerySet <using_concept_manager>`.
 
 .. autoclass:: aristotle_mdr.models.ConceptManager
+   :noindex:
+
 
 Permissions template tags
 -------------------------
 
 .. automodule:: aristotle_mdr.templatetags.aristotle_tags
    :members: can_edit, can_view, can_view_iter
+   :noindex:
+
+There are more :doc:`template tags available in Aristotle <templatetags>`

@@ -12,14 +12,17 @@ Django
 
 Every django setting can be overridden, but the ones that will be most important are:
 
-* ```DATABASE`` - By default Aristotle will configure a SQLite file-based database.
+* ``DATABASE`` - By default Aristotle will configure a SQLite file-based database.
   While this is fine fors very small low use registries, configuring Django to use a
   fully-fledged relational database management system like PostgreSQL or MySQL will
   be better for larger, high-traffic sites.
-
-* ``ROOT_URLCONF``  'possum_mdr.urls'
-* ``WSGI_APPLICATION`` = 'possum_mdr.wsgi.application'
-
+* ``ROOT_URLCONF`` - This is the python library that will be used to define the
+  settings for django to resolve URLs. If you aren't using any extensions, you can
+  just leave this as the default which points to the Aristotle URLs file - ``aristotle_mdr.urls``.
+  If you are using extensions, you'll need to point this the URL file that you have created to
+  handle all of the different URL files for each extension.
+* ``WSGI_APPLICATION`` - This points to the file and WSGI application that you have created
+  to if you are intending to `deploy via a WSGI server <https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/>`_.
 
 Haystack
 --------

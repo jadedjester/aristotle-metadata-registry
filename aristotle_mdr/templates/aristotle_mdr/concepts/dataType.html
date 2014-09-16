@@ -2,8 +2,9 @@
 {% load inplace_edit %}
 
 {% block objSpecific %}
+{% endblock %}
 
-    <h2>Relational attributes</h2>
+{% block relationships %}
     {% if item.valuedomain_set.all %}
         <h3>Value Domains using this Data Type</h3>
         <ul>
@@ -14,5 +15,4 @@
         {% endfor %}
         </ul>
     {% endif %}
-
 {% endblock %}

@@ -1,12 +1,11 @@
 Installing Aristotle MetaData Registry
 ======================================
 
-Table of Contents
-=================
 
 .. toctree::
    :maxdepth: 2
 
    quickstart.rst
+   required_libraries.rst
    settings.rst
    thirdparty.rst
