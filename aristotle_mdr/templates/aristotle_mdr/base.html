@@ -127,7 +127,8 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
    </head>
 
    <body>
-   <a class="sr-only" href="#main">Skip to content</a>
+   <a class="sr-only" accesskey="j" href="#main">Skip to content</a>
+   <a class="sr-only" accesskey="x" href="{% url 'aristotle:accessibility' %}#accesskeys">Learn about the access keys available for {{ config.SITE_NAME }}</a>
     <nav class="navbar navbar-inverse">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -165,7 +166,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
             <ul class="nav navbar-nav navbar-right">
             {% if user.is_active %}
                 <li class="dropdown">
-                    <a href="{% url 'aristotle:createList' %}" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
+                    <a href="{% url 'aristotle:createList' %}" accesskey="o" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
                             <i class="fa fa-angle-down fa-lg"></i>
                     Create
                     </a>
@@ -202,7 +203,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="{% url 'aristotle:userHome' %}" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
+                    <a href="{% url 'aristotle:userHome' %}" accesskey="u" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
                         {% if user.is_superuser %}
                             <i class="fa fa-user-md fa-lg"></i>
                         {% else %}
@@ -261,7 +262,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                     </ul>
                 </li>
             {% else %}
-                <li>
+                <li accesskey="l">
                 <a href="/accounts/login?next={{request.path}}">
                     <i class="fa fa-sign-in fa-lg"></i>  {% trans 'Log in'%}
                 </a>
@@ -286,10 +287,10 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
     <footer class="footer">
     <div class="container">
     <div>
-        <a href="#">Accessibility</a>
-        <a href="#">Copyright</a>
-        <a href="#">Disclaimer</a>
-        <a href="#">Privacy</a>
+        <a href="{% url 'aristotle:accessibility' %}">Accessibility</a>
+        <a href="{% url 'aristotle:copyright' %}">Copyright</a>
+        <a href="{% url 'aristotle:disclaimer' %}">Disclaimer</a>
+        <a href="{% url 'aristotle:privacy' %}">Privacy</a>
         <a href="#">Sitemap</a>
     </div>
     {# Removing or altering the following line may breach your licence #}

@@ -20,6 +20,11 @@
         {% endif %}
         <a href="#">{% inplace_edit 'item.name' %}</a>
         <small>({{ item.get_verbose_name }})</small>
+        {% if item|can_edit:request.user %}
+        <a class="sr-only" accesskey="p" href="{% adminEdit item %}">
+            <i class="fa fa-sliders"></i> Admin editor
+        </a>
+        {% endif %}
     </h1>
     <div class="btn-group pull-right" >
         {% if user_can_edit %}
@@ -39,7 +44,7 @@
             <a href="?view=technical" id="viewChange" class="btn btn-default"><i class="fa fa-graduation-cap"></i> Technical View</a>
         {% endif %}
         <div class="btn-group">
-            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <button accesskey="d" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-download"></i> Download
             </button>
             {% downloadMenu item %}

@@ -2,15 +2,20 @@
 <footer class="grp-module grp-submit-row grp-fixed-footer">
     <header style="display:none"><h1>Submit Options</h1></header>
     <ul>
+        {% comment %}
         {% if show_delete_link %}
             <li class="grp-float-left"><a href="delete/" class="grp-button grp-delete-link">{% trans "Delete" %}</a></li>
         {% endif %}
-            <li class="grp-float-left"><a href="delete/" class="grp-button grp-button">{% trans "Cancel and return to item" %}</a></li>
+        {% endcomment %}
+        {% if original.id %}
+        <li class="grp-float-left">
+            <a accesskey="c" class="grp-button grp-delete-link" href="{% url 'aristotle:item' original.id %}">{% trans "Cancel editing and return to main site" %}</a></li>
+        {% endif %}
         {% if show_save %}
         	<li><input type="submit" accesskey="s" value="{% trans 'Save and return to item' %}" class="grp-button grp-default" name="_save" /></li>
         {% endif %}
         {% if show_save_as_new %}
-        	<li><input type="submit" value="{% trans 'Save as new' %}" class="grp-button" name="_saveasnew" /></li>
+        	<li><input type="submit" accesskey="s" value="{% trans 'Save as new' %}" class="grp-button" name="_saveasnew" /></li>
         {% endif %}
         {% if show_save_and_add_another %}
         	<li><input type="submit" value="{% trans 'Save and add another' %}" class="grp-button" name="_addanother" /></li>

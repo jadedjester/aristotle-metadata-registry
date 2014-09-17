@@ -1,0 +1,66 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% block title %}Accessibility{% endblock %}
+
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        <a href="#">Accessibility statement for <em>{{ config.SITE_NAME }}</em></a>
+    </h1>
+    <img src="{{ config.SITE_BRAND }}" alt="" title="" class="pull-right">
+</header>
+<section class="row">
+The Aristotle MetaData Registry system aims to be as widely accessible as possible and aims
+to meet the <a href="http://www.w3.org/TR/WCAG20/">Web Content Accessibility Guidelines (WCAG) 2.0</a>
+to the Double A (AA) standard.
+
+<h2 id="accesskeys">Keyboard navigation</h2>
+Aristotle uses the Twitter Bootstrap CSS framework, which encourages the use of ARIA
+roles and markup to improve keyboard navigation. All dropdown menus in Aristotle have
+<a href="#accesskeys">access keys</a> and can be controlled with arrow keys, to make
+navigations easier.
+
+<h2 id="accesskeys">Quick Access keys</h2>
+<p>
+To improve user experience, <a href="http://en.wikipedia.org/wiki/Access_key">access keys</a>
+are available on different sections of the site throughout the site, some are available
+<a href="#sitewide">on the whole site</a>, <a href="#edit">while editing</a> or
+<a href="#search">while searching</a>.
+</p>
+<p>
+    Each browser has different ways to activate these keys, but common browsers on Windows
+    use <kbd>Alt</kbd> or <kbd>Alt</kbd>+<kbd>Shift</kbd> while on Mac browsers use
+    <kbd>Crtl</kbd> or <kbd>Crtl</kbd>+<kbd>&#8997; Opt</kbd>. Learn more about
+    <a href="http://en.wikipedia.org/wiki/Access_key">how to use access keys on Wikipedia.</a>
+</p>
+<h3 id="sitewide">Site-wide shortcuts</h3>
+<dl class="quickkeys">
+    <dt><kbd>x</kbd></dt><dd>Jump to the accessibility, and focus on this legend</dd>
+    <dt><kbd>j</kbd></dt><dd>Activates the "skip to content" link (screen readers only)</dd>
+    <dt><kbd>q</kbd></dt><dd>Highlight the quicksearch bar</dd>
+    <dt><kbd>u</kbd></dt><dd>Open user menu</dd>
+    <dt><kbd>o</kbd></dt><dd>Open create content menu</dd>
+    <dt><kbd>d</kbd></dt><dd>Open download menu, only for applicable content</dd>
+</dl>
+<h3 id="edit">Editing shortcuts</h3>
+The following links are only applicable for editors.
+<dl id="editors" class="quickkeys">
+    <dt><kbd>e</kbd></dt><dd>Enable inline-editing</dd>
+    <dt><kbd>p</kbd></dt><dd>Jump to the admin page for this item</dd>
+    <dt><kbd>a</kbd></dt><dd>Apply - in the admin site, this saves the item and stays on the items admin page</dd>
+    <dt><kbd>s</kbd></dt><dd>Save - in the admin site, this saves the item and goes the items page. When using inline editing this saves the current item.</dd>
+    <dt><kbd>c</kbd></dt><dd>Cancel - in the admin site, this cancels any unsaved changes goes the items page. When using inline editing this saves the current item.</dd>
+</dl>
+<h3 id="search">Search shortcuts</h3>
+The following links are only applicable for editors:
+<dl class="quickkeys">
+    <dt><kbd>e</kbd></dt><dd>Expand "item type" filters</dd>
+    <dt><kbd>s</kbd></dt><dd>Expand "state" filters</dd>
+    <dt><kbd>r</kbd></dt><dd>Expand "registration" filters</dd>
+    <dt><kbd>r</kbd></dt><dd>Next page of results</dd>
+    <dt><kbd>p</kbd></dt><dd>Previous page of results</dd>
+    {# <dt><kbd>1</kbd></dt><dd>First page of results</dd> ... soon#}
+</dl>
+</p>
+</section>
+{% endblock %}

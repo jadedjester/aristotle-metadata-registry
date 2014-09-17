@@ -1,0 +1,37 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% block title %}Privacy {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        <a href="#">Privacy statement for <em>{{ config.SITE_NAME }}</em></a>
+    </h1>
+    <img src="{{ config.SITE_BRAND }}" alt="" title="" class="pull-right">
+</header>
+<section class="row">
+<p>
+The administrators of <em>{{ config.SITE_NAME }}</em> haven't set up a privacy statement.
+</p>
+<p>
+    In leiu of a full privacy statement, here are some important things to know about the Aristotle MetaData registry
+    <ul>
+        <li><strong>We require personal information</strong> - Aristotle will collect personal
+            information, including your name and email address for authentication and identification.
+        </li>
+        <li><strong>We use cookies</strong> - Aristotle uses cookies to keep you logged in,
+            keep track of your preferences and notifications and to help protect against
+            <a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">cross-site request forgery</a>.
+        </li>
+        <li><strong>We protect your information</strong> - Passwords are never stored as plain text.
+            There are mechanisms to reset your password, but we will never send it
+            to you in plaintext. <a href="https://docs.djangoproject.com/en/1.6/topics/auth/passwords/">The Django web framework uses a </a>
+            <q> password stretching mechanism recommended by <a href='http://csrc.nist.gov/'>NIST</a>...
+            [that is] quite secure, requiring massive amounts of computing time to break.</q>
+        </li>
+    </ul>
+</p>
+
+Please also see the <a href="{% url 'aristotle:disclaimer' %}">Disclaimer</a>.
+</section>
+{% endblock %}

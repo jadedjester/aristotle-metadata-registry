@@ -1,0 +1,18 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% block title %}Copyright{% endblock %}
+
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        <a href="#">Copyright notice for <em>{{ config.SITE_NAME }}</em></a>
+    </h1>
+    <img src="{{ config.SITE_BRAND }}" alt="" title="" class="pull-right">
+</header>
+<section class="row">
+The administrators of <em>{{ config.SITE_NAME }}</em> haven't set up a copyright notice.
+Therefore until they have, all content is the express property of the owners of this
+site, "{{ config.SITE_NAME }}" and they retain retain all rights and do not permit
+distribution, reproduction, or derivative works.
+</section>
+{% endblock %}
