@@ -2,6 +2,7 @@
 {% load aristotle_tags %}
 
 {% block includes %}
+{% comment  %}
 <dd>
     {% with total=item.dssInclusions.count %}
         {% if total > 0 %}<a href="#DSSInclusions">{% endif %}
@@ -9,6 +10,7 @@
         {% if total > 0 %}</a>{% endif %}
     {% endwith %}
 </dd>
+{% endcomment %}
 {% endblock %}
 
 {% block objSpecific %}
