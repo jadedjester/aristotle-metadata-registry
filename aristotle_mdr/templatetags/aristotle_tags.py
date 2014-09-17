@@ -214,12 +214,12 @@ def downloadMenu(item):
         )
 
 @register.simple_tag
-def extra_content(extension,item):
+def extra_content(extension,item,user):
     try:
         from django.template.loader import get_template
         from django.template import Context
         return get_template(extension+"/concepts/extra_content/"+item.template_name()+".html").render(
-            Context({'item':item})
+            Context({'item':item,'user':user})
         )
     except template.TemplateDoesNotExist:
         return ""

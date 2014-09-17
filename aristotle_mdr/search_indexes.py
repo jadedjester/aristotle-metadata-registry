@@ -84,7 +84,3 @@ class DataElementIndex(conceptIndex, indexes.Indexable):
 class ValueDomainIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.ValueDomain
-
-class DataSetSpecificationIndex(conceptIndex, indexes.Indexable):
-    def get_model(self):
-        return models.DataSetSpecification

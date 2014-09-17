@@ -203,9 +203,6 @@ def dataelement(*args,**kwargs):
 def datatype(*args,**kwargs):
     return render_if_user_can_view(MDR.DataType,*args,**kwargs)
 
-def datasetspecification(*args,**kwargs):
-    return render_if_user_can_view(MDR.DataSetSpecification,*args,**kwargs)
-
 def package(*args,**kwargs):
     return render_if_user_can_view(MDR.Package,*args,**kwargs)
 
@@ -681,13 +678,6 @@ def bulkFavourite(request,url="aristotle:userFavourites"):
     if 'favourites' in getVars.keys(): getVars.pop('favourites')
     if 'addFavourites' in getVars.keys(): getVars.pop('addFavourites')
     return HttpResponseRedirect(reverse(url)+'?'+urllib.urlencode(getVars))
-
-def removeDataElementFromDSS(request,de_id,dss_id):
-    de = get_object_or_404(MDR.DataElement,id=de_id)
-    dss = get_object_or_404(MDR.DataSetSpecification,id=dss_id)
-    if user_can_view(request.user,de) and user_can_edit(request.user,dss):
-        dss.dataElements.filter(dataElement=de).delete()
-    return HttpResponseRedirect(reverse("aristotle:%s"%dss.url_name(),args=[dss.id]))
 
 # Search views
 

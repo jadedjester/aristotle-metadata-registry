@@ -82,13 +82,4 @@
 {% endblock %}
 
 {% block relationships %}
-<h3 id="DSSInclusions">Dataset specifications</h3>
-This data element is included in the following Dataset specifications, some datasets may be hidden based on your current permissions.
-<ul>
-    {% for inclusion in item.dssInclusions.all %} {#|can_view_iter:request.user %#}
-        <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=inclusion.dss %} ({{ inclusion.cardinality }})</li>
-    {% endfor %}
-</ul>
-
 {% endblock %}
-

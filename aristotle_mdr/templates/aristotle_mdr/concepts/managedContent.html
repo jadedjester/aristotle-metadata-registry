@@ -185,7 +185,7 @@
     <h2>Relationships</h2>
         {% block relationships %}{% endblock %}
         {% for extension in config.CONTENT_EXTENSIONS %}
-            {% extra_content extension item %}
+            {% extra_content extension item request.user %}
         {% endfor %}
     </div>
 

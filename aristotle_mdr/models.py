@@ -619,41 +619,6 @@ class DataElementDerivation(concept):
                 blank=True,null=True)
     derivation_rule = models.TextField(blank=True)
 
-CARDINALITY = Choices(('optional', _('Optional')),('conditional', _('Conditional')), ('mandatory', _('Mandatory')))
-class DataSetSpecification(concept):
-    template = "aristotle_mdr/concepts/dataSetSpecification.html"
-    def addDataElement(self,dataElement,**kwargs):
-        inc = DSSDEInclusion.objects.get_or_create(
-            dataElement=dataElement,
-            dss = self,
-            defaults = kwargs
-            )
-
-    @property
-    def registryCascadeItems(self):
-        return [i.dataElement for i in self.dataElements.all()]
-
-    @property
-    def getPdfItems(self):
-        des = self.dataElements.all()
-        return {
-            'dataElements':(de.dataElement for de in des),
-            'valueDomains':set(de.dataElement.valueDomain for de in des),
-        }
-# Holds the link between a DSS and a Data Element with the DSS Specific details.
-class DSSDEInclusion(models.Model):
-    dataElement = models.ForeignKey(DataElement,related_name="dssInclusions")
-    dss = models.ForeignKey(DataSetSpecification,related_name="dataElements")
-    maximumOccurances = models.PositiveIntegerField(default=1)
-    cardinality = models.CharField(choices=CARDINALITY, default=CARDINALITY.conditional,max_length=20)
-    specificInformation = models.TextField(blank=True)
-    conditionalObligation = models.TextField(blank=True)
-    order = models.PositiveSmallIntegerField("Position",blank=True)
-    ordered = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = "DSS Data Element Inclusion"
-
 
 class Package(concept):
     items = models.ManyToManyField(_concept,related_name="packages",blank=True,null=True)
@@ -831,10 +796,7 @@ def concept_saved(sender, instance, created, **kwargs):
         return
     for p in instance.favourited_by.all():
         favourite_updated(recipient=p.user,obj=instance)
-    print"-"*100
-    print instance.workgroup.viewers
     for user in instance.workgroup.viewers:
-        print p
         if created:
             workgroup_item_new(recipient=user,obj=instance)
         else:

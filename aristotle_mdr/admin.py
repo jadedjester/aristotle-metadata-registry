@@ -12,18 +12,6 @@ import reversion
 from reversion_compare.admin import CompareVersionAdmin
 
 
-class DSSDEInclusionInline(admin.TabularInline):
-    model=MDR.DSSDEInclusion
-    extra=0
-    classes = ('grp-collapse grp-closed',)
-    raw_id_fields = ('dataElement',)
-    autocomplete_lookup_fields = {
-        'fk': ['dataElement']
-    }
-
-from django import forms
-from django.utils.safestring import mark_safe
-
 # Thanks http://stackoverflow.com/questions/6727372/
 class RegistrationAuthoritySelect(forms.Select):
     def render(self, name, value, attrs=None, choices=()):
@@ -202,9 +190,6 @@ class ConceptAdmin(CompareVersionAdmin):
         return response
 
 
-class DataSetSpecification(ConceptAdmin):
-    inlines = ConceptAdmin.inlines + [DSSDEInclusionInline, ]
-
 class DataElementAdmin(ConceptAdmin):
     fieldsets = ConceptAdmin.fieldsets + [
             ('Components', {'fields': ['dataElementConcept','valueDomain']}),
@@ -270,7 +255,6 @@ class RegistrationAuthorityAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(MDR.DataElement,DataElementAdmin)
-admin.site.register(MDR.DataSetSpecification,DataSetSpecification)
 admin.site.register(MDR.DataElementConcept,DataElementConceptAdmin)
 admin.site.register(MDR.Workgroup,WorkgroupAdmin)
 admin.site.register(MDR.ValueDomain,ValueDomainAdmin)
@@ -307,12 +291,4 @@ class UserAdmin(UserAdmin):
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
-
-
-#reversion.register(MDR.DataElement)
-#reversion.register(MDR.DataElementConcept)
-#reversion.register(MDR.Workgroup)
-#reversion.register(MDR.ValueDomain)
-#reversion.register(MDR.Property)
-#reversion.register(MDR.ObjectClass)
 

@@ -1,41 +1,58 @@
 {% extends "aristotle_mdr/workgroup.html" %}
 {% url 'aristotle:item' item.id %}
-{% block title %}{{ workgroup.name }} Membership list{% endblock %}
+{% block title %}{{ workgroup.name }} members{% endblock %}
 {% block page %}
-<header>Details</header>
-
+<h1>{{ workgroup.name }} members</h1>
+<p>
+    Below is a list of members in this workgroup, every person listed on this page can view content in
+    this workgroup. Additional permissions are listed with each group.
+    Permissions only apply to specific workgroup, so a user may be a manager in one group but
+    an editor in another.<br>
+    All members of a workgroup can participate in workgroup conversations.
+    <br>
+    <strong>Note: permissions are non-hierarchical, so to get all permissions a member may need
+        to be in multiple groups.
+    </strong>
+</p>
 <dl>
 <dt>Managers {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Manager" class="inline_action">Add</a>{% endif %}</dt>
 <dd>
+Workgroup managers can add and remove users from a workgroup, delete workgroup
+conversations and retire a workgroup. They can also create and edit content
+<em>that has been not progressed to a locked state</em>.
 <ul>
 {% for member in workgroup.managers %}
-    {% if user_is_admin %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
-        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Manager' userid=member.id %}" title="Remove from managers."><i class="text-danger fa fa-times"></i></a>
+        {% if user_is_admin %}
+            <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Manager' userid=member.id %}" title="Remove from managers."><i class="text-danger fa fa-times"></i></a>
+        {% endif %}
     </li>
-    {% endif %}{% endfor %}
+{% endfor %}
 </ul>
 </dd>
 <dt>Super-editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Super-Editor" class="inline_action">Add</a>{% endif %}</dt>
 <dd>
+Super-editors are trusted editors that can create and edit content that has been progressed to a locked state, but cannot edit content that is public. They also have the permissions of editors.
 <ul>
 {% for member in workgroup.super_editors %}
-    {% if user_is_admin %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
-        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Super-Editor' userid=member.id %}" title="Remove from super editors."><i class="text-danger fa fa-times"></i></a>
+        {% if user_is_admin %}
+            <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Super-Editor' userid=member.id %}" title="Remove from super editors."><i class="text-danger fa fa-times"></i></a>
+        {% endif %}
     </li>
-    {% endif %}{% endfor %}
+{% endfor %}
 </ul>
 </dd>
 <dt>Editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Editor" class="inline_action">Add</a>{% endif %}</dt>
 <dd>
+Editors can edit content that has not been progressed by a registrar to a locked state. They can view all content in a workgroup and can set the flag that an item is ready for review by a registrar.
 <ul>
 {% for member in workgroup.editors %}
-    {% if user_is_admin %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
-        <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Editor' userid=member.id %}" title="Remove from editors."><i class="text-danger fa fa-times"></i></a>
+        {% if user_is_admin %}
+            <a href="{% url 'aristotle:removeWorkgroupRole' iid=workgroup.id role='Editor' userid=member.id %}" title="Remove from editors."><i class="text-danger fa fa-times"></i></a>
+        {% endif %}
     </li>
-    {% endif %}
 {% endfor %}
 </ul>
 </dd>
@@ -45,13 +62,15 @@
     </a>{% endif %}
 </dt>
 <dd>
+Viewers are only able to view content in a workgroup. They may also participate in workgroup conversations.
 <ul>
 {% for member in workgroup.viewers %}
-    {% if user_is_admin %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
-        <a href="/remove/WorkgroupRole/{{ workgroup.id }}/Viewer/{{ member.id }}" title="Remove from viewers."><i class="text-danger fa fa-times"></i></a>
+        {% if user_is_admin %}
+            <a href="/remove/WorkgroupRole/{{ workgroup.id }}/Viewer/{{ member.id }}" title="Remove from viewers."><i class="text-danger fa fa-times"></i></a>
+        {% endif %}
     </li>
-    {% endif %}{% endfor %}
+{% endfor %}
 </ul>
 </dd>
 </dl>
