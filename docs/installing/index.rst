@@ -8,4 +8,6 @@ Installing Aristotle MetaData Registry
    quickstart.rst
    required_libraries.rst
    settings.rst
+   adding_pages.rst
+   changing_styles.html
    thirdparty.rst

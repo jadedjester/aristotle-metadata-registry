@@ -21,23 +21,6 @@
     </strong>
     </p>
 {% endif %}
-{% if item.standardDataSetSpecifications %}
-    <h2>Data set specifications standardised by this registration authority</h2>
-    <ul>
-        {% for dss,s in item.standardDataSetSpecifications %}
-        <li>
-            {% include "aristotle_mdr/helpers/itemLink.html" with item=dss %}
-            Standardised on {{ s.registrationDate }}
-        </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>
-    <strong>
-        This registration authority has no current standard data set specifications
-    </strong>
-    </p>
-{% endif %}
 
 {% endblock %}
 

@@ -128,7 +128,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
 
    <body>
    <a class="sr-only" accesskey="j" href="#main">Skip to content</a>
-   <a class="sr-only" accesskey="x" href="{% url 'aristotle:accessibility' %}#accesskeys">Learn about the access keys available for {{ config.SITE_NAME }}</a>
+   <a class="sr-only" accesskey="l" href="{% url 'aristotle:accessibility' %}#accesskeys">Learn about the access keys available for {{ config.SITE_NAME }}</a>
     <nav class="navbar navbar-inverse">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -239,7 +239,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                         {% endif %}
                         {% if user.profile.is_registrar %}
                             <li role="presentation" class="divider"></li>
-                            <li><a href="{% url 'admin:index' %}">
+                            <li><a href="{% url 'aristotle:userRegistrarTools' %}">
                             <i class="fa fa-university fa-fw"></i> {% trans 'Registrar tools' %}
                             </a></li>
                         {% endif %}
@@ -291,6 +291,10 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
         <a href="{% url 'aristotle:copyright' %}">Copyright</a>
         <a href="{% url 'aristotle:disclaimer' %}">Disclaimer</a>
         <a href="{% url 'aristotle:privacy' %}">Privacy</a>
+    </div>
+    <div>
+        <a href="{% url 'aristotle:contact' %}">Contact</a>
+        <a href="{% url 'aristotle:helpMain' %}">Help</a>
         <a href="#">Sitemap</a>
     </div>
     {# Removing or altering the following line may breach your licence #}

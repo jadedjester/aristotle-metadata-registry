@@ -38,6 +38,7 @@ class baseAristotleObject(TimeStampedModel):
 
     class Meta:
         verbose_name = "item" # So the url_name works for items we can't determine
+        #Can't be abstract as we need unique app wide IDs.
         abstract = True
 
     def was_modified_recently(self):
@@ -67,11 +68,14 @@ class baseAristotleObject(TimeStampedModel):
         return False
     @property
     def is_workgroup(self):
-        return True
+        return False
 
 class unmanagedObject(baseAristotleObject):
     class Meta:
         abstract = True
+    @property
+    def item(self):
+        return self
 
 #Pseudo-abstract: Can't actually abstract as 'tracker' isn't pulled across into the children
 class registryGroup(unmanagedObject):
@@ -171,12 +175,6 @@ class RegistrationAuthority(registryGroup):
                 ( p,p.statuses.filter(registrationAuthority=self,state__in=[STATES.standard,STATES.preferred]).first() )
                 for p in Package.objects.filter(statuses__registrationAuthority=self,statuses__state__in=[STATES.standard,STATES.preferred])
             ]
-    def standardDataSetSpecifications(self):
-        return [
-                ( dss,dss.statuses.filter(registrationAuthority=self,state__in=[STATES.standard,STATES.preferred]).first() )
-                for dss in DataSetSpecification.objects.filter(statuses__registrationAuthority=self,statuses__state__in=[STATES.standard,STATES.preferred])
-            ]
-        return DataSetSpecification.objects.filter(statuses__registrationAuthority=self,statuses__state__in=[STATES.standard,STATES.preferred])
 
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.

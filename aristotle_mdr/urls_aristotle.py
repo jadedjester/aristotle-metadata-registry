@@ -74,17 +74,18 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 
-    url(r'^about/site/?$', views.aboutThisSite, name="aboutThisSite"),
-    url(r'^about/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
-    url(r'^about/?$', TemplateView.as_view(template_name='aristotle_mdr/static/aristotle_mdr.html'), name="aboutMain"),
+    url(r'^help/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
+    url(r'^about/aristotle/?$', TemplateView.as_view(template_name='aristotle_mdr/static/aristotle_mdr.html'), name="aboutMain"),
     url(r'^help/(?P<template>.+)/?$', views.HelpTemplateView.as_view(), name="help"),
     url(r'^help/?$', TemplateView.as_view(template_name='aristotle_mdr/static/help/help.html'), name="helpMain"),
 
 
+    url(r'^about/?$', TemplateView.as_view(template_name='site/about.html'), name="aboutThisSite"),
     url(r'^privacy/?$', TemplateView.as_view(template_name='site/privacy.html'), name="privacy"),
     url(r'^copyright/?$', TemplateView.as_view(template_name='site/copyright.html'), name="copyright"),
     url(r'^disclaimer/?$', TemplateView.as_view(template_name='site/disclaimer.html'), name="disclaimer"),
     url(r'^accessibility/?$', TemplateView.as_view(template_name='site/accessibility.html'), name="accessibility"),
+    url(r'^contact/?$', TemplateView.as_view(template_name='site/contact.html'), name="contact"),
 
     url(r'^search/?', search_view_factory(
      view_class=views.PermissionSearchView,
@@ -92,8 +93,5 @@ urlpatterns = patterns('aristotle_mdr.views',
      searchqueryset=sqs,
      form_class=forms.PermissionSearchForm
      ), name='search'),
-
-    # Things that keep it running
-    #url(r'^manage/', include(admin.site.urls)),
 )
 

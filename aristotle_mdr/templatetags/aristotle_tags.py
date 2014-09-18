@@ -194,6 +194,12 @@ def aboutLink(item):
     app_name = item._meta.app_label
     return reverse("%s:about"%app_name,args=[item.url_name().lower()])
 
+
+@register.simple_tag
+def itemURL(item):
+    app_name = item._meta.app_label
+    return reverse("%s:%s"%(app_name,item.template_name()),args=[item.id])
+
 @register.simple_tag
 def downloadMenu(item):
     """

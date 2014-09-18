@@ -70,8 +70,8 @@ LOGIN_REDIRECT_URL = '/account/home'
 
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
 GRAPPELLI_ADMIN_TITLE = "Aristotle admin interface"

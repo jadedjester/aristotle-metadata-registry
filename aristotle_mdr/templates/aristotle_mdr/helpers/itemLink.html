@@ -1,7 +1,7 @@
 {% load aristotle_tags %}
 
 {% if item %}
-    <a href="{% url 'aristotle:item' item.id %}">
+    <a href="{% itemURL item %}">
     {% if space %}
         {% zws item.name %}
     {% else %}

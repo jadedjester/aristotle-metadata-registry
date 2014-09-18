@@ -26,7 +26,7 @@ function(editor) {
         text: 'Save',
         onclick: function() {
             if (form.data('ajaxTime')) {
-                return
+                return;
             }
             form.find('.apply').click();
         }
@@ -37,16 +37,23 @@ function(editor) {
         text: 'Cancel',
         onclick: function() {
             if (form.data('ajaxTime')) {
-                return
+                return;
             }
             form.find('.cancel').click();
         }
     });
-    editor.addShortcut('crtl+alt+s','save',
+    editor.addShortcut('alt+s','save',
         function() {
             if (form.data('ajaxTime')) {
-                return
+                return;
             }
             form.find('.apply').click();
+        });
+    editor.addShortcut('alt+c','cancel',
+        function() {
+            if (form.data('ajaxTime')) {
+                return;
+            }
+            form.find('.cancel').click();
         });
 }

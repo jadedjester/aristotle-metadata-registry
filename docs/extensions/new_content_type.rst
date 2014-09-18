@@ -86,7 +86,6 @@ expected item, and not the ``_concept`` parent, is used.
 In the very worst case a single additional query is made and the right item is used, in
 the best case an very cheap Python property is called and the item is returned straight back.
 
-
 Creating admin pages for new items types
 ----------------------------------------
 
@@ -230,10 +229,34 @@ can arise from doing so.
         countries = models.ManyToManyField(Country)
         objects = aristotle_mdr.models.ConceptManager()
 
+Creating ``unmanagedContent`` types
+-----------------------------------
+
+Not all content needs to undergo a standardisation process, and in fact some content
+should only be accessible to administrators. In Aristotle this is termed an "unmanagedObject".
+Content types that are unmanaged do not belong to workgroups, and can only be edited by
+users with the Django "super user" privileges.
+
+It is perfectly safe to extend from the ``unmanagedObject`` types, however because these
+are closer to pure Django objects there are much fewer convenience method set up to
+handle them. By default, ``unmanagedContent`` is always visible.
+
+Because of their visibility and strict privileges, they are generally suited to relatively
+static items that may vary between individual sites and add context to other items. Inheriting
+from this class can be done like so::
+
+    class Country(aristotle.models.unmanagedObject):
+        # Inherits name and description.
+        isoCode = models.CharField(maxLength=3)
+
+For example, in Aristotle "Unit of Measure" is an ``unmanagedObject`` type, that is used
+to give extra context to Value Domains.
+
+
 A complete example of an Aristotle Extension
 --------------------------------------------
-The first content extension for Aristotle that helped clarify a lot of the issues
-around inheritance was the
+The first package of content extension for Aristotle that helped clarify a lot
+of the issues around inheritance was the
 `Comet Indicator Registry <https://github.com/LegoStormtroopr/comet-indicator-registry>`_.
 This adds 6 new content types along with admin pages, search indexes and templates and includes an override for the
 Aristotle ``DataElement`` template - which was all achieved with less than 600 lines of code.
