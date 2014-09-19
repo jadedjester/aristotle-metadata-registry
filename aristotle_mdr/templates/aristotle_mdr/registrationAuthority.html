@@ -1,26 +1,29 @@
 {% extends "aristotle_mdr/unmanagedContent.html" %}
+{% load aristotle_tags %}
 
 {% block title %}{{ item.name }} {% endblock %}
 
 {% block objSpecific %}
 
-{% if item.standardPackages %}
-    <h2>Packages standardised by this registration authority</h2>
-    <ul>
-        {% for p,s in item.standardPackages %}
-        <li>
-            {% include "aristotle_mdr/helpers/itemLink.html" with item=p %}
-            Standardised on {{ s.registrationDate }}
-        </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>
-    <strong>
-        This registration authority has no current standard packages
-    </strong>
-    </p>
-{% endif %}
+    {% with standardPackages=item|public_standards:"aristotle_mdr.Package" %}
+    {% if standardPackages %}
+        <h2>Packages standardised by this registration authority</h2>
+        <ul>
+            {% for p,s in standardPackages %}
+            <li>
+                {% include "aristotle_mdr/helpers/itemLink.html" with item=p %}
+                Standardised on {{ s.registrationDate }}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+        <strong>
+            This registration authority has no current standard packages
+        </strong>
+        </p>
+    {% endif %}
+    {% endwith %}
 
 {% endblock %}
 

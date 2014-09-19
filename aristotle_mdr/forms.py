@@ -3,6 +3,7 @@ autocomplete_light.autodiscover()
 
 from django import forms
 import aristotle_mdr.models as MDR # Treble-one seven nine
+from django.db.models import Q
 from tinymce.widgets import TinyMCE
 from django.contrib.auth.models import User
 from django.contrib.admin import widgets
@@ -281,9 +282,9 @@ class PermissionSearchForm(ModelSearchForm):
         sqs = super(PermissionSearchForm, self).search()
 
         #Whoosh workaround
-        if self.get_models():
-            for model in ['%s.%s'%(m._meta.app_label,m._meta.object_name) for m in self.get_models()]:
-                sqs = sqs.filter_or(django_ct=model)
+        #if self.get_models():
+        #    for model in ['%s.%s'%(m._meta.app_label,m._meta.object_name) for m in self.get_models()]:
+        #        sqs = sqs.filter_or(django_ct=model)
 
         if not self.is_valid():
             return self.no_query_found()
@@ -300,22 +301,30 @@ class PermissionSearchForm(ModelSearchForm):
 
         if user.is_anonymous():
             # Regular users can only see public items, so boot them off now.
-            return sqs.filter(is_public=True)
+            return sqs.filter_and(is_public=True)
 
-        public_only=False
-        if self.cleaned_data['public_only']:
-            public_only = "on" == self.cleaned_data['public_only']
-            sqs = sqs.filter(is_public=True)
-        myWorkgroups_only=False
-        if self.cleaned_data['myWorkgroups_only']:
-            myWorkgroups_only = "on" == self.cleaned_data['myWorkgroups_only']
-            # Restricted it to only workgroups as if a superuser want to search everything they can just not tick this box
-            sqs = sqs.filter(workgroup__in=user.profile.workgroups.all())
+        only_public = self.cleaned_data['public_only'] == "on"
+        self.cleaned_data['myWorkgroups_only'] == "on"
 
-        if not public_only or not myWorkgroups_only:
-            # If its public or in a users workgroup they can see it so, we don't need to restrict the query any further. This will (should?) save time on the search.
-            # Can't use a generator or we would.
-            sqs = [s for s in sqs] # if user_can_view(user,s.object)]
+        q = Q()
 
-        return sqs
+        if user.is_superuser:
+            sqs = sqs
+        elif not user.profile.is_registrar:
+            # Non-registrars can only see public things or things in their workgroup
+            q |= Q(workgroup__in=user.profile.workgroups.all())
+        elif user.profile.is_registrar:
+            q |= Q(workgroup__in=user.profile.workgroups.all())
+            q |= Q(registrationAuthorities__in=user.profile.registrarAuthorities)
+        else:
+            #I'm paranoid...
+            q = Q(is_public=True)
+            return sqs.filter(q)
+
+        if self.cleaned_data['public_only'] == True:
+            q &= Q(is_public=True)
+        if self.cleaned_data['myWorkgroups_only'] == True:
+            q &= Q(workgroup__in=user.profile.workgroups.all())
+
+        return sqs.filter(q)
 

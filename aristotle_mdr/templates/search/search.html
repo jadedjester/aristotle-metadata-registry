@@ -118,7 +118,7 @@
                     {% if user.is_active %}
                         <input type='checkbox' value='{{ result.object.id }}' title='select to add to favourites' name='favourites'></input>
                     {% endif %}
-                    <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a> ({{ result.object.get_verbose_name }})
+                    <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.id }}{{ result.object.name }}</a> ({{ result.object.get_verbose_name }})
                     <div>
                     <span class="attr">Last modified: {{ result.object.modified }}</span>
                     <span class="attr">Statuses:

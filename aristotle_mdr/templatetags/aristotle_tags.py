@@ -78,6 +78,40 @@ def can_view_iter(qs,user):
         return []
 
 @register.filter
+def public_standards(regAuth,itemType="aristotle._concept"):
+    """
+    This is a filter that accepts a registration Authority and an item type and returns
+    a list of tuples that contain all *public* items with a status of "Standard" or
+    "Preferred Standard" *in that Registration Authority only*, as well as a the
+    status object for that Authority.
+
+    The item type should consist of the name of the app the item is from and the
+    name of the item itself separated by a period (``.``).
+
+    This requires the django ``django.contrib.contenttypes`` app is installed.
+
+    If calling ``public_standards`` throws an exception or the item type requested
+    is not found it safely returns an empty list.
+
+    For example::
+
+        {% for item, status in registrationAuthority|public_standards:'aristotle_mdr.DataElement' %}
+          {{ item }} - made standard on {{ status.registrationDate }}.
+        {% endfor %}
+    """
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        app_label,model_name=itemType.lower().split('.',1)[0:2]
+        standard_states = [MDR.STATES.standard,MDR.STATES.preferred]
+        return [
+                ( i,i.statuses.filter(registrationAuthority=regAuth,state__in=standard_states).first() )
+                for i in ContentType.objects.get(app_label=app_label,model=model_name).model_class().objects.filter(statuses__registrationAuthority=regAuth,statuses__state__in=standard_states).public()
+        ]
+    except:
+        return []
+
+
+@register.filter
 def islice(itera,slice):
     """
     A duplicate of the django `slice filter`_ that works on iterables as well as lists.
@@ -224,7 +258,7 @@ def extra_content(extension,item,user):
     try:
         from django.template.loader import get_template
         from django.template import Context
-        return get_template(extension+"/concepts/extra_content/"+item.template_name()+".html").render(
+        return get_template(extension+"/extra_content/"+item.template_name()+".html").render(
             Context({'item':item,'user':user})
         )
     except template.TemplateDoesNotExist:

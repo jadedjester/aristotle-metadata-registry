@@ -142,7 +142,7 @@ all simple cases when searching for new items, like so::
         def get_model(self):
             return models.Question
 
-**It is important to import the required models from  ``aristotle.search_indexes``
+**It is important to import the required models from**  ``aristotle.search_indexes``
 directly, otherwise there are circular dependancies in Haystack when importing.
 This will prevent the app and the whole site from being used.
 
