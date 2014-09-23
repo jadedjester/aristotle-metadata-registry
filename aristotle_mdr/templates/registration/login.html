@@ -3,7 +3,7 @@
 {% load aristotle_tags %}
 
 {% block title %}Login{% endblock %}
-{% block headScripts %}
+{% block extra_head_scripts %}
       <link rel="stylesheet/less" href="{% static 'aristotle_mdr/login.less' %}" rel="stylesheet" type="text/css"/>
 {% endblock %}
 {% block content %}
@@ -31,7 +31,7 @@
                 {% endif %}
                 required autofocus>
             </div>
-            <label>Password:</label> 
+            <label>Password:</label>
             <a href="#" class="forgot">(Forgotten your password)</a>
             <div class="input-group">
               <span class="input-group-addon"><i class="fa fa-lock fa-lg fa-fw"></i></span>

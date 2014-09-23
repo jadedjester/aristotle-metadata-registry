@@ -6,7 +6,8 @@ a framework for building compliant ISO/IEC 11179 Metadata Registries, using 100%
 Free Open Source Software, and released to the public as Free Open Source Software.
 
 By designing Aristotle-MDR in an extensible way, the core data model of Aristotle aims
-to be as close to the model of ISO/IEC 11179-3, without burdening the code with unnecessary objects.
+to be as close to the model of ISO/IEC 11179-3, without burdening the framework with
+unnecessary code.
 
 Aristotle-MDR is designed to provide the framework for a metadata registry, and
 is explicitly *not* designed to be a standard web content management system, and a core

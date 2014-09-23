@@ -1,0 +1,62 @@
+/* CSS for search page */
+
+#searchAdvanced {
+    .navbar-header {
+        float:none;
+    }
+    .navbar-brand {
+        margin:auto;
+        padding:15px 0;
+    }
+}
+
+#searchOptions {
+    padding:0;
+    label {
+        font-weight: normal;
+    }
+    ul {
+        margin-left:0em;
+        padding-left:0em;
+    }
+    li {
+        list-style-type:none;
+    }
+    dt[data-toggle='collapse'] {
+        &:before {
+            font-family: FontAwesome;
+            content: '\f107';
+            font-weight:normal;
+            padding-right:3px;
+        }
+        &.collapsed:before {
+            content: '\f105';
+        }
+    }
+}
+
+ol.searchResults {
+    margin-left:0px;
+    padding-left:0px;
+    &.active li div {
+        padding-left:20px;
+    }
+    li {
+        padding:5px;
+        list-style-type:none;
+        a {
+            font-size:125%;
+            padding-right:10px;
+        }
+        div {
+            padding-top:2px;
+            padding-left:5px;
+
+            .attr {
+                display:block;
+                color:gray;
+                font-size:90%;
+            }
+        }
+    }
+}

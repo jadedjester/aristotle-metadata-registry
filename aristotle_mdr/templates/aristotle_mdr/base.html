@@ -1,4 +1,5 @@
 {% load inplace_edit %}
+{% load staticfiles %}
 {% load i18n %}
 {% load bootstrap3 %}
 
@@ -10,35 +11,33 @@
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
       <!-- load the jQuery and require.js libraries -->
-      {% load staticfiles %}
       <!-- script src="{% static 'aristotle_mdr/jquery.min.js' %}" type="text/javascript"></script -->
       <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
       <script src="{% static 'aristotle_mdr/possum.js' %}" type="text/javascript"></script>
       <script src="{% static 'aristotle_mdr/dropit/dropit.js' %}" type="text/javascript"></script>
 
-      <!-- link href="{% static 'aristotle_mdr/possum.css' %}" rel="stylesheet" type="text/css"/- ->
-      <link href="{% static 'aristotle_mdr/dropit/dropit.css' %}" rel="stylesheet" type="text/css"/>
-      <!- -
-      -->
+    <link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" />
     {{ form.media }}
 
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/possum.less' %}" />
+    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.less' %}" />
+    <script src="{% static 'aristotle_mdr/aristotle.js' %}" type="text/javascript"></script>
 
-    {% block headScripts %}
+    {% block extra_head_scripts %}
         {% comment %}
             Only for scripts that need to be inserted for other special templates
-            For example: look ups in supersedes
+            For example: look ups in supersedes, login, search, etc...
         {% endcomment %}
     {% endblock %}
     <script src="{% static 'aristotle_mdr/less.min.js' %}" type="text/javascript"></script>
 
-
 <script src="/static/js/jquery.json.js" type="text/javascript"></script>
 {% if user_can_edit %}
 {# This block is copied from django-inplaceedit with minor tweaks #}
+<script type="text/javascript" src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
 <script src="/static/js/jquery.inplaceeditform.js" type="text/javascript"></script>
 <script src="/static/js/jquery.inplaceeditform.hooks.js" type="text/javascript"></script>
 
@@ -60,70 +59,11 @@
             }
         </script>
     <!--<![endif]-->
-
+    <script src="{% static 'aristotle_mdr/aristotle.inplaceedit.js' %}" type="text/javascript"></script>
     <script type="text/javascript">
-        var csrf_token = "{{ csrf_token }}";
-        (function($){
-            $(document).ready(function () {
-                var options = {"getFieldUrl": "/inplaceeditform/get_field/",
-                               "saveURL": "/inplaceeditform/save/",
-                               "successText": "Successfully saved",
-                               "eventInplaceEdit": "dblclick",
-                               "disableClick": true,
-                               "autoSave": false,
-                               "unsavedChanges": "You have unsaved changes",
-                               "enableClass": "enable",
-                               "fieldTypes": "input, select, textarea",
-                               "focusWhenEditing": true};
-                var inplaceManager = $(".inplaceedit").inplaceeditform(options);
-
-                    if ($(".inplaceedit").size()) {
-
-var enabledEditText = "<i class='fa fa-edit'></i> Edit";
-var disabledEditText = "<i class='fa fa-power-off'></i> Editing...";
-var toggleInplaceEdit = function () {
-    var trigger = $(this);
-    if (trigger.hasClass('active')) {
-        inplaceManager.disable();
-        trigger.removeClass('active');
-        trigger.html(enabledEditText);
-        $('.inline_action').removeClass('enable');
-        trigger.parent().removeClass('active');
-        $('#progress.alert').slideToggle()
-        $('#progress.alert').addClass('alert-success').removeClass('alert-warning');
-    } else {
-        inplaceManager.enable();
-        trigger.addClass('active');
-        trigger.html(disabledEditText);
-        $('.inline_action').addClass('enable');
-        trigger.parent().addClass('active');
-        $('#progress.alert').removeClass('hidden').hide()
-        $('#progress.alert').addClass('alert-danger').removeClass('alert-success');
-        $('#progress.alert').slideToggle();
-    }
-};
-
-var toolbar = $("#ActivateInplaceEdit");
-var actions = toolbar.find(".toolbarActions");
-toolbar.replaceWith("<a class='toolbarAction btn btn-default' href='#' id=\"ActivateInplaceEdit\" accesskey='e'>" + enabledEditText + "</a>");
-$("#ActivateInplaceEdit").click(toggleInplaceEdit);
-                    }
-        });
-    })(jQuery);
-</script>
+        var csrf_token = "{{ csrf_token }}"; {# This is populated by django and needed for the inplace edit #}
+    </script>
 {% endif %}
-<link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" />
-<link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" />
-
-<script type="text/javascript" src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
-
-<script>
-    // Scrap modals if they lose focus so they can be loaded with new content
-    $(document).on('hidden.bs.modal', function (e) {
-        $(e.target).removeData('bs.modal');
-    });
-</script>
-
    </head>
 
    <body>
@@ -178,6 +118,7 @@ $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                         <li><a href="{% url 'admin:aristotle_mdr_dataelementconcept_add' %}">Data Element Concept</a></li>
                         <li><a href="{% url 'admin:aristotle_mdr_dataelement_add' %}">Data Element</a></li>
                         {% comment %}
+                        {# Pulling the wizard-based creation tools until a later release #}
                         <li><a href="{% url 'aristotle:createObjectClass'%}">Object Class</a></li>
                         <li><a href="{% url 'aristotle:createProperty'%}">Property</a></li>
                         <li><a href="{% url 'aristotle:createValueDomain'%}">Value Domain</a></li>

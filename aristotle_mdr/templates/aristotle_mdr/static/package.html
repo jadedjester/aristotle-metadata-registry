@@ -1,0 +1,23 @@
+{% extends "aristotle_mdr/static/about_base.html" %}
+
+{% block title %}About: Package{% endblock %}
+{% block item_name %}Package{% endblock %}
+
+{% block breadcrumbs %}
+    <!-- li><a href="{% url 'aristotle:about' 'package' %}">Package</a></li -->
+{% endblock %}
+
+{% block description %}
+    <p>An package is the only non ISO 11179 object within the core Aristotle MDR framework.
+        It provides a conveinent system-independant way of collecting similarly related items
+        in a way that allows these packages to be standardised in accordance with the
+        workflow of ISO 11179-3.
+    </p>
+
+    <p>
+        Additionally, packages can be used to convieniently group items that need to be
+        standardised together. The ability to cascade a registration status from one item
+        to its child items, means packages can be used to create simple data dictionaries
+        with all subsequent Data Elements and their components standardised in a single action.
+    </p>
+{% endblock %}

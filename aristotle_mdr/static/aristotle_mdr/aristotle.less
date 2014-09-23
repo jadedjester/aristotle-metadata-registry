@@ -1,36 +1,36 @@
-/* Colors: professional
-https://kuler.adobe.com/Case-Tracker-Basic-color-theme-2192347/
-#1D1D1D - dark gray
-#2E2526 - dark maroon brown
-#D4DBE3 - light gray blue
-#C6D3E3 - light blue
-#D0D1D5 - light gray
-*/
-@colors_background:#D4DBE3;
-@colors_menu:#2E2526;
-@colors_menu_text:#D0D1D5;
 @colors_border:#C6D3E3;
-@colors_content_background:white;
-@colors_header:white;
 @colors_footer:#2E2526;
 @colors_footer_text:#D0D1D5;
-/* End professional */
+@colors_favourite:goldenrod;
 
-@media (max-width:992px)  {
+/*
+  Aristotle-MDR assume the breakpoints for bootstrap have been modified to those below.
+  600px for small is the bootstrap standard values.
+  However, 760px as the lower point for a "medium" screen ensures the the site retains functionality
+  on smaller desktop widths. It seemed pointless to drop functionality.
+  992px is the standard "medium" minimum, and between 760px and 992pxo this value
+
+  an override for the main
+*/
+@screen-sm-min:600px;
+@screen-sm-max:760px;
+@screen-md-regular:992px;
+
+@media (max-width:@screen-md-regular)  {
     .container {
         width:100%;
     }
 }
-@media (min-width:600px)  {
+@media (min-width:@screen-sm-min)  {
     #content {padding:0 45px;}
     #infobox-wrap {padding:0;border:none;background-color:white;}
     #infobox {margin:0;}
 }
-@media (max-width:600px)  {
+@media (max-width:@screen-sm-min)  {
     #content {padding:0 25px;}
     h1#objectTitle {margin-left:20px;}
 }
-@media (max-width:760px)  {
+@media (max-width:@screen-sm-max)  {
     #infobox {
         border:none;
         dl * {float:none!important;}
@@ -77,7 +77,7 @@ dl {
 }
 #description {
     padding-bottom:1em;
-    border-bottom:1px solid lightgray;
+    border-bottom:1px solid @colors_border;
     margin-bottom:1em;
     font-size:120%;
 }
@@ -86,8 +86,8 @@ dl .description {
 }
 
 #supersedes {
-    border-top:1px solid gray;
-    border-bottom:1px solid gray;
+    border-top:1px solid @colors_border;
+    border-bottom:1px solid @colors_border;
     > li {
         display:inline-block;
         vertical-align:text-top;
@@ -124,14 +124,7 @@ table.mceLayout iframe {
     h3 {
         font-size:1.3em;
     }
-    h4 {
-        /*font-size:1.3em;*/
-    }
-    div.navbar {
-        margin-bottom:0px;
-    }
 }
-
 
 .inline_action {
     &:before {content: "["}
@@ -161,7 +154,6 @@ body > footer {
     }
     a {
         text-decoration:underline;
-        text-decoration-style:dashed;
     }
 }
 
@@ -189,8 +181,8 @@ body > footer {
             display:block;
         }
     }
-
     .helptext {
+        /* hides "ctrl+click" to select multiple */
         display:none !important;
     }
 }
@@ -201,7 +193,7 @@ body > footer {
     &>div {
         display:table-row;
         &>*:first-child{
-            border-right:1px solid gray;
+            border-right:1px solid @colors_border;
         }
         &>* {
             display:table-cell;
@@ -214,40 +206,8 @@ body > footer {
         &>span {
             font-weight:bold;
             text-align:center;
-            border-bottom:1px solid gray;
+            border-bottom:1px solid @colors_border;
         }
-    }
-}
-
-#search-advanced {
-    padding:0;
-    label {
-        font-weight: normal;
-    }
-    ul {
-        margin-left:0em;
-        padding-left:0em;
-    }
-    li {
-        list-style-type:none;
-    }
-    dt[data-toggle='collapse'] {
-        &:before {
-            font-family: FontAwesome;
-            content: '\f107';
-            font-weight:normal;
-            padding-right:3px;
-        }
-        &.collapsed:before {
-            content: '\f105';
-        }
-    }
-}
-.searchResults {
-    margin-left:0px;
-    padding-left:0px;
-    li {
-        list-style-type:none;
     }
 }
 
@@ -269,7 +229,7 @@ li.viewHistory {
     background-color:white;
     dl {
         margin-bottom:0px;
-        dt {
+        dt {clear:both;
             float:left;
             &.large {float:none;}
         }
@@ -282,9 +242,6 @@ li.viewHistory {
                 }
             }
         }
-    }
-    &>*{
-        clear:both;
     }
 }
 
@@ -303,9 +260,9 @@ li.viewHistory {
         .dashSubMenu {
             margin-left:7px;
             margin-right:3px;
-            border-left:1px solid darkgray;
-            border-bottom:1px solid darkgray;
-            border-right:1px solid darkgray;
+            border-left:1px solid @colors_border;
+            border-bottom:1px solid @colors_border;
+            border-right:1px solid @colors_border;
             & > li > a {
                 font-size:90%;
             }
@@ -337,44 +294,7 @@ label strong {
     color:red;
 }
 
-
-.message {
-    background-repeat: no-repeat;
-    background-size: 24px;
-    background-position: 5px center;
-    border:1px solid;
-    border-radius: 5px 5px 5px 5px;
-    min-height:32px;
-    padding:5px;
-    padding-left: 35px;
-    margin-right:5px;
-}
-.info {
-    .message;
-    color: #00529B;
-    background-color: #BDE5F8;
-    background-image: url('/static/aristotle_mdr/images/toolbar/Knob Info.png');
-}
-.success {
-    .message;
-    color: #4F8A10;
-    background-color: #DFF2BF;
-    background-image:url('/static/aristotle_mdr/images/toolbar/Knob Valid Green.png');
-
-}
-.warning {
-    .message;
-    color: #9F6000;
-    background-color: #FEEFB3;
-    background-image: url('/static/aristotle_mdr/images/toolbar/Knob Attention.png');
-}
-.error {
-    .message;
-    color: #D8000C;
-    background-color:#FFBABA ;
-    background-image: url('/static/aristotle_mdr/images/toolbar/Knob Cancel.png');
-}
-
+/* the alert heading just after the item title for concepts/administeredItems */
 #progress.alert {
     text-indent:15px hanging;
     &:before {
@@ -385,17 +305,17 @@ label strong {
 }
 
 table.valueDomainRepresentation {
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: @screen-sm-min) {
         width:100%;
     }
-    @media only screen and (min-width: 600px) {
+    @media only screen and (min-width: @screen-sm-min) {
         width:65%;
     }
     td {
         padding:5px;
     }
 }
-
+/*
 aside.creationTips {
     border:1px solid @colors_border;
     border-radius: 5px;
@@ -408,9 +328,6 @@ aside.creationTips {
         font-size: 110%;
         font-weight: bold;
     }
-}
-.mceIframeContainer {
-    font-size: 10em;
 }
 
 #content form {
@@ -449,6 +366,7 @@ aside.creationTips {
         vertical-align:middle;
     }
 }
+*/
 
 .objectTitle {
     padding-left:15px;
@@ -461,54 +379,18 @@ aside.creationTips {
     left:-25px;
     .fa{
         width:0px;
-        color:goldenrod;
+        color:@colors_favourite;
     }
 }
 
-#searchAdvanced {
-    .navbar-header {
-        float:none;
-    }
-    .navbar-brand {
-        margin:auto;
-        padding:15px 0;
-    }
-}
-
-ol.searchResults {
-    &.active li div {
-        padding-left:20px;
-    }
-    li {
-        padding:5px;
-
-        a {
-            font-size:125%;
-            padding-right:10px;
-        }
-        div {
-            padding-top:2px;
-            padding-left:5px;
-
-            .attr {
-                display:block;
-                color:gray;
-                font-size:90%;
-            }
-        }
-    }
-}
 
 table.codeList {
-    @media only screen and (max-width: 480px) {
-        width:85%;
-    }
     border-collapse:collapse;
     thead, tbody {
-        border-bottom:1px solid darkgray;
+        border-bottom:1px solid @colors_border;
     }
     thead th, tbody td {
-        border-left:1px solid darkgray;
+        border-left:1px solid @colors_border;
     }
 
     tr {
