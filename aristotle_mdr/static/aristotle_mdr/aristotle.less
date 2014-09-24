@@ -39,6 +39,10 @@
     }
 }
 
+tbody.newRa {
+    border-top-width: 4px ;
+}
+
 #homeFaq {
     margin-top:50px;
     margin-bottom:20px;
@@ -423,7 +427,33 @@ table.dssInclusions {
         font-size:90%;
     }
 }
+dl.status_definitions {
+    &>dt {
+        clear:both;
+        border-top:1px solid @colors_border;
+        width:120px;
+        float:left;
+        text-align:center;
+        padding-top:7px;
+        &:after {
+            content:"";
+        }
+        .fa {
+            display:block;
+            padding-top:3px;
 
+            font-size:200%;
+        }
+    }
+    &>dd {
+        border-top:1px solid @colors_border;
+        margin-left:120px;
+        dl {
+            margin-top:7px;
+            margin-bottom:11px;
+        }
+    }
+}
 dl.browse, dl.treble_defintions {
     dd {
         padding-left:25px;

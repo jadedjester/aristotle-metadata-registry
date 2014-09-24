@@ -40,6 +40,7 @@ class baseObjectIndex(indexes.SearchIndex):
 
 class conceptIndex(baseObjectIndex):
     statuses = indexes.MultiValueField()
+    ra_statuses = indexes.MultiValueField()
     registrationAuthorities = indexes.MultiValueField()
     workgroup = indexes.CharField(model_attr="workgroup")
     is_public = indexes.BooleanField()
@@ -54,6 +55,12 @@ class conceptIndex(baseObjectIndex):
     def prepare_statuses(self, obj):
         # We don't remove duplicates as it should mean the more standard it is the higher it will rank
         states = [s.state_name for s in obj.statuses.all()]
+        return states
+
+    def prepare_ra_statuses(self, obj):
+        # This allows us to check a registration authority and a state simultaneously
+        states = ["%s___%s"%(str(s.registrationAuthority.id),str(s.state))
+                    for s in obj.statuses.all()]
         return states
 
     def get_model(self):

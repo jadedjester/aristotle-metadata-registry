@@ -1,5 +1,6 @@
 {% extends "aristotle_mdr/user/userHome.html" %}
 {% load inplace_edit %}
+{% load aristotle_tags %}
 
 {% block collapse-link %}
     <i class="fa fa-institution fa-fw"></i> Registrar tools </a>
@@ -11,35 +12,56 @@
 
 {% block page %}
 <h1>{% block title %}Registrar tools{% endblock %}</h1>
-    <section id="workgroups">
-        <header>Recent Workgroups</header>
-        <ul>
-        {% for item in user.profile.myWorkgroups.all %}
-          <li><a href="{% url 'aristotle:workgroup' item.id %}">{{ item }}</a> -
-            <span>{{ item.description }}</span>
-            </li>
-        {% empty %}
-            <li> No workgroups </li>
-        {% endfor %}
-        </ul>
-    </section>
 
-<h2>Recent conversations</h2>
-<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
-<table>
-    <thead>
-        <tr>
-            <td>Title</td>
-            <td>Author</td>
-            <td>Last comment</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+    <table class='table table-bordered table-condensed'>
+        <caption>
+            <p>This table lists every Registration Authority you are a registrar in,
+            clicking on the name of a Registration Authority will take you to its
+            home page.
+            </p><p>
+            The links in the rows will perform a search for items in the specified
+            Registration Authority with the listed statuses
+            </p>
+        </caption>
+        {% for ra in request.user.profile.registrarAuthorities %}
+        <tbody class="newRa">
+            <tr>
+                <th rowspan='2'>
+                    <a href="{% url 'aristotle:registrationAuthority' ra.id %}">{{ ra.name }}</a>
+                </th>
+                <td colspan="{{ ra.unlocked_states|length }}" >
+                    <i class="fa fa-unlock"></i>
+                    <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ unlocked|join:'&state=' }}">All Unlocked</a>
+                </td>
+                <td colspan="{{ ra.locked_states|length }}">
+                    <i class="fa fa-lock"></i>
+                    <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ locked|join:'&state=' }}">All locked</a>
+                </td>
+                <th colspan="{{ ra.public_states|length }}">
+                    <i class="fa fa-eye"></i>
+                    <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ public|join:'&state=' }}">All public</a>
+                </th>
+            </tr>
+            <tr>
+                {% for s in ra.unlocked_states %}
+                    <td class="info">
+                        <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ s }}">{{ s|stateToText }}</a>
+                    </td>
+                {% endfor %}
+                {% for s in ra.locked_states %}
+                    <td class="success">
+                        <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ s }}">{{ s|stateToText }}</a>
+                    </td>
+                {% endfor %}
+                {% for s in ra.public_states %}
+                    <td class="warning">
+                        <a href="{% url 'aristotle:search' %}?q=&ra={{ra.id}}&state={{ s }}">{{ s|stateToText }}</a>
+                    </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+        {% endfor %}
+    </table>
+
+
 {% endblock %}

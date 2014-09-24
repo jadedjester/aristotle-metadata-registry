@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.admin import widgets
 
 from haystack.forms import ModelSearchForm
+from haystack.query import SearchQuerySet
 from aristotle_mdr.perms import user_can_view, user_can_edit
 from django.utils.safestring import mark_safe
 from bootstrap3_datetime.widgets import DateTimePicker
@@ -277,7 +278,7 @@ class PermissionSearchForm(ModelSearchForm):
         label="items in my workgroups"
     )
 
-    def search(self):
+    def search(self,repeat_search=False):
         # First, store the SearchQuerySet received from other processing.
         sqs = super(PermissionSearchForm, self).search()
 
@@ -288,28 +289,53 @@ class PermissionSearchForm(ModelSearchForm):
 
         if not self.is_valid():
             return self.no_query_found()
+        query_text = self.cleaned_data['q']
+        states = self.cleaned_data['state']
+        ras = self.cleaned_data['ra']
+        has_filter = states or ras
+        if has_filter and not query_text:
+            # If there is a filter, but no `q`uery then we'll force some results.
+            sqs = SearchQuerySet().order_by('-modified')
+        if query_text and sqs.count() == 0:
+            from urllib import quote_plus
+            suggestions = []
+            has_suggestions = False
+            suggested_query = []
+            for token in query_text.split(" "):
+                if token: # remove blanks
+                    suggestion = SearchQuerySet().spelling_suggestion(token)
+                    if suggestion:
+                        suggested_query.append(suggestion)
+                        has_suggestions = True
+                    else:
+                        suggested_query.append(token)
+                    suggestions.append((token,suggestion))
+            self.spelling_suggestions = suggestions
+            self.has_spelling_suggestions = has_suggestions
+            self.suggested_query = quote_plus(' '.join(suggested_query),safe="")
 
         user = self.request.user
 
-        if self.cleaned_data['state']:
+        if states and not ras:
             states = [MDR.STATES[int(s)] for s in self.cleaned_data['state']]
             sqs = sqs.filter(statuses__in=states)
-        if self.cleaned_data['ra']:
+        elif ras and not states:
             ras = [ra for ra in self.cleaned_data['ra']]
             sqs = sqs.filter(registrationAuthorities__in=ras)
-
+        elif states and ras:
+            # If we have both states and ras, merge them so we only search for
+            # items with those statuses in those ras
+            terms = ["%s___%s"%(str(r),str(s)) for r in ras for s in states]
+            sqs = sqs.filter(ra_statuses__in=terms)
 
         if user.is_anonymous():
             # Regular users can only see public items, so boot them off now.
             return sqs.filter_and(is_public=True)
 
-        only_public = self.cleaned_data['public_only'] == "on"
-        self.cleaned_data['myWorkgroups_only'] == "on"
-
         q = Q()
 
         if user.is_superuser:
-            sqs = sqs
+            pass
         elif not user.profile.is_registrar:
             # Non-registrars can only see public things or things in their workgroup
             q |= Q(workgroup__in=user.profile.workgroups.all())
@@ -326,5 +352,15 @@ class PermissionSearchForm(ModelSearchForm):
         if self.cleaned_data['myWorkgroups_only'] == True:
             q &= Q(workgroup__in=user.profile.workgroups.all())
 
-        return sqs.filter(q)
+        sqs = sqs.filter(q)
+
+        if repeat_search == False and (states or ras) and sqs.count() == 0:
+            # If there are 0 results, and filters, lets be nice and remove them.
+            # There will be a big message on the search page that says what we did.
+            self.cleaned_data['state'] = None
+            self.cleaned_data['ra'] = None
+            self.auto_broaden_search = True
+            sqs = self.search(repeat_search=True)
+
+        return sqs
 

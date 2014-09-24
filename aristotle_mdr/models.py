@@ -150,6 +150,35 @@ class RegistrationAuthority(registryGroup):
     class Meta:
         verbose_name_plural = _("Registration Authorities")
 
+    @property
+    def unlocked_states(self):
+        return range(STATES.notprogressed,self.locked_state)
+    @property
+    def locked_states(self):
+        return range(self.locked_state,self.public_state)
+    @property
+    def public_states(self):
+        return range(self.public_state,STATES.retired+1)
+
+    def statusDescriptions(self):
+        descriptions =[
+            self.notprogressed,
+            self.incomplete,
+            self.candidate,
+            self.recorded,
+            self.qualified,
+            self.standard,
+            self.preferred,
+            self.superseded,
+            self.retired
+        ]
+
+        unlocked = [(STATES[i],descriptions[i]) for i in self.unlocked_states]
+        locked = [(STATES[i],descriptions[i]) for i in self.locked_states]
+        public = [(STATES[i],descriptions[i]) for i in self.public_states]
+
+        return (('unlocked',unlocked),('locked',locked),('public',public))
+
     def register(self,item,state,user,regDate=timezone.now(),cascade=False):
         reg,created = Status.objects.get_or_create(
                 concept=item,

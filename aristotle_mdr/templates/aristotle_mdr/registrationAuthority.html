@@ -4,6 +4,41 @@
 {% block title %}{{ item.name }} {% endblock %}
 
 {% block objSpecific %}
+    <p>
+        The following list gives a desciption of the context of the 11179-6 status
+        levels according to this Registration Authority.
+    </p>
+    <dl class="status_definitions">
+        {% for visiblity,descriptions in item.statusDescriptions %}
+            <dt>
+                {{ visiblity|title }}
+
+                {% if visiblity == "unlocked" %}
+                <i class="fa fa-unlock"></i>
+                {% elif visiblity == "locked" %}
+                <i class="fa fa-lock"></i>
+                {% elif visiblity == "public" %}
+                <i class="fa fa-eye"></i>
+                {% else %}
+                <i class="fa fa-bug"></i>
+                {% endif %}
+            </dt>
+            <dd>
+            <dl>
+                {% for state,text in descriptions %}
+                <dt>{{ state }}</dt>
+                <dd>
+                {% if text %}
+                    {{ text }}
+                {% else %}
+                    <em>No description given</em>
+                {% endif %}
+                </dd>
+                {% endfor %}
+            </dl>
+            </dd>
+        {% endfor %}
+    </dl>
 
     {% with standardPackages=item|public_standards:"aristotle_mdr.Package" %}
     {% if standardPackages %}
