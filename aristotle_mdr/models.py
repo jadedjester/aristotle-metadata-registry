@@ -202,11 +202,12 @@ class RegistrationAuthority(registryGroup):
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
 
-## TODO: Workgroup owners may choose to 'archive' a workgroup. While all content remains visible
+Workgroup owners may choose to 'archive' a workgroup. All content remains visible,
+but the workgroup is hidden in lists.
 """
 class Workgroup(registryGroup):
     template = "aristotle_mdr/workgroup.html"
-    #archived = models.BooleanField(default=False)
+    archived = models.BooleanField(default=False)
     registrationAuthorities = models.ManyToManyField(
             RegistrationAuthority, blank=True, null=True,
             related_name="workgroups",
@@ -267,17 +268,23 @@ class Workgroup(registryGroup):
     def viewers(self):
         return Group.objects.get(name="{name} {role}".format(name=self.name, role='Viewer')).user_set.all()
 
+class discussionAbstract(TimeStampedModel):
+    body = models.TextField()
+    author = models.ForeignKey(User)
+    class Meta:
+        ordering = ['modified']
+        abstract = True
+    @property
+    def edited(self):
+        return self.created != self.modifed
 
-#class WorkgroupPost(TimeStampedModel):
-#    workgroup = models.ForeignKey(Workgroup)
-#    name = models.CharField(max_length=100)
-#    description = models.TextField()
-#    author = models.OneToOneField(User, related_name='posts')
-#
-#class WorkgroupComment(TimeStampedModel):
-#    post = models.ForeignKey(WorkgroupPost, related_name='comments')
-#    author = models.OneToOneField(User, related_name='comments')
-#    comment = models.TextField()
+class DiscussionPost(discussionAbstract):
+    workgroup = models.ForeignKey(Workgroup)
+    title = models.CharField(max_length=256)
+    relatedItems = models.ManyToManyField('_concept',related_name='relatedDiscussions')
+
+class DiscussionComment(discussionAbstract):
+    post = models.ForeignKey(DiscussionPost, related_name='comments')
 
 #class ReferenceDocument(models.Model):
 #    url = models.URLField()
@@ -688,7 +695,7 @@ class PossumProfile(models.Model):
         if self.user.is_superuser:
             return Workgroup.objects.all()
         else:
-            return self.workgroups.all()
+            return self.workgroups.filter(archived=False)
 
     @property
     def myFavourites(self):

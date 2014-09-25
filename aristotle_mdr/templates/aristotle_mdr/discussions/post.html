@@ -1,0 +1,71 @@
+{% extends "aristotle_mdr/discussions/base.html" %}
+{% load humanize %}
+{% load aristotle_tags %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}">{{ post.workgroup }}</a>
+    </li>
+    <li>
+        <a href="#">{{ post.title }}</a>
+    </li>
+{% endblock %}
+
+{% block discussion_content %}
+
+<h1>{{ post.title }}</h1>
+
+<div class="thread">
+    <div class="comment panel-success panel">
+        <header class="panel-heading">
+            <span class="author">{{ post.author }}</span>
+            <small class="date" title='{{ post.created }}'>Posted {{ post.created|naturaltime }}</small>
+            {% if post.edited %}
+                , <span class="edit" title='{{ post.modified }}'>edited {{ post.modified|naturaltime }}</span>
+            {% endif %}
+        {% if request.user|can_alter_post:post %}
+            <span class="post_action_bar btn-group pull-right">
+                <a href="{% url 'aristotle:discussionsEditPost' post.id %}"class="btn btn-sm btn-default"><i class="fa fa-pencil fa-fw"></i> Edit</a>
+                <a href="{% url 'aristotle:discussionsDeletePost' post.id %}" class="btn btn-sm btn-default"><i class="fa fa-trash fa-fw"></i> Delete post and all comments</a>
+            </span>
+        {% endif %}
+        </header>
+        <div class="panel-body">{{ post.body|linebreaks }}</div>
+        {% if post.relatedItems.first %}
+             <div class="panel-footer">
+             Related Items
+                {% for item in post.relatedItems.all %}
+                    | <a href="{% url 'aristotle:item' item.id %}">{{ item.name }} (id:{{ item.id }})</a>
+                {% endfor %}
+             </div>
+        {% endif %}
+    </div>
+
+{% for comment in post.comments.all %}
+    <div class="comment panel panel-{% cycle 'default' 'info' %}" id="comment_{{comment.id }}">
+        <header class="panel-heading">
+            <span class="author">{{ comment.author }}</span>
+            <small class="date" title='{{ comment.created }}'>Posted {{ comment.created|naturaltime }}</small>
+            {% if comment.edited %}
+                , <span class="edit"  title='{{ comment.modified }}'>edited {{ comment.modified|naturaltime }}</span>
+            {% endif %}
+        {% if request.user|can_alter_comment:comment %}
+            <span class="comment_action_bar btn-group pull-right">
+                <a href="{% url 'aristotle:discussionsEditComment' comment.id %}" class="btn btn-sm btn-default"><i class="fa fa-pencil fa-fw"></i> Edit</a>
+                <a href="{% url 'aristotle:discussionsDeleteComment' comment.id %}" class="btn btn-sm btn-default"><i class="fa fa-trash fa-fw"></i> Delete comment</a>
+            </span>
+        {% endif %}
+        </header>
+        <div class="panel-body">{{ comment.body|linebreaks }}</div>
+    </div>
+{% endfor %}
+
+</div>
+<form enctype="multipart/form-data" action="{% url 'aristotle:discussionsPostNewComment' post.id %} " method='post'>
+    {% csrf_token %}
+    {% include 'aristotle_mdr/discussions/comment_form.html' %}
+    <button class="btn btn-primary" type='submit' value='Submit'><i class="fa fa-pencil fa-fw"></i>Add comment</button>
+</form>
+{% endblock %}

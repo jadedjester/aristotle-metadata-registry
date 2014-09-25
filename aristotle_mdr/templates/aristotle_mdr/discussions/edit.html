@@ -1,0 +1,22 @@
+{% extends "aristotle_mdr/discussions/base.html" %}
+{% block title %}Editing post {{ post.title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}">{{ post.workgroup }}</a>
+    </li>
+    <li>
+        <a href="#">{{ post.title }}</a>
+    </li>
+{% endblock %}
+
+{% block discussion_content %}
+
+<form method='post'>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary" type='submit' value='Submit'><i class="fa fa-save  fa-fw"></i>Save changes</button>
+    <a class="btn btn-default" href="{% url 'aristotle:discussionsPost' post.id %}"><i class="fa fa-times fa-fw"></i>Cancel</a>
+</form>
+
+{% endblock %}

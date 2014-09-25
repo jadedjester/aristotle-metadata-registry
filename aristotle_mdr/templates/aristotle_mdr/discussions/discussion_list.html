@@ -1,0 +1,40 @@
+{% load humanize %}
+
+<table class='table'>
+    <thead>
+        <tr>
+            <th>Author</th>
+            <th>Title <small class="visible-xs-inline">(and workgroup)</small></th>
+            <th class="hidden-xs">Workgroup</th>
+            <th>Latest comment</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for post in discussions %}
+        <tr>
+            <td>{{ post.author }}<br>
+                <small>{{ post.created|naturaltime }}</small>
+            </td>
+            <td>
+                <a href="{% url 'aristotle:discussionsPost' post.id %}">{{ post.title }}</a>
+                <span class="visible-xs-block">
+                    In <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}" title="View discussions for this workgroup only">{{ post.workgroup }}</a>
+                </span>
+            </td>
+            <td class="hidden-xs">
+                <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}" title="View discussions for this workgroup only">{{ post.workgroup }}</a>
+            </td>
+            <td>
+                {% if post.comments.last %}
+                    <a href="{% url 'aristotle:discussionsPost' post.id %}#comment_{{post.comments.last.id}}"
+                        title="Jump to last comment">
+                        {{ post.comments.last.author }}, {{ post.comments.last.created|naturaltime }}</a>
+                    ({{ post.comments.count }} total)
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

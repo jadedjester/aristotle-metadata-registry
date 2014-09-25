@@ -1,0 +1,25 @@
+{% extends "aristotle_mdr/discussions/base.html" %}
+{% load aristotle_tags %}
+
+{% block title %}Editing comment for {{ post.title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}">{{ post.workgroup }}</a>
+    </li>
+    <li>
+        <a href="#">{{ post.title }}</a>
+    </li>
+{% endblock %}
+
+{% block discussion_content %}
+
+<h1>Edit comment on post "{{ post.title }}"</h1>
+
+<form enctype="multipart/form-data" action="{% url 'aristotle:discussionsPostNewComment' post.id %} " method='post'>
+    {% csrf_token %}
+    {% include 'aristotle_mdr/discussions/comment_form.html' %}
+    <button class="btn btn-primary" type='submit' value='Submit'><i class="fa fa-save fa-fw"></i>Save changes</button>
+    <a class="btn btn-default" href="{% url 'aristotle:discussionsPost' post.id %}"><i class="fa fa-times fa-fw"></i>Cancel</a>
+</form>
+{% endblock %}

@@ -31,6 +31,7 @@ class PermissionsAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         return super(PermissionsAutocomplete, self).choices_for_request()
 
 autocompletesToRegister = [
+        MDR._concept,
         MDR.DataElement,
         MDR.DataElementConcept,
         MDR.ObjectClass,

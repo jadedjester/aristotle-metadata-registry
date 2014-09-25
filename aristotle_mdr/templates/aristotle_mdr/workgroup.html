@@ -52,7 +52,7 @@
 </dd>
 <dt>Items</dt>
 <dd>
-<a href="{% url 'aristotle:workgroup' iid=item.id subpage='items' %}">
+<a href="{% url 'aristotle:workgroupItems' iid=item.id %}">
     {% with total=workgroup.items.count %}
         {% comment %} Cache the count then reuse for performance.{% endcomment %}
         {{ total }} current item{{ total|pluralize }}

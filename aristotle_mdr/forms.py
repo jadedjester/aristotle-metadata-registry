@@ -65,7 +65,7 @@ class ConceptForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(ConceptForm, self).__init__(*args, **kwargs)
         if not self.user.is_superuser:
-            self.fields['workgroup'].queryset = self.user.profile.workgroups
+            self.fields['workgroup'].queryset = self.user.profile.myWorkgroups
 
     pass
 #    userAware = forms.BooleanField()
@@ -77,6 +77,30 @@ class ConceptForm(forms.ModelForm):
 #        super(ConceptForm, self).__init__(*args, **kwargs)
 #        if hasSimilarItems:
 #            del self.fields['userAware']
+
+class DiscussionNewPostForm(forms.ModelForm):
+    relatedItems = forms.ModelMultipleChoiceField(
+                queryset=MDR._concept.objects.all(),
+                label="Related items",
+                widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_concept'))
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(DiscussionNewPostForm, self).__init__(*args, **kwargs)
+        self.fields['workgroup'].queryset = self.user.profile.myWorkgroups
+
+    class Meta:
+        model = MDR.DiscussionPost
+        exclude = ['author']
+
+class DiscussionEditPostForm(forms.ModelForm):
+    class Meta:
+        model = MDR.DiscussionPost
+        exclude = ['author','workgroup']
+
+class DiscussionCommentForm(forms.ModelForm):
+    class Meta:
+        model = MDR.DiscussionComment
+        exclude = ['author','post']
 
 class ValueDomainForm(ConceptForm):
     template = "aristotle_mdr/create/valueDomain.html"

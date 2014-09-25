@@ -20,6 +20,39 @@ from django.core.urlresolvers import reverse, resolve
 
 register = template.Library()
 
+
+@register.filter
+def can_alter_comment(user,comment):
+    try:
+        return perms.user_can_alter_comment(user,comment)
+    except:
+        return False
+
+@register.filter
+def can_alter_post(user,post):
+    try:
+        return perms.user_can_alter_post(user,post)
+    except:
+        return False
+
+@register.filter
+def is_workgroup_manager(user,workgroup):
+    """
+    A filter that acts as a wrapper around ``aristotle_mdr.perms.user_is_workgroup_manager``.
+    Returns true if the user has permission to administer the workgroup, otherwise it returns False.
+    If calling ``user_can_view`` throws an exception it safely returns False.
+
+    For example::
+
+      {% if request.user|is_workgroup_manager:workgroup %}
+        {{ something }}
+      {% endif %}
+    """
+    try:
+        return perms.user_is_workgroup_manager(user,workgroup)
+    except:
+        return False
+
 @register.filter
 def can_view(item,user):
     """

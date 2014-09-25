@@ -74,17 +74,15 @@ class PropertyIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.Property
 
+class PackageIndex(conceptIndex, indexes.Indexable):
+    def get_model(self):
+        return models.Package
+
 class DataElementConceptIndex(conceptIndex, indexes.Indexable):
     def get_model(self):
         return models.DataElementConcept
 
 class DataElementIndex(conceptIndex, indexes.Indexable):
-    # Trying to boost data elements to push them higher, but its not happening.
-    def prepare(self, obj):
-        data = super(DataElementIndex, self).prepare(obj)
-        data['boost'] = 1.8
-        return data
-
     def get_model(self):
         return models.DataElement
 

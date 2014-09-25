@@ -1,0 +1,20 @@
+{% extends "aristotle_mdr/base.html" %}
+{% load inplace_edit %}
+{% load staticfiles %}
+
+{% block title %}All Discussions{% endblock %}
+
+{% block extra_head_scripts %}
+<link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle_discussions.less' %}" />
+{% endblock %}
+
+{% block content %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'aristotle:discussions' %}">All Discussions</a></li>
+        {% block breadcrumbs %}
+        {% endblock %}
+    </ol>
+
+    {% block discussion_content %}
+    {% endblock %}
+{% endblock %}

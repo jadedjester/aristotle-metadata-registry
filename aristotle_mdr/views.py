@@ -3,7 +3,7 @@ from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -13,6 +13,7 @@ import urllib
 from django.contrib.auth.models import User
 
 from aristotle_mdr.perms import user_can_view, user_can_edit, user_in_workgroup, user_is_workgroup_manager, user_can_change_status
+from aristotle_mdr import perms
 import aristotle_mdr.forms as MDRForms # Treble-one seven nine
 import aristotle_mdr.models as MDR # Treble-one seven nine
 
@@ -207,17 +208,23 @@ def package(*args,**kwargs):
     return render_if_user_can_view(MDR.Package,*args,**kwargs)
 
 @login_required
-def workgroup(request, iid,subpage=None):
+def workgroup(request, iid):
     wg = get_object_or_404(MDR.Workgroup,pk=iid)
     if not user_in_workgroup(request.user,wg):
-        return redirect('/account/login/?next=%s' % request.path)
+        raise PermissionDenied
     renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
-    if subpage == None:
-        renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:10] #.filter("modified__gt"=(timezone.now()-datetime.timedelta(days=1)))[:10]
-        page = render(request,wg.template,renderDict)
-    elif subpage == "items":
-        renderDict['items'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
-        page = render(request,"aristotle_mdr/workgroupItems.html",renderDict)
+    renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:10] #.filter("modified__gt"=(timezone.now()-datetime.timedelta(days=1)))[:10]
+    page = render(request,wg.template,renderDict)
+    return page
+
+@login_required
+def workgroupItems(request, iid):
+    wg = get_object_or_404(MDR.Workgroup,pk=iid)
+    if not user_in_workgroup(request.user,wg):
+        raise PermissionDenied
+    renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
+    renderDict['items'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
+    page = render(request,"aristotle_mdr/workgroupItems.html",renderDict)
     return page
 
 @login_required
@@ -225,27 +232,143 @@ def workgroupMembers(request, iid):
     wg = get_object_or_404(MDR.Workgroup,pk=iid)
     renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
     if not user_in_workgroup(request.user,wg):
-        return redirect('/account/login/?next=%s' % request.path)
+        raise PermissionDenied
     return render(request,"aristotle_mdr/workgroupMembers.html",renderDict)
 
 @login_required
 def discussions(request):
-    if request.GET.get('workgroup'):
-        #Show all discussions for this workgroup
-
-        page = render(request,"aristotle_mdr/discussions.html",{})
-        pass
-    elif request.GET.get('post'):
-        #Show the requested discussion
-        page = render(request,"aristotle_mdr/discussion.html",{})
-    else:
-        #Show all discussions for all of a users workgroups
-        page = render(request,"aristotle_mdr/discussions.html",{})
+    #Show all discussions for all of a users workgroups
+    page = render(request,"aristotle_mdr/discussions/all.html",{
+        'discussions':MDR.DiscussionPost.objects.filter(workgroup__in=request.user.profile.myWorkgroups.all())
+        })
     return page
 
 @login_required
+def discussionsWorkgroup(request,wgid):
+    wg = get_object_or_404(MDR.Workgroup,pk=wgid)
+    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=wg.name)):
+        raise PermissionDenied
+    #Show all discussions for a workgroups
+    page = render(request,"aristotle_mdr/discussions/workgroup.html",{
+        'workgroup':wg,
+        'discussions':MDR.DiscussionPost.objects.filter(workgroup=wg)
+        })
+    return page
+
+@login_required
+def discussionsPost(request,pid):
+    post = get_object_or_404(MDR.DiscussionPost,pk=pid)
+    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+        raise PermissionDenied
+    #Show all discussions for a workgroups
+    comment_form = MDRForms.DiscussionCommentForm(initial={'post':pid})
+    page = render(request,"aristotle_mdr/discussions/post.html",{
+        'workgroup':post.workgroup,
+        'post':post,
+        'comment_form':comment_form
+        })
+    return page
+
+@login_required
+def discussionsNew(request):
+    if request.method == 'POST': # If the form has been submitted...
+        form = MDRForms.DiscussionNewPostForm(request.POST,user=request.user) # A form bound to the POST data
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            new = MDR.DiscussionPost(
+                workgroup = form.cleaned_data['workgroup'],
+                title = form.cleaned_data['title'],
+                body = form.cleaned_data['body'],
+                author = request.user,
+            )
+            new.save()
+            new.relatedItems = form.cleaned_data['relatedItems']
+            return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[new.pk]))
+    else:
+        form = MDRForms.DiscussionNewPostForm(user=request.user)
+    return render(request,"aristotle_mdr/discussions/new.html",
+            {"item":item,
+             "form":form,
+                }
+            )
+
+@login_required
+def discussionsPostNewComment(request,pid):
+    post = get_object_or_404(MDR.DiscussionPost,pk=pid)
+    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+        raise PermissionDenied
+    if request.method == 'POST':
+        form = MDRForms.DiscussionCommentForm(request.POST)
+        if form.is_valid():
+            new = MDR.DiscussionComment(
+                post = post,
+                body = form.cleaned_data['body'],
+                author = request.user,
+            )
+            new.save()
+            return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[new.post.pk])+"#comment_%s"%new.id)
+    else:
+        form = MDRForms.DiscussionCommentForm(initial={'post':pid})
+    return render(request,"aristotle_mdr/discussions/new.html",{"form":form,})
+
+@login_required
+def discussionsDeleteComment(request,cid):
+    comment = get_object_or_404(MDR.DiscussionComment,pk=cid)
+    post = comment.post
+    if not perms.user_can_alter_comment(request.user,comment):
+        raise PermissionDenied
+    comment.delete()
+    return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[post.pk]))
+
+@login_required
+def discussionsDeletePost(request,pid):
+    post = get_object_or_404(MDR.DiscussionPost,pk=pid)
+    workgroup = post.workgroup
+    if not perms.user_can_alter_post(request.user,post):
+        raise PermissionDenied
+    post.comments.all().delete()
+    post.delete()
+    return HttpResponseRedirect(reverse("aristotle:discussionsWorkgroup",args=[workgroup.pk]))
+
+@login_required
+def discussionsEditComment(request,cid):
+    comment = get_object_or_404(MDR.DiscussionComment,pk=cid)
+    post = comment.post
+    if not perms.user_can_alter_comment(request.user,comment):
+        raise PermissionDenied
+    if request.method == 'POST':
+        form = MDRForms.DiscussionCommentForm(request.POST)
+        if form.is_valid():
+            comment.body = form.cleaned_data['body']
+            comment.save()
+            return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[comment.post.pk])+"#comment_%s"%comment.id)
+    else:
+        form = MDRForms.DiscussionCommentForm(instance=comment)
+
+    return render(request,"aristotle_mdr/discussions/edit_comment.html",{
+        'post':post,
+        'comment_form':form})
+
+@login_required
+def discussionsEditPost(request,pid):
+    post = get_object_or_404(MDR.DiscussionPost,pk=pid)
+    if not perms.user_can_alter_post(request.user,post):
+        raise PermissionDenied
+    if request.method == 'POST': # If the form has been submitted...
+        form = MDRForms.DiscussionEditPostForm(request.POST) # A form bound to the POST data
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            post.title = form.cleaned_data['title']
+            post.body = form.cleaned_data['body']
+            post.save()
+            post.relatedItems = form.cleaned_data['relatedItems']
+            return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[post.pk]))
+    else:
+        form = MDRForms.DiscussionEditPostForm(instance=post)
+    return render(request,"aristotle_mdr/discussions/edit.html",{"form":form,'post':post})
+
+@login_required
 def userHome(request):
-    notices = request.user.notifications.unread()[:5]
     page = render(request,"aristotle_mdr/user/userHome.html",{"item":request.user})
     return page
 
@@ -290,6 +413,7 @@ def userEdit(request):
              "form":form,
                 }
             )
+
 @login_required
 def userFavourites(request):
     page = render(request,"aristotle_mdr/user/userFavourites.html",

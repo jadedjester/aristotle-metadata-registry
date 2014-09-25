@@ -67,7 +67,7 @@
    </head>
 
    <body>
-   <a class="sr-only" accesskey="j" href="#main">Skip to content</a>
+   <a class="sr-only" accesskey="j" href="#content">Skip to content</a>
    <a class="sr-only" accesskey="l" href="{% url 'aristotle:accessibility' %}#accesskeys">Learn about the access keys available for {{ config.SITE_NAME }}</a>
     <nav class="navbar navbar-inverse">
     <div class="container-fluid">
@@ -96,7 +96,7 @@
                     <div class="input-group">
                         <input type="text" class="form-control" id="searchText" name="q" accesskey="q"></input>
                         <span class="input-group-btn">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" title="Search">
                             {% bootstrap_icon "search" %}&nbsp;
                         </button>
                     </div>
@@ -173,6 +173,9 @@
                             <span class="badge pull-right" title="{{ notecount }} unread notifications">{{ notecount }}</span>
                             {% endwith %}
                         </a></li>
+                        <li><a href="{% url 'aristotle:discussions' %}">
+                            <i class="fa fa-comments fa-fw"></i> {% trans 'Discussions'%}
+                        </a></li>
                         {% if user.has_usable_password %}
                             <li><a href="{% url 'admin:password_change' %}">
                             <i class="fa fa-cog fa-fw"></i> {% trans 'Change password' %}
@@ -184,7 +187,7 @@
                             <i class="fa fa-university fa-fw"></i> {% trans 'Registrar tools' %}
                             </a></li>
                         {% endif %}
-                        {% if user.is_superuser %}
+                        {% if user.is_staff %}
                             <li role="presentation" class="divider"></li>
                             <li><a href="{% url 'admin:index' %}">
                             <i class="fa fa-sliders fa-fw"></i> {% trans 'Management interface' %}
