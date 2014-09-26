@@ -72,8 +72,8 @@ For a complete example of how to successfully include Aristotle, see the `exampl
     :scale: 100%
     :target: https://readthedocs.org/projects/aristotle-metadata-registry/
 
-.. |coverage| image:: https://coveralls.io/repos/LegoStormtroopr/aristotle-metadata-registry/badge.png
+.. |coverage| image:: https://coveralls.io/repos/LegoStormtroopr/aristotle-metadata-registry/badge.png?branch=master
     :alt: Code coverage
     :scale: 100%
-    :target: https://coveralls.io/r/LegoStormtroopr/aristotle-metadata-registry
+    :target: https://coveralls.io/r/LegoStormtroopr/aristotle-metadata-registry?branch=master
 
