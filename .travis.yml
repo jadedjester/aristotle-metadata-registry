@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.6"
+#  - "2.6" # unsupported due to reportlab, which is needed for PDF downloads, not supporting 2.6.
   - "2.7"
 # Python3 support to come with Django 1.7
 #  - "3.2"
