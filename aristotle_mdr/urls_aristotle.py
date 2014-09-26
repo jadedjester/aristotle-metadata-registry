@@ -42,6 +42,7 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^discussions/delete/post/(?P<pid>\d+)?$', views.discussionsDeletePost, name='discussionsDeletePost'),
     url(r'^discussions/edit/comment/(?P<cid>\d+)?$', views.discussionsEditComment, name='discussionsEditComment'),
     url(r'^discussions/edit/post/(?P<pid>\d+)?$', views.discussionsEditPost, name='discussionsEditPost'),
+    url(r'^discussions/post/(?P<pid>\d+)/toggle?$', views.discussionsPostToggle, name='discussionsPostToggle'),
 
     url(r'^item/(?P<item_id>\d+)/?$', views.item, name='item'),
     url(r'^item/(?P<item_id>\d+)/packages/?$', views.itemPackages, name='itemPackages'),

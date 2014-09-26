@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,m2m_changed
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils.managers import InheritanceManager, InheritanceQuerySet
@@ -57,7 +58,9 @@ class baseAristotleObject(TimeStampedModel):
     def get_verbose_name_plural(self):
         return self._meta.verbose_name_plural.title()
     def url_name(self):
-        return "".join(self._meta.verbose_name.lower().split())
+        s = "".join(self._meta.verbose_name.title().split())
+        s = s[0].lower() + s[1:]
+        return s
     def template_name(self):
         s = "".join(self._meta.verbose_name.title().split())
         s = s[0].lower() + s[1:]
@@ -281,7 +284,13 @@ class discussionAbstract(TimeStampedModel):
 class DiscussionPost(discussionAbstract):
     workgroup = models.ForeignKey(Workgroup)
     title = models.CharField(max_length=256)
-    relatedItems = models.ManyToManyField('_concept',related_name='relatedDiscussions')
+    relatedItems = models.ManyToManyField('_concept',blank=True,
+                    related_name='relatedDiscussions',
+                    )
+    closed = models.BooleanField(default=False)
+    @property
+    def active(self):
+        return not self.closed
 
 class DiscussionComment(discussionAbstract):
     post = models.ForeignKey(DiscussionPost, related_name='comments')
@@ -447,7 +456,6 @@ class _concept(baseAristotleObject):
     def autocomplete_search_fields(self):
         return ("name__icontains",) # Is this right?"""
     def get_absolute_url(self):
-        from django.core.urlresolvers import reverse
         return reverse("aristotle:item",args=[self.id])
 
     # This returns the items that can be registered along with the this item.
@@ -461,6 +469,15 @@ class _concept(baseAristotleObject):
     @property
     def is_registered(self):
         return self.statuses.count() > 0
+
+    def testt(self):
+        print "hello"
+
+    def is_superseded(self):
+        return all(STATES.superseded == status.state for status in self.statuses.all())
+
+    def is_retired(self):
+        return all(STATES.retired == status.state for status in self.statuses.all())
 
     def is_public(self):
         """
@@ -504,6 +521,8 @@ class concept(_concept):
         Return self, because we already have the correct item.
         """
         return self
+    def testt(self):
+        print "hello"
 
     @property
     def getPdfItems(self):
@@ -829,7 +848,32 @@ def concept_saved(sender, instance, created, **kwargs):
             workgroup_item_new(recipient=user,obj=instance)
         else:
             workgroup_item_updated(recipient=user,obj=instance)
+    try:
+        # This will fail during first load, and if admins delete aristotle.
+        system = User.objects.get(username="aristotle")
+        for post in instance.relatedDiscussions.all():
+            DiscussionComment.objects.create(
+                post = post,
+                body = 'The item "{name}" (id:{iid}) has been changed.\n\n\
+                    <a href="{url}">View it on the main site.</a>.'.format(
+                    name=instance.name,
+                    iid = instance.id,
+                    url = reverse("aristotle:item",args=[instance.id])
+                ),
+                author = system,
+            )
+    except:
+        pass
+@receiver(post_save,sender=DiscussionComment)
+def new_comment_created(sender, **kwargs):
 
+    comment = kwargs['instance']
+    post = comment.post
+    if not kwargs['created']:
+        return # We don't need to notify a topic poster of an edit.
+    if comment.author == post.author:
+        return # We don't need to tell someone they replied to themselves
+    notify.send(comment.author, recipient=post.author, verb="made a comment on your post", target=post)
 
 # Loads test bed of data
 def testData():
@@ -920,8 +964,10 @@ def testData():
         codeVal.save()
     de,c = DataElement.objects.get_or_create(name="Person-sex, Code N",
             workgroup=pw,description="The sex of the person with a code.",
-            dataElementConcept=dec,valueDomain=vd
             )
+    de.dataElementConcept=dec
+    de.valueDomain=vd
+    de.save()
 
     print "Configuring registration authority"
     ra,c = RegistrationAuthority.objects.get_or_create(

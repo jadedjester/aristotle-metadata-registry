@@ -16,6 +16,14 @@
 {% block discussion_content %}
 
 <h1>{{ post.title }}</h1>
+{% if post.closed %}
+        <div class=" alert alert-warning">
+            This discussion thread is now closed.
+            {% if request.user|can_alter_post:post %}
+            <a class="btn btn-small btn-primary pull-right" href="{% url 'aristotle:discussionsPostToggle' post.id %}">Reopen discussion</a>
+            {% endif %}
+        </div>
+{% endif %}
 
 <div class="thread">
     <div class="comment panel-success panel">
@@ -25,10 +33,11 @@
             {% if post.edited %}
                 , <span class="edit" title='{{ post.modified }}'>edited {{ post.modified|naturaltime }}</span>
             {% endif %}
-        {% if request.user|can_alter_post:post %}
+        {% if request.user|can_alter_post:post and post.active %}
             <span class="post_action_bar btn-group pull-right">
                 <a href="{% url 'aristotle:discussionsEditPost' post.id %}"class="btn btn-sm btn-default"><i class="fa fa-pencil fa-fw"></i> Edit</a>
                 <a href="{% url 'aristotle:discussionsDeletePost' post.id %}" class="btn btn-sm btn-default"><i class="fa fa-trash fa-fw"></i> Delete post and all comments</a>
+                <a class="btn btn-sm btn-danger" href="{% url 'aristotle:discussionsPostToggle' post.id %}">Close</a>
             </span>
         {% endif %}
         </header>
@@ -44,6 +53,16 @@
     </div>
 
 {% for comment in post.comments.all %}
+    {% if comment.author.username == 'aristotle' %}
+    <div class="comment panel panel-danger" id="comment_{{comment.id }}">
+        <header class="panel-heading">
+            <span class="author"><strong>System message: </strong></span>
+            <small class="date" title='{{ comment.created }}'>Posted {{ comment.created|naturaltime }}</small>
+        </header>
+        <div class="panel-body">{{ comment.body|safe|linebreaks }}</div>
+    </div>
+
+    {% else %}
     <div class="comment panel panel-{% cycle 'default' 'info' %}" id="comment_{{comment.id }}">
         <header class="panel-heading">
             <span class="author">{{ comment.author }}</span>
@@ -51,7 +70,7 @@
             {% if comment.edited %}
                 , <span class="edit"  title='{{ comment.modified }}'>edited {{ comment.modified|naturaltime }}</span>
             {% endif %}
-        {% if request.user|can_alter_comment:comment %}
+        {% if request.user|can_alter_comment:comment and post.active %}
             <span class="comment_action_bar btn-group pull-right">
                 <a href="{% url 'aristotle:discussionsEditComment' comment.id %}" class="btn btn-sm btn-default"><i class="fa fa-pencil fa-fw"></i> Edit</a>
                 <a href="{% url 'aristotle:discussionsDeleteComment' comment.id %}" class="btn btn-sm btn-default"><i class="fa fa-trash fa-fw"></i> Delete comment</a>
@@ -60,12 +79,23 @@
         </header>
         <div class="panel-body">{{ comment.body|linebreaks }}</div>
     </div>
+    {% endif %}
 {% endfor %}
 
 </div>
+{% if post.closed %}
+        <div class=" alert alert-warning">
+            This discussion thread is now closed.
+            {% if request.user|can_alter_post:post %}
+            <a class="btn btn-small btn-primary pull-right" href="{% url 'aristotle:discussionsPostToggle' post.id %}">Reopen discussion</a>
+            {% endif %}
+        </div>
+{% else %}
 <form enctype="multipart/form-data" action="{% url 'aristotle:discussionsPostNewComment' post.id %} " method='post'>
     {% csrf_token %}
     {% include 'aristotle_mdr/discussions/comment_form.html' %}
     <button class="btn btn-primary" type='submit' value='Submit'><i class="fa fa-pencil fa-fw"></i>Add comment</button>
+    <a class="btn btn-danger" href="{% url 'aristotle:discussionsPostToggle' post.id %}">Close discussion</a>
 </form>
+{% endif %}
 {% endblock %}

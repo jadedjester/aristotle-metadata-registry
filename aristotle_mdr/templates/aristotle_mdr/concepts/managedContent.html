@@ -8,7 +8,7 @@
 <header class="row">
     <h1 id="objectTitle"  class="pull-left">
         {% if user.is_authenticated %}
-        <a href="/account/toggleFavourite/{{item.id}}"
+        <a href="{% url 'aristotle:toggleFavourite' item.id %}"
             title="{% ternary isFavourite 'Remove from my favourite items' 'Add to my favourite items' %}"
             id="favourite">
             {% if isFavourite %}
@@ -145,7 +145,18 @@
     </div>
 </aside>
 <div> {# removed class="col-xs-12 col-sm-8" to ensure sections float around aside #}
-    {% if item.is_public %}
+
+    {% if item.is_superseded  %}
+        <div id="progress" class=" alert alert-info">
+            This item has been superseded by the newer version,
+            <em>{% include "aristotle_mdr/helpers/itemLink.html" with item=item.superseded_by %}</em>.
+        </div>
+    {% elif item.is_retired %}
+        <div id="progress" class=" alert alert-warning">
+            This item has been retired and is not recommended for use by any
+            registration authority.
+        </div>
+    {% elif item.is_public %}
         {# split the if condition as if its public and not technical, we want nothing not one of the lower alerts #}
         <div id="progress" class='alert alert-success {% if view != "technical" %}hidden{% endif %}'>
             This item is currently public.

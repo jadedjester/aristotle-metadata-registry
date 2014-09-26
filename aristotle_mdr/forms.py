@@ -2,7 +2,7 @@ import autocomplete_light
 autocomplete_light.autodiscover()
 
 from django import forms
-import aristotle_mdr.models as MDR # Treble-one seven nine
+import aristotle_mdr.models as MDR
 from django.db.models import Q
 from tinymce.widgets import TinyMCE
 from django.contrib.auth.models import User
@@ -81,7 +81,7 @@ class ConceptForm(forms.ModelForm):
 class DiscussionNewPostForm(forms.ModelForm):
     relatedItems = forms.ModelMultipleChoiceField(
                 queryset=MDR._concept.objects.all(),
-                label="Related items",
+                label="Related items",required=False,
                 widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_concept'))
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -90,12 +90,12 @@ class DiscussionNewPostForm(forms.ModelForm):
 
     class Meta:
         model = MDR.DiscussionPost
-        exclude = ['author']
+        exclude = ['author','closed']
 
 class DiscussionEditPostForm(forms.ModelForm):
     class Meta:
         model = MDR.DiscussionPost
-        exclude = ['author','workgroup']
+        exclude = ['author','workgroup','closed']
 
 class DiscussionCommentForm(forms.ModelForm):
     class Meta:

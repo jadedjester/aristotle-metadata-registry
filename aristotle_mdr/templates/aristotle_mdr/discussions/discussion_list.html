@@ -1,5 +1,5 @@
 {% load humanize %}
-
+{% load aristotle_tags %}
 <table class='table'>
     <thead>
         <tr>
@@ -33,6 +33,7 @@
                 {% else %}
                     -
                 {% endif %}
+                {% ternary post.closed '(Closed)' '' %}
             </td>
         </tr>
     {% endfor %}

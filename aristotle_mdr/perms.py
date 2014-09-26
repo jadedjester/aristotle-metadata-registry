@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 
 class MyAdaptorEditInline(object):

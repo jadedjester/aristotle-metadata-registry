@@ -270,6 +270,15 @@ def discussionsPost(request,pid):
     return page
 
 @login_required
+def discussionsPostToggle(request,pid):
+    post = get_object_or_404(MDR.DiscussionPost,pk=pid)
+    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+        raise PermissionDenied
+    post.closed = not post.closed
+    post.save()
+    return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[post.pk]))
+
+@login_required
 def discussionsNew(request):
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.DiscussionNewPostForm(request.POST,user=request.user) # A form bound to the POST data
@@ -745,7 +754,6 @@ def deprecate(request, iid):
     qs=item.__class__.objects.filter().editable_slow(request.user)
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.DeprecateForm(request.POST,user=request.user,item=item,qs=qs) # A form bound to the POST data
-        print request.POST
         if form.is_valid():
             # Check use the itemset as there are permissions issues and we want to remove some:
             #  Everything that was superseded, but isn't in the returned set

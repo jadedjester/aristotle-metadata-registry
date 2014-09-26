@@ -14,7 +14,11 @@
 
 <form method='post'>
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.errors }}
+    <div><label for="id_title">Title: </label> {{ form.title }}</div>
+    <div><label for="id_body" class="sr-only">Post body</label> {{ form.body }}</div>
+    <div><label for="id_relatedItems">Related Items</label>
+    <div>{{ form.relatedItems }}</div>
     <button class="btn btn-primary" type='submit' value='Submit'><i class="fa fa-save  fa-fw"></i>Save changes</button>
     <a class="btn btn-default" href="{% url 'aristotle:discussionsPost' post.id %}"><i class="fa fa-times fa-fw"></i>Cancel</a>
 </form>
