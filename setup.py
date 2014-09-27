@@ -15,7 +15,7 @@ setup(
     license='Aristotle-MDR Modified BSD Licence',  # example license
     description='Aristotle-MDR is an open-source metadata registry as laid out by the requirements of the IEC/ISO 11179:2013 specification.',
     long_description=README,
-    url='http://github.com/LegoStormtroopr/aristotle-mdr/',
+    url='https://github.com/LegoStormtroopr/aristotle-metadata-registry',
     author='Samuel Spencer',
     author_email='sam@sqbl.org',
     classifiers=[
