@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group, Permission
 from django.core.urlresolvers import reverse
+from aristotle_mdr.tests import utils
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
@@ -32,3 +33,20 @@ class ViewersPostingAndCommenting(TestCase):
         self.assertFalse(perms.user_can_alter_comment(self.viewer1,comment))
         self.assertTrue(perms.user_can_alter_comment(self.manager,comment))
         self.assertTrue(perms.user_can_alter_comment(self.viewer2,comment))
+
+class ViewDiscussionPostPage(utils.LoggedInViewPages,TestCase):
+    def setUp(self):
+        super(ViewDiscussionPostPage, self).setUp()
+        self.viewer2 = User.objects.create_user('viewer2','','viewer') # not in any workgroup
+        self.viewer3 = User.objects.create_user('viewer3','','viewer') # not in out "primary testing workgroup" (self.wg1)
+        self.wg2.giveRoleToUser('Viewer',self.viewer3)
+
+    def test_viewer_can_see_post_in_workgroup(self):
+        post = models.DiscussionPost(author=self.viewer,workgroup=self.wg1,title="test",body="test")
+        post.save()
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:discussionsPost',args=[post.id]))
+        self.assertEqual(response.status_code,200)
+        self.wg1.removeRoleFromUser('Viewer',self.viewer)
+        response = self.client.get(reverse('aristotle:discussionsPost',args=[post.id]))
+        self.assertEqual(response.status_code,403)
