@@ -12,28 +12,27 @@ setup_test_environment()
 
 class SuperuserPermissions(TestCase):
     # All of the below are called with None as a Superuser, by definition *must* be able to edit, view and managed everything. Since a is_superuser chcek is cheap is should be called first, so calling with None checks that there is no other database calls going on.
+    def setUp(self):
+        self.su=User.objects.create_superuser('super','','user')
 
+    def test_user_can_alter_comment(self):
+        self.assertTrue(perms.user_can_alter_comment(self.su,None))
+    def test_user_can_alter_post(self):
+        self.assertTrue(perms.user_can_alter_post(self.su,None))
     def test_can_view(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_can_view(s,None))
+        self.assertTrue(perms.user_can_view(self.su,None))
     def test_is_registrar(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_is_registrar(s))
+        self.assertTrue(perms.user_is_registrar(self.su))
     def test_is_registrar_in_ra(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_is_registrar_in_ra(s,None))
+        self.assertTrue(perms.user_is_registrar_in_ra(self.su,None))
     def test_is_workgroup_manager(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_is_workgroup_manager(s,None))
+        self.assertTrue(perms.user_is_workgroup_manager(self.su,None))
     def test_can_change_status(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_can_change_status(s,None))
+        self.assertTrue(perms.user_can_change_status(self.su,None))
     def test_can_edit(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_can_edit(s,None))
+        self.assertTrue(perms.user_can_edit(self.su,None))
     def test_in_workgroup(self):
-        s = User.objects.create_superuser('super','','user')
-        self.assertTrue(perms.user_in_workgroup(s,None))
+        self.assertTrue(perms.user_in_workgroup(self.su,None))
 
 # Since all managed objects have the same rules, these can be used to cover everything
 # This isn't an actual TestCase, we'll just pretend it is
