@@ -528,7 +528,7 @@ class concept(_concept):
 class Status(TimeStampedModel):
     concept = models.ForeignKey(_concept,related_name="statuses")
     registrationAuthority = models.ForeignKey(RegistrationAuthority)
-    changeDetails = models.CharField(max_length=100)
+    changeDetails = models.CharField(max_length=512)
     state = models.IntegerField(choices=STATES, default=STATES.incomplete)
 
     inDictionary = models.BooleanField(default=True)
