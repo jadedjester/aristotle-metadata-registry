@@ -142,7 +142,7 @@ class UserSelfEditForm(forms.Form):
 class DeprecateForm(forms.Form):
     olderItems = forms.ModelMultipleChoiceField(
                 queryset=MDR._concept.objects.all(),
-                label="Deprecate items",
+                label="Supersede older items",
                 required=False,
                 widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_concept'))
 
@@ -154,7 +154,7 @@ class DeprecateForm(forms.Form):
         super(DeprecateForm, self).__init__(*args, **kwargs)
         self.fields['olderItems']=forms.ModelMultipleChoiceField(
                 queryset=self.qs,
-                label="Deprecate items",
+                label="Supersede older items",
                 required=False,
                 initial=self.item.supersedes.all(),
                 widget=autocomplete_light.MultipleChoiceWidget(self.item.get_autocomplete_name()))
