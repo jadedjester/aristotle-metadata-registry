@@ -731,13 +731,13 @@ def supersede(request, iid):
             raise PermissionDenied
     qs=item.__class__.objects.all()
     if request.method == 'POST': # If the form has been submitted...
-        form = MDRForms.SupersedeForm(request.POST,item=item,qs=qs) # A form bound to the POST data
+        form = MDRForms.SupersedeForm(request.POST,user=request.user,item=item,qs=qs) # A form bound to the POST data
         if form.is_valid():
             item.superseded_by = form.cleaned_data['newerItem']
             item.save()
             return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
-        form = MDRForms.SupersedeForm(item=item,qs=qs)
+        form = MDRForms.SupersedeForm(item=item,user=request.user,qs=qs)
     return render(request,"aristotle_mdr/actions/supersedeItem.html",
             {"item":item,
              "form":form,
