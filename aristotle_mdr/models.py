@@ -470,14 +470,13 @@ class _concept(baseAristotleObject):
     def is_registered(self):
         return self.statuses.count() > 0
 
-    def testt(self):
-        print "hello"
-
+    @property
     def is_superseded(self):
-        return all(STATES.superseded == status.state for status in self.statuses.all())
+        return all(STATES.superseded == status.state for status in self.statuses.all()) and self.superseded_by
 
+    @property
     def is_retired(self):
-        return all(STATES.retired == status.state for status in self.statuses.all())
+        return all(STATES.retired == status.state for status in self.statuses.all())and self.statuses.count() > 0
 
     def is_public(self):
         """
@@ -521,8 +520,6 @@ class concept(_concept):
         Return self, because we already have the correct item.
         """
         return self
-    def testt(self):
-        print "hello"
 
     @property
     def getPdfItems(self):

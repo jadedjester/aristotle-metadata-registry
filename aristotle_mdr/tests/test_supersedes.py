@@ -7,6 +7,33 @@ from aristotle_mdr.tests import utils
 from django.test.utils import setup_test_environment
 setup_test_environment()
 
+class SupersededProperty(TestCase):
+    def setUp(self):
+        self.wg = models.Workgroup.objects.create(name="Test WG")
+        self.item1 = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg)
+        self.item2 = models.ObjectClass.objects.create(name="OC2",workgroup=self.wg)
+        self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
+
+    def test_is_supersede_property(self):
+        self.assertFalse(self.item1.is_superseded)
+        self.item1.superseded_by = self.item2
+        self.item1.save()
+        self.assertTrue(self.item1.is_superseded)
+
+        s = models.Status.objects.create(
+                concept=self.item1,
+                registrationAuthority=self.ra,
+                registrationDate=timezone.now(),
+                state=self.ra.public_state
+                )
+        #self.item1=models.ObjectClass.objects.get(id=self.item1.id)
+        
+        self.assertFalse(self.item1.is_superseded)
+        s.state = models.STATES.superseded
+        s.save()
+        self.assertTrue(self.item1.is_superseded)
+    
+
 class SupersedePage(utils.LoggedInViewPages,TestCase):
     def setUp(self):
         super(SupersedePage, self).setUp()
@@ -83,3 +110,4 @@ class DeprecatePage(utils.LoggedInViewPages,TestCase):
         response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id]),{'olderItems': [self.item4.id]})
         self.assertEqual(response.status_code,200) # Item 4 is a different type, so cannot deprecate, so it did not save and was served the form again.
         self.assertListEqual(list(self.item1.supersedes.all()),[self.item2])
+
