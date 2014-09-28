@@ -3,6 +3,13 @@
 {% block title %}Change state for {{ item.name }}{% endblock %}
 {% block content %}
 <form method="post" action="{% url 'aristotle:changeStatus' item.id %}">{% csrf_token %}
+
+{% if item and not request.is_ajax %}
+<ol class="breadcrumb">
+  <li><a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a></li>
+  <li class="active">Change registation status</li>
+</ol>
+{% endif %}
 <header>This form allows you to change the status of items in the registratation authorities you are a registrar.
 </header>
 <section>
