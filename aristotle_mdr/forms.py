@@ -208,6 +208,11 @@ class ChangeStatusForm(forms.Form):
         choices=[(0,'No'),(1,'Yes')],
         label="Do you want to update the registration of associated items?"
     )
+    changeDetails = forms.CharField(max_length=512,
+        label="Why is the status being changed for these items?",
+        widget=forms.Textarea
+    )
+
     # Thanks to http://jacobian.org/writing/dynamic-form-generation/
     def __init__(self, *args, **kwargs):
         ras = kwargs.pop('ras')

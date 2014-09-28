@@ -182,23 +182,25 @@ class RegistrationAuthority(registryGroup):
 
         return (('unlocked',unlocked),('locked',locked),('public',public))
 
-    def register(self,item,state,user,regDate=timezone.now(),cascade=False):
+    def register(self,item,state,user,registrationDate=timezone.now(),cascade=False,changeDetails=""):
         reg,created = Status.objects.get_or_create(
                 concept=item,
                 registrationAuthority=self,
                 defaults ={
-                    "registrationDate" : regDate,
-                    "state" : state
+                    "registrationDate" : registrationDate,
+                    "state" : state,
+                    "changeDetails":changeDetails
                     }
                 )
         if not created:
+            reg.changeDetails = changeDetails
             reg.state = state
-            reg.registrationDate = regDate
+            reg.registrationDate = registrationDate
             reg.save()
         if cascade:
             for i in item.registryCascadeItems:
                 if i is not None and perms.user_can_change_status(user,i):
-                   self.register(i,state,user,regDate,cascade)
+                   self.register(i,state,user,registrationDate=registrationDate,cascade=cascade,changeDetails=changeDetails)
         return reg
 
 
@@ -528,7 +530,7 @@ class concept(_concept):
 class Status(TimeStampedModel):
     concept = models.ForeignKey(_concept,related_name="statuses")
     registrationAuthority = models.ForeignKey(RegistrationAuthority)
-    changeDetails = models.CharField(max_length=512)
+    changeDetails = models.CharField(max_length=512,blank=True,null=True)
     state = models.IntegerField(choices=STATES, default=STATES.incomplete)
 
     inDictionary = models.BooleanField(default=True)

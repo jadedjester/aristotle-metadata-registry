@@ -708,11 +708,12 @@ def changeStatus(request, iid):
             state = form.cleaned_data['state']
             regDate = form.cleaned_data['registrationDate']
             cascade = form.cleaned_data['cascadeRegistration']
+            changeDetails = form.cleaned_data['changeDetails']
             if regDate is None:
                 regDate = timezone.now().date()
             for ra in ras:
                 ra = MDR.RegistrationAuthority.objects.get(id=int(ra))
-                ra.register(item,state,request.user,regDate,cascade)
+                ra.register(item,state,request.user,regDate,cascade,changeDetails)
             return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
         form = MDRForms.ChangeStatusForm(ras=ras)
