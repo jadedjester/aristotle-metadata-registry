@@ -143,7 +143,8 @@ class DeprecateForm(forms.Form):
     olderItems = forms.ModelMultipleChoiceField(
                 queryset=MDR._concept.objects.all(),
                 label="Deprecate items",
-                widget=autocomplete_light.MultipleChoiceWidget('AutocompleteDataElement'))
+                required=False,
+                widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_concept'))
 
                 #widget=forms.CheckboxSelectMultiple)
     def __init__(self, *args, **kwargs):
@@ -154,32 +155,47 @@ class DeprecateForm(forms.Form):
         self.fields['olderItems']=forms.ModelMultipleChoiceField(
                 queryset=self.qs,
                 label="Deprecate items",
-                #widget=forms.CheckboxSelectMultiple,
+                required=False,
                 initial=self.item.supersedes.all(),
                 widget=autocomplete_light.MultipleChoiceWidget(self.item.get_autocomplete_name()))
 
     def clean_olderItems(self):
         olderItems = self.cleaned_data['olderItems']
-        #items = [i for i in olderItems if user_can_edit(self.user,i)]
-        #self.choices.editable_slow(self.request.user)
-        cleaned = self.item.__class__.objects.filter(id__in=olderItems).editable_slow(self.user)
-        return cleaned
+        if self.item in olderItems:
+            raise forms.ValidationError("An item may not supersede itself")
+        for i in olderItems:
+            if not user_can_edit(self.user,i):
+                raise forms.ValidationError("You cannot supersede an item that you do not have permission to edit")
+        return olderItems
 
 # For superseding an item with a newer one.
 class SupersedeForm(forms.Form):
     newerItem = forms.ModelChoiceField(
                 queryset=MDR._concept.objects.all(),
                 empty_label="None",
-                label="Superseded by")
+                label="Superseded by",
+                required=False,
+                widget=autocomplete_light.ChoiceWidget('Autocomplete_concept'))
     def __init__(self, *args, **kwargs):
         self.item = kwargs.pop('item')
         self.qs = kwargs.pop('qs')
+        self.user = kwargs.pop('user')
         super(SupersedeForm, self).__init__(*args, **kwargs)
         self.fields['newerItem']=forms.ModelChoiceField(
                 queryset=self.qs,
                 empty_label="None",
                 label="Superseded by",
-                initial=self.item.superseded_by)
+                initial=self.item.superseded_by,
+                required=False,
+                widget=autocomplete_light.ChoiceWidget(self.item.get_autocomplete_name()))
+    def clean_newerItem(self):
+        item  = self.cleaned_data['newerItem']
+        if self.item.id == item.id:
+            raise forms.ValidationError("An item may not supersede itself")
+        if not user_can_edit(self.user,item):
+            raise forms.ValidationError("You cannot supersede with an item that you do not have permission to edit")
+        return item
+
 
 class ChangeStatusForm(forms.Form):
     state = forms.ChoiceField(choices=MDR.STATES,widget=forms.RadioSelect)

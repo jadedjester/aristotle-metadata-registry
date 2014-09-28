@@ -4,6 +4,9 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 class LoggedInViewPages(object):
+    """
+    This helps us manage testing across different user types.
+    """
     def setUp(self):
 
         self.client = Client()

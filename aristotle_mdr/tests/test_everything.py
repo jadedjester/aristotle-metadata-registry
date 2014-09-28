@@ -369,6 +369,23 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(reverse('aristotle:supersede',args=[self.item3.id]))
         self.assertEqual(response.status_code,200)
 
+    def test_viewer_cannot_view_deprecate_page(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item1.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_editor_can_view_deprecate_page(self):
+        self.login_editor()
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item3.id]))
+        self.assertEqual(response.status_code,200)
+
+
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
     itemType=models.ObjectClass
