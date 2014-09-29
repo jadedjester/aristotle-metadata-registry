@@ -37,17 +37,21 @@ setup(
         'django-notifications-hq',
         'django-grappelli',
         
+        #Search requirements
         'django-haystack',
         'Whoosh',
         
+        #Rich text editors
         'django-tinymce',
         'django-inplaceedit',
         'django-inplaceedit-extra-fields',
         
+        # Revision
         'django-reversion',
         'django-reversion-compare',
-        'diff-match-patch'
+        'diff-match-patch',
         
+        # Fancy UI stuff
         'django-autocomplete-light',
         'django-bootstrap3',
         'django-bootstrap3-datetimepicker',
