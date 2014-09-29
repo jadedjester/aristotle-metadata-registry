@@ -4,7 +4,9 @@ amount of information around the Value Domain
 So we've split this out into its own template.
 {% endcomment %}
 
+{% load aristotle_tags %}
 {% load inplace_edit %}
+
 <div>
 <table class="table table-striped valueDomainRepresentation">
 {% if item.dataType %}
@@ -34,9 +36,9 @@ So we've split this out into its own template.
 </table>
 </div>
 {% if item.permissibleValues.count > 0 %}
-  <strong>Permissable Values</strong>
+  <strong>Permissible Values</strong>
   {% if user_can_edit %}
-  <a class="inline_action" href="/manage/aristotle_mdr/codelist/{{ item.id }}">edit</a>
+  <a class="inline_action" href="{% adminEdit item %}#permissibleValues-group">edit</a>
   {% endif %}
     <table class="codeList table table-striped">
         <thead>
@@ -52,7 +54,13 @@ So we've split this out into its own template.
                     {% if forloop.first %}
                     <th rowspan="{{ item.permissibleValues.count }}">Permissable Values</th>
                     {% endif %}
-                    <td>{{ perm.value }}</td><td>{{ perm.meaning }}</td>
+                    {% if allowEditing %}
+                        <td>{% inplace_edit 'perm.value' %}</td>
+                        <td>{% inplace_edit 'perm.meaning' %}</td>
+                    {% else %}
+                        <td>{{ perm.value }}</td>
+                        <td>{{ perm.meaning }}</td>
+                    {% endif%}
                 </tr>
             {% endfor %}
         </tbody>
@@ -64,7 +72,13 @@ So we've split this out into its own template.
                     {% if forloop.first %}
                     <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values</th>
                     {% endif %}
-                    <td>{{ perm.value }}</td><td>{{ perm.meaning }}</td>
+                    {% if allowEditing %}
+                        <td>{% inplace_edit 'perm.value' %}</td>
+                        <td>{% inplace_edit 'perm.meaning' %}</td>
+                    {% else %}
+                        <td>{{ perm.value }}</td>
+                        <td>{{ perm.meaning }}</td>
+                    {% endif%}
                 </tr>
             {% endfor %}
         </tbody>
