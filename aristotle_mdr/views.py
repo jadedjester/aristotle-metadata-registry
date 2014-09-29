@@ -239,7 +239,7 @@ def workgroupMembers(request, iid):
 def discussions(request):
     #Show all discussions for all of a users workgroups
     page = render(request,"aristotle_mdr/discussions/all.html",{
-        'discussions':MDR.DiscussionPost.objects.filter(workgroup__in=request.user.profile.myWorkgroups.all())
+        'discussions':request.user.profile.discussions
         })
     return page
 
@@ -294,7 +294,10 @@ def discussionsNew(request):
             new.relatedItems = form.cleaned_data['relatedItems']
             return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[new.pk]))
     else:
-        form = MDRForms.DiscussionNewPostForm(user=request.user)
+        initial = {}
+        if request.GET.get('workgroup') and request.user.profile.myWorkgroups.filter(id=request.GET.get('workgroup')).exists():
+            initial={'workgroup':request.GET.get('workgroup')}
+        form = MDRForms.DiscussionNewPostForm(user=request.user,initial=initial)
     return render(request,"aristotle_mdr/discussions/new.html",
             {"item":item,
              "form":form,

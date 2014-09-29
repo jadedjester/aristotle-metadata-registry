@@ -275,7 +275,7 @@ class discussionAbstract(TimeStampedModel):
     body = models.TextField()
     author = models.ForeignKey(User)
     class Meta:
-        ordering = ['modified']
+        ordering = ['-modified']
         abstract = True
     @property
     def edited(self):
@@ -720,6 +720,10 @@ class PossumProfile(models.Model):
     @property
     def is_registrar(self):
         return perms.user_is_registrar(self.user)
+
+    @property
+    def discussions(self):
+        return DiscussionPost.objects.filter(workgroup__in=self.myWorkgroups.all())
 
     @property
     def registrarAuthorities(self):

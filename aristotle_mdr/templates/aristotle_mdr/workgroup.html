@@ -62,23 +62,8 @@
 </dl>
 
 <h2>Recent conversations</h2>
-<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
-<table>
-    <thead>
-        <tr>
-            <td>Title</td>
-            <td>Author</td>
-            <td>Last comment</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+<a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
+{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=item.discussionpost_set.all|slice:":5" %}
 
 <div id="addMember" class="modal fade">
     <div class="modal-dialog">
