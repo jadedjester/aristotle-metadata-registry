@@ -28,4 +28,31 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
+    install_requires = [
+        'django',
+        'South',
+        'pytz',
+        
+        'django-model-utils',
+        'django-notifications-hq',
+        'django-grappelli',
+        
+        'django-haystack',
+        'Whoosh',
+        
+        'django-tinymce',
+        'django-inplaceedit',
+        'django-inplaceedit-extra-fields',
+        
+        'django-reversion',
+        'django-reversion-compare',
+        'diff-match-patch'
+        
+        'django-autocomplete-light',
+        'django-bootstrap3',
+        'django-bootstrap3-datetimepicker',
+        
+        'xhtml2pdf'
+    ],
+
 )
