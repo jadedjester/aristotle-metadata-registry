@@ -398,8 +398,10 @@ def userInbox(request,folder=None):
         {"item":request.user,"notifications":notices,'folder':folder})
     return page
 
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
 def userAdminTools(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     page = render(request,"aristotle_mdr/user/userAdminTools.html",{"item":request.user})
     return page
 
@@ -441,13 +443,17 @@ def userRegistrationAuthorities(request,iid):
 
 @login_required
 def userRegistrarTools(request):
+    if not request.user.profile.is_registrar:
+        raise PermissionDenied
     page = render(request,"aristotle_mdr/user/userRegistrarTools.html")
     return page
 
 @login_required
 def userReadyForReview(request):
+    if not request.user.profile.is_registrar:
+        raise PermissionDenied
     if not request.user.is_superuser:
-        ras = request.user.profile.registrarAuthorities.all()
+        ras = request.user.profile.registrarAuthorities
         wgs = MDR.Workgroup.objects.filter(registrationAuthorities__in=ras)
         items = MDR._concept.objects.filter(workgroup__in=wgs)
     else:

@@ -201,6 +201,10 @@ class RegistrationAuthority(registryGroup):
                    self.register(i,state,user,regDate,cascade)
         return reg
 
+    def giveRoleToUser(self,role,user):
+        super(RegistrationAuthority, self).giveRoleToUser(role,user)
+        user.profile.registrationAuthorities.add(self)
+
 
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
