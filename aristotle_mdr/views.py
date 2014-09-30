@@ -213,7 +213,7 @@ def workgroup(request, iid):
     if not user_in_workgroup(request.user,wg):
         raise PermissionDenied
     renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
-    renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:10] #.filter("modified__gt"=(timezone.now()-datetime.timedelta(days=1)))[:10]
+    renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:5]
     page = render(request,wg.template,renderDict)
     return page
 

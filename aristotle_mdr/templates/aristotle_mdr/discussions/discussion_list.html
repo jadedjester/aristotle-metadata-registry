@@ -5,7 +5,9 @@
         <tr>
             <th>Author</th>
             <th>Title <small class="visible-xs-inline">(and workgroup)</small></th>
-            <th class="hidden-xs">Workgroup</th>
+            {% if showWorkgroups %}
+                <th class="hidden-xs">Workgroup</th>
+            {% endif %}
             <th>Latest comment</th>
         </tr>
     </thead>
@@ -17,13 +19,17 @@
             </td>
             <td>
                 <a href="{% url 'aristotle:discussionsPost' post.id %}">{{ post.title }}</a>
+                {% if showWorkgroups %}
                 <span class="visible-xs-block">
                     In <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}" title="View discussions for this workgroup only">{{ post.workgroup }}</a>
                 </span>
+                {% endif %}
             </td>
+            {% if showWorkgroups %}
             <td class="hidden-xs">
                 <a href="{% url 'aristotle:discussionsWorkgroup' post.workgroup.id %}" title="View discussions for this workgroup only">{{ post.workgroup }}</a>
             </td>
+            {% endif %}
             <td>
                 {% if post.comments.last %}
                     <a href="{% url 'aristotle:discussionsPost' post.id %}#comment_{{post.comments.last.id}}"

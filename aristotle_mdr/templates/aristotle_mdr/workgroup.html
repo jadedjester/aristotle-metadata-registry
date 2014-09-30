@@ -18,6 +18,8 @@
 
 {% block page %}
 <h1>{% block title %}{{ workgroup.name }}{% endblock %}</h1>
+<div class="row">
+
 <aside id="infoBox" class="col-xs-12 col-sm-4 pull-right">
 <section id="items">
 <header>Recently changed items</header>
@@ -28,6 +30,8 @@
     </ul>
 </section>
 </aside>
+
+<div class="col-sm-8">
 <header>Details</header>
 <dl>
 <dt>Managers</dt>
@@ -65,6 +69,8 @@
 <a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
 {% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=item.discussionpost_set.all|slice:":5" %}
 
+</div>
+</div>
 <div id="addMember" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content"></div>
