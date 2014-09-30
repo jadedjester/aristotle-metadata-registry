@@ -63,6 +63,22 @@ tbody.newRa {
     }
 }
 
+.inline_action {
+    &:before {content: "["}
+    &:after  {content: "]"}
+    margin-left:2px;
+    font-size:80%;
+    font-weight:normal;
+    color:darkblue;
+    text-decoration:none;
+    &:hover {
+        text-decoration:underline;
+    }
+    &.enable {
+        font-weight:bold;
+    }
+}
+
 dl.quickkeys {
     dt {
         float:left;
