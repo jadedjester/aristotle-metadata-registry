@@ -15,17 +15,21 @@ class LoggedInViewPages(object):
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
 
         self.su = User.objects.create_superuser('super','','user')
+        self.manager = User.objects.create_user('mandy','','manager')
         self.editor = User.objects.create_user('eddie','','editor')
         self.viewer = User.objects.create_user('vicky','','viewer')
         self.registrar = User.objects.create_user('reggie','','registrar')
 
         self.wg1.addUser(self.editor)
         self.wg1.giveRoleToUser('Editor',self.editor)
+        self.wg1.addUser(self.editor)
+        self.wg1.giveRoleToUser('Manager',self.manager)
         self.wg1.addUser(self.viewer)
         self.wg1.giveRoleToUser('Viewer',self.viewer)
         self.ra.giveRoleToUser('Registrar',self.registrar)
 
         self.editor = User.objects.get(pk=self.editor.pk)
+        self.manager = User.objects.get(pk=self.manager.pk)
         self.viewer = User.objects.get(pk=self.viewer.pk)
         self.registrar = User.objects.get(pk=self.registrar.pk)
 
@@ -53,6 +57,11 @@ class LoggedInViewPages(object):
     def login_editor(self):
         self.logout()
         response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'eddie', 'password': 'editor'})
+        self.assertEqual(response.status_code,302)
+        return response
+    def login_manager(self):
+        self.logout()
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'mandy', 'password': 'manager'})
         self.assertEqual(response.status_code,302)
         return response
 

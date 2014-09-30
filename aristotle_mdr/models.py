@@ -243,6 +243,11 @@ class Workgroup(registryGroup):
                     ]
             }
 
+    def giveRoleToUser(self,role,user):
+        super(Workgroup, self).giveRoleToUser(role,user)
+        if self not in user.profile.workgroups.all():
+            user.profile.workgroups.add(self)
+
     def addUser(self,user):
         if self not in user.profile.workgroups.all():
             user.profile.workgroups.add(self)

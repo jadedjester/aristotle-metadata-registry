@@ -52,7 +52,7 @@
         {% endif %}
     </div>
 
-{% for comment in post.comments.all %}
+{% for comment in post.comments.all reversed %}
     {% if comment.author.username == 'aristotle' %}
     <div class="comment panel panel-danger" id="comment_{{comment.id }}">
         <header class="panel-heading">

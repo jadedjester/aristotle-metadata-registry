@@ -657,7 +657,7 @@ class DataElementConceptWizard(SessionWizardView):
         pass
 
 # Actions
-def removeWorkgroupRole(request,iid,rolename,userid):
+def removeWorkgroupRole(request,iid,role,userid):
     workgroup = get_object_or_404(MDR.Workgroup,pk=iid)
     if not (workgroup and user_is_workgroup_manager(request.user,workgroup)):
         if request.user.is_anonymous():
@@ -666,7 +666,7 @@ def removeWorkgroupRole(request,iid,rolename,userid):
             raise PermissionDenied
     try:
         user = User.objects.get(id=userid)
-        workgroup.removeRoleFromUser(rolename,user)
+        workgroup.removeRoleFromUser(role,user)
     except:
         pass
     return HttpResponseRedirect('/workgroup/%s/members'%(workgroup.id))
