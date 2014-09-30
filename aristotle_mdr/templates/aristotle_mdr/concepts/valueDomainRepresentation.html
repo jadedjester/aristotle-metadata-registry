@@ -4,19 +4,24 @@ amount of information around the Value Domain
 So we've split this out into its own template.
 {% endcomment %}
 
+{% load aristotle_tags %}
 {% load inplace_edit %}
+
 <div>
 <table class="table table-striped valueDomainRepresentation">
 {% if item.dataType %}
 <tr>
   <th>Data Type</th>
-  <td><a href="/datatype/{{ item.dataType.id }}">{% inplace_edit 'item.dataType' %}</a></dd>
+  <td><a href="{% url 'aristotle:dataType' item.dataType.id %}">{% inplace_edit 'item.dataType' %}</a></dd>
 </tr>
 {% endif %}
 {% if item.unitOfMeasure %}
 <tr>
   <th>Unit Of Measure</th>
-  <td>{% inplace_edit 'item.unitOfMeasure' %}</td>
+  <td><a href="{% url 'aristotle:unitOfMeasure' item.unitOfMeasure.id %}">
+    {% inplace_edit 'item.unitOfMeasure' %}
+    {% if item.unitOfMeasure.symbol %}<tt>({{ item.unitOfMeasure.symbol }})</tt>{% endif %}
+  </td>
 </tr>
 {% endif %}
 {% if item.format %}
@@ -34,10 +39,7 @@ So we've split this out into its own template.
 </table>
 </div>
 {% if item.permissibleValues.count > 0 %}
-  <strong>Permissable Values</strong>
-  {% if user_can_edit %}
-  <a class="inline_action" href="/manage/aristotle_mdr/codelist/{{ item.id }}">edit</a>
-  {% endif %}
+  <strong>Permissible Values</strong>
     <table class="codeList table table-striped">
         <thead>
             <tr>
@@ -50,9 +52,19 @@ So we've split this out into its own template.
             {% for perm in item.permissibleValues.all %}
                 <tr>
                     {% if forloop.first %}
-                    <th rowspan="{{ item.permissibleValues.count }}">Permissable Values</th>
+                    <th rowspan="{{ item.permissibleValues.count }}">Permissable Values
+                        {% if user_can_edit %}
+                            <a class="inline_action" href="{% adminEdit item %}#permissibleValues-group">edit</a>
+                        {% endif %}
+                    </th>
                     {% endif %}
-                    <td>{{ perm.value }}</td><td>{{ perm.meaning }}</td>
+                    {% if allowEditing %}
+                        <td>{% inplace_edit 'perm.value' %}</td>
+                        <td>{% inplace_edit 'perm.meaning' %}</td>
+                    {% else %}
+                        <td>{{ perm.value }}</td>
+                        <td>{{ perm.meaning }}</td>
+                    {% endif%}
                 </tr>
             {% endfor %}
         </tbody>
@@ -62,9 +74,19 @@ So we've split this out into its own template.
             {% for perm in item.supplementaryValues.all %}
                 <tr>
                     {% if forloop.first %}
-                    <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values</th>
+                    <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values
+                        {% if user_can_edit %}
+                            <a class="inline_action" href="{% adminEdit item %}#supplementaryValues-group">edit</a>
+                        {% endif %}
+                    </th>
                     {% endif %}
-                    <td>{{ perm.value }}</td><td>{{ perm.meaning }}</td>
+                    {% if allowEditing %}
+                        <td>{% inplace_edit 'perm.value' %}</td>
+                        <td>{% inplace_edit 'perm.meaning' %}</td>
+                    {% else %}
+                        <td>{{ perm.value }}</td>
+                        <td>{{ perm.meaning }}</td>
+                    {% endif%}
                 </tr>
             {% endfor %}
         </tbody>

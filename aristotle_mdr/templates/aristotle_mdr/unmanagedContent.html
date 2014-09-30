@@ -5,47 +5,57 @@
 
 {% block title %}{{ item.name }}{% endblock %}
 {% block content %}
-<section class="unmanaged row">
-    <h1>
-        <a href="#">{{ item.name }}</a>
+<header class="unmanaged row">
+    <h1 id="objectTitle"  class="pull-left">
+        <a href="#">{% inplace_edit 'item.name' %}</a>
         <span>({{ item.get_verbose_name }})</span>
     </h1>
-<aside id="infobox-wrap" class="col-xs-12 col-sm-4 pull-right navbar navbar-default">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#infobox">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a href="#" class="navbar-brand visible-xs" style="float:none;">
-        {% block collapse-link %}
-        <i class="fa fa-info-circle fa-fw"></i>More details...
-        {% endblock %}
-      </a>
+        <div class="btn-group pull-right" >
+        {% if user_can_edit %}
+        <a id="ActivateInplaceEdit" class="btn btn-default"></a>
+        <a class="btn btn-default hidden-xs" href="{% adminEdit item %}">
+            <i class="fa fa-sliders"></i> Advanced editor
+        </a>
+        {% endif %}
     </div>
-    <div id="infobox" class="collapse navbar-collapse" >
-    <header>{{ item.name }}</header>
-    <dl>
-        <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
-    </dl>
-    <dl>
-        <dt>Last updated</dt><dd><a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a></dd>
-        <dt>Created</dt><dd>{{item.created}}</dd>
-    </dl>
-{% block asideContent %}{% endblock %}
-</aside>
-<div class="description" id="description">
-    <h2 class="sr-only">Description</h2>
-    {{ item.description | safe }}
-</div>
+</header>
+<section class="unmanaged row">
+    <aside id="infobox-wrap" class="col-xs-12 col-sm-4 pull-right navbar navbar-default">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#infobox">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="#" class="navbar-brand visible-xs" style="float:none;">
+            {% block collapse-link %}
+            <i class="fa fa-info-circle fa-fw"></i>More details...
+            {% endblock %}
+          </a>
+        </div>
+        <div id="infobox" class="collapse navbar-collapse" >
+        <header>{{ item.name }}</header>
+        <dl>
+            <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
+            {% block asideContent %}{% endblock %}
+            <dt>Last updated</dt><dd><a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a></dd>
+            <dt>Created</dt><dd>{{item.created}}</dd>
+        </dl>
+    </aside>
 <div>
-    {% block objSpecific %}
-    {% endblock %}
-</div>
+    <div class="description" id="description">
+        <h2 class="sr-only">Description</h2>
+        {% inplace_edit 'item.description' adaptor='aristotle' %}
+    </div>
+    <div>
+        {% block objSpecific %}
+        {% endblock %}
+    </div>
         {% for extension in config.CONTENT_EXTENSIONS %}
             {% extra_content extension item request.user %}
         {% endfor %}
+</div>
 </section>
 
 {% endblock %}

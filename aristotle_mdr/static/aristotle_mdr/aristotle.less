@@ -130,22 +130,6 @@ table.mceLayout iframe {
     }
 }
 
-.inline_action {
-    &:before {content: "["}
-    &:after  {content: "]"}
-    margin-left:2px;
-    font-size:80%;
-    font-weight:normal;
-    color:darkblue;
-    text-decoration:none;
-    &:hover {
-        text-decoration:underline;
-    }
-    &.enable {
-        font-weight:bold;
-    }
-}
-
 body > footer {
     clear:both;
     text-align:center;
@@ -411,13 +395,6 @@ table.codeList {
     }
 }
 
-.inplaceedit.enable, .inline_action.enable {
-    padding:2px;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    background-color: #f7f7f7 !important;
-}
 
 table.dssInclusions {
     tr>*:nth-child(4),tr>*:nth-child(5) {

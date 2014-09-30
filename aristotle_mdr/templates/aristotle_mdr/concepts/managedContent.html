@@ -182,7 +182,7 @@
         If an item is marked "ready for review", registrars will be able to see this
         item and begin the standardisation process according to their registration authority.
 
-        <p><label>Is this item {% ternary item.readyToReview "" "still" %} ready for review?</label>
+        <p><label>Is this item {% ternary item.readyToReview "still" "" %} ready for review?</label>
         {% inplace_edit 'item.readyToReview' adaptor='booleanYesNo' %}
     </div>
     {% endif %}
