@@ -746,7 +746,7 @@ def supersede(request, iid):
         if form.is_valid():
             item.superseded_by = form.cleaned_data['newerItem']
             item.save()
-            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
+            return HttpResponseRedirect(reverse("aristotle:item",args=[item.id]))
     else:
         form = MDRForms.SupersedeForm(item=item,user=request.user,qs=qs)
     return render(request,"aristotle_mdr/actions/supersedeItem.html",
@@ -777,7 +777,7 @@ def deprecate(request, iid):
             for i in form.cleaned_data['olderItems']:
                 if user_can_edit(request.user,i): #Would check item.supersedes but its a set
                     item.supersedes.add(i)
-            return HttpResponseRedirect(reverse("aristotle:item",args=str(item.id)))
+            return HttpResponseRedirect(reverse("aristotle:item",args=[str(item.id)]))
     else:
         form = MDRForms.DeprecateForm(user=request.user,item=item,qs=qs)
     return render(request,"aristotle_mdr/actions/deprecateItems.html",
