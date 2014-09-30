@@ -201,6 +201,10 @@ class RegistrationAuthority(registryGroup):
                    self.register(i,state,user,regDate,cascade)
         return reg
 
+    def giveRoleToUser(self,role,user):
+        super(RegistrationAuthority, self).giveRoleToUser(role,user)
+        user.profile.registrationAuthorities.add(self)
+
 
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
@@ -239,6 +243,11 @@ class Workgroup(registryGroup):
                     ]
             }
 
+    def giveRoleToUser(self,role,user):
+        super(Workgroup, self).giveRoleToUser(role,user)
+        if self not in user.profile.workgroups.all():
+            user.profile.workgroups.add(self)
+
     def addUser(self,user):
         if self not in user.profile.workgroups.all():
             user.profile.workgroups.add(self)
@@ -275,7 +284,7 @@ class discussionAbstract(TimeStampedModel):
     body = models.TextField()
     author = models.ForeignKey(User)
     class Meta:
-        ordering = ['modified']
+        ordering = ['-modified']
         abstract = True
     @property
     def edited(self):
@@ -720,6 +729,10 @@ class PossumProfile(models.Model):
     @property
     def is_registrar(self):
         return perms.user_is_registrar(self.user)
+
+    @property
+    def discussions(self):
+        return DiscussionPost.objects.filter(workgroup__in=self.myWorkgroups.all())
 
     @property
     def registrarAuthorities(self):

@@ -11,8 +11,8 @@
 
     <h1>Showing discussions for <a href="{% url 'aristotle:workgroup' workgroup.id %}">{{ workgroup }}</a></h1>
 
-    <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}">New discussion</a>
+    <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}?workgroup={{ workgroup.id }}">New discussion</a>
     {% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=discussions %}
-    <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}">New discussion</a>
+    <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}?workgroup={{ workgroup.id }}">New discussion</a>
 
 {% endblock %}

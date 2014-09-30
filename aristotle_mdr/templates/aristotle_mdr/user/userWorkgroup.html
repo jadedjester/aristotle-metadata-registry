@@ -50,7 +50,7 @@ Members {% if user_is_admin %}<a href="#" class="inline_action">Add</a>{% endif 
 </dl>
 
 <h2>Recent conversations</h2>
-<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
+<a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
 <table>
     <thead>
         <tr>

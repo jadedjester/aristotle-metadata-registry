@@ -16,7 +16,7 @@
         <ul>
         {% for item in user.profile.myWorkgroups.all %}
           <li><a href="{% url 'aristotle:workgroup' item.id %}">{{ item }}</a> -
-            <span>{{ item.description }}</span>
+            <span>{{ item.description|striptags }}</span>
             </li>
         {% empty %}
             <li> No workgroups </li>
@@ -25,21 +25,7 @@
     </section>
 
 <h2>Recent conversations</h2>
-<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
-<table>
-    <thead>
-        <tr>
-            <td>Title</td>
-            <td>Author</td>
-            <td>Last comment</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+<a href="{% url 'aristotle:discussions' %}">View all posts.</a>
+{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=request.user.profile.discussions.all|slice:":5" %}
+
 {% endblock %}

@@ -213,7 +213,7 @@ def workgroup(request, iid):
     if not user_in_workgroup(request.user,wg):
         raise PermissionDenied
     renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
-    renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:10] #.filter("modified__gt"=(timezone.now()-datetime.timedelta(days=1)))[:10]
+    renderDict['recent'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses().order_by('-modified')[:5]
     page = render(request,wg.template,renderDict)
     return page
 
@@ -239,7 +239,7 @@ def workgroupMembers(request, iid):
 def discussions(request):
     #Show all discussions for all of a users workgroups
     page = render(request,"aristotle_mdr/discussions/all.html",{
-        'discussions':MDR.DiscussionPost.objects.filter(workgroup__in=request.user.profile.myWorkgroups.all())
+        'discussions':request.user.profile.discussions
         })
     return page
 
@@ -294,7 +294,10 @@ def discussionsNew(request):
             new.relatedItems = form.cleaned_data['relatedItems']
             return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[new.pk]))
     else:
-        form = MDRForms.DiscussionNewPostForm(user=request.user)
+        initial = {}
+        if request.GET.get('workgroup') and request.user.profile.myWorkgroups.filter(id=request.GET.get('workgroup')).exists():
+            initial={'workgroup':request.GET.get('workgroup')}
+        form = MDRForms.DiscussionNewPostForm(user=request.user,initial=initial)
     return render(request,"aristotle_mdr/discussions/new.html",
             {"item":item,
              "form":form,
@@ -395,8 +398,10 @@ def userInbox(request,folder=None):
         {"item":request.user,"notifications":notices,'folder':folder})
     return page
 
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
 def userAdminTools(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     page = render(request,"aristotle_mdr/user/userAdminTools.html",{"item":request.user})
     return page
 
@@ -438,13 +443,17 @@ def userRegistrationAuthorities(request,iid):
 
 @login_required
 def userRegistrarTools(request):
+    if not request.user.profile.is_registrar:
+        raise PermissionDenied
     page = render(request,"aristotle_mdr/user/userRegistrarTools.html")
     return page
 
 @login_required
 def userReadyForReview(request):
+    if not request.user.profile.is_registrar:
+        raise PermissionDenied
     if not request.user.is_superuser:
-        ras = request.user.profile.registrarAuthorities.all()
+        ras = request.user.profile.registrarAuthorities
         wgs = MDR.Workgroup.objects.filter(registrationAuthorities__in=ras)
         items = MDR._concept.objects.filter(workgroup__in=wgs)
     else:
@@ -648,7 +657,7 @@ class DataElementConceptWizard(SessionWizardView):
         pass
 
 # Actions
-def removeWorkgroupRole(request,iid,rolename,userid):
+def removeWorkgroupRole(request,iid,role,userid):
     workgroup = get_object_or_404(MDR.Workgroup,pk=iid)
     if not (workgroup and user_is_workgroup_manager(request.user,workgroup)):
         if request.user.is_anonymous():
@@ -657,7 +666,7 @@ def removeWorkgroupRole(request,iid,rolename,userid):
             raise PermissionDenied
     try:
         user = User.objects.get(id=userid)
-        workgroup.removeRoleFromUser(rolename,user)
+        workgroup.removeRoleFromUser(role,user)
     except:
         pass
     return HttpResponseRedirect('/workgroup/%s/members'%(workgroup.id))
