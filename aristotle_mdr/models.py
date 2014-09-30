@@ -887,8 +887,8 @@ def new_comment_created(sender, **kwargs):
         return # We don't need to tell someone they replied to themselves
     notify.send(comment.author, recipient=post.author, verb="made a comment on your post", target=post)
 
-# Loads test bed of data
-def exampleData():
+# Loads example data, this is never used in formal testing.
+def exampleData(): # pragma: no cover
     defaultData()
     print "configuring users"
 
