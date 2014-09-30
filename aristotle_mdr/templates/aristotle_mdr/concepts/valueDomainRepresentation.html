@@ -37,9 +37,6 @@ So we've split this out into its own template.
 </div>
 {% if item.permissibleValues.count > 0 %}
   <strong>Permissible Values</strong>
-  {% if user_can_edit %}
-  <a class="inline_action" href="{% adminEdit item %}#permissibleValues-group">edit</a>
-  {% endif %}
     <table class="codeList table table-striped">
         <thead>
             <tr>
@@ -52,7 +49,11 @@ So we've split this out into its own template.
             {% for perm in item.permissibleValues.all %}
                 <tr>
                     {% if forloop.first %}
-                    <th rowspan="{{ item.permissibleValues.count }}">Permissable Values</th>
+                    <th rowspan="{{ item.permissibleValues.count }}">Permissable Values
+                        {% if user_can_edit %}
+                            <a class="inline_action" href="{% adminEdit item %}#permissibleValues-group">edit</a>
+                        {% endif %}
+                    </th>
                     {% endif %}
                     {% if allowEditing %}
                         <td>{% inplace_edit 'perm.value' %}</td>
@@ -70,7 +71,11 @@ So we've split this out into its own template.
             {% for perm in item.supplementaryValues.all %}
                 <tr>
                     {% if forloop.first %}
-                    <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values</th>
+                    <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values
+                        {% if user_can_edit %}
+                            <a class="inline_action" href="{% adminEdit item %}#supplementaryValues-group">edit</a>
+                        {% endif %}
+                    </th>
                     {% endif %}
                     {% if allowEditing %}
                         <td>{% inplace_edit 'perm.value' %}</td>
