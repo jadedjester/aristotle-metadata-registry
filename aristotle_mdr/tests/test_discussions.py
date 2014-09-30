@@ -42,8 +42,8 @@ class ViewDiscussionPostPage(utils.LoggedInViewPages,TestCase):
         self.wg2.giveRoleToUser('Viewer',self.viewer3)
 
     def test_viewer_can_see_post_in_workgroup(self):
-        post = models.DiscussionPost(author=self.viewer,workgroup=self.wg1,title="test",body="test")
-        post.save()
+        post = models.DiscussionPost.objects.create(author=self.viewer,workgroup=self.wg1,title="test",body="test")
+        comment = models.DiscussionComment.objects.create(author=self.viewer2,post=post,body="test")
         self.login_viewer()
         response = self.client.get(reverse('aristotle:discussionsPost',args=[post.id]))
         self.assertEqual(response.status_code,200)
