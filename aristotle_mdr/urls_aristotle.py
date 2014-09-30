@@ -86,7 +86,7 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 
-    url(r'^help/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
+    url(r'^about/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
     url(r'^about/aristotle/?$', TemplateView.as_view(template_name='aristotle_mdr/static/aristotle_mdr.html'), name="aboutMain"),
     url(r'^help/(?P<template>.+)/?$', views.HelpTemplateView.as_view(), name="help"),
     url(r'^help/?$', TemplateView.as_view(template_name='aristotle_mdr/static/help/help.html'), name="helpMain"),
