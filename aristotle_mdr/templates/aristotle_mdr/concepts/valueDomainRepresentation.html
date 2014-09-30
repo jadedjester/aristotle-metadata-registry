@@ -12,13 +12,16 @@ So we've split this out into its own template.
 {% if item.dataType %}
 <tr>
   <th>Data Type</th>
-  <td><a href="/datatype/{{ item.dataType.id }}">{% inplace_edit 'item.dataType' %}</a></dd>
+  <td><a href="{% url 'aristotle:dataType' item.dataType.id %}">{% inplace_edit 'item.dataType' %}</a></dd>
 </tr>
 {% endif %}
 {% if item.unitOfMeasure %}
 <tr>
   <th>Unit Of Measure</th>
-  <td>{% inplace_edit 'item.unitOfMeasure' %}</td>
+  <td><a href="{% url 'aristotle:unitOfMeasure' item.unitOfMeasure.id %}">
+    {% inplace_edit 'item.unitOfMeasure' %}
+    {% if item.unitOfMeasure.symbol %}<tt>({{ item.unitOfMeasure.symbol }})</tt>{% endif %}
+  </td>
 </tr>
 {% endif %}
 {% if item.format %}

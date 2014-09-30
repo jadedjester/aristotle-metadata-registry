@@ -203,6 +203,8 @@ def dataelement(*args,**kwargs):
 
 def datatype(*args,**kwargs):
     return render_if_user_can_view(MDR.DataType,*args,**kwargs)
+def unitofmeasure(*args,**kwargs):
+    return render_if_user_can_view(MDR.UnitOfMeasure,*args,**kwargs)
 
 def package(*args,**kwargs):
     return render_if_user_can_view(MDR.Package,*args,**kwargs)

@@ -596,8 +596,10 @@ class Property(concept):
 class Measure(unmanagedObject):
     pass
 class UnitOfMeasure(unmanagedObject):
+    template="aristotle_mdr/unmanaged/unitOfMeasure.html"
+
     measure = models.ForeignKey(Measure)
-    symbol =  models.CharField(max_length=20)
+    symbol =  models.CharField(max_length=20,blank=True)
 class DataType(concept):
     template = "aristotle_mdr/concepts/dataType.html"
     pass
@@ -829,10 +831,10 @@ def defaultData():
         ]),
     ]
     for measure,units in unitsOfMeasure:
-        m,created = Measure.objects.get_or_create(name=name,description="")
+        m,created = Measure.objects.get_or_create(name=measure,description="")
         print "making measure: {name}".format(name=name)
-        for name,description in units:
-            u,created = UnitOfMeasure.objects.get_or_create(name=name,description=desc,measure=m)
+        for name,symbol in units:
+            u,created = UnitOfMeasure.objects.get_or_create(name=name,symbol=symbol,measure=m)
             print "   making unit of measure: {name}".format(name=name)
 
 

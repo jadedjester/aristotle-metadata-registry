@@ -1,0 +1,36 @@
+{% extends "aristotle_mdr/unmanagedContent.html" %}
+{% load aristotle_tags %}
+
+{% block title %}{{ item.name }} {% if item.symbol %}({{ item.symbol }}){% endif %} {% endblock %}
+{% block asideContent %}
+<dt>Measures</dt>
+<dd>
+    {{ item.measure.name }}
+</dd>
+{% if item.symbol %}
+<dt>Symbol</dt>
+<dd>
+    <tt>{{ item.symbol }}</tt>
+</dd>
+{% endif %}
+{% endblock %}
+{% block objSpecific %}
+
+    <h3>Measure information - {{ item.measure.name }}</h3>
+    <div>
+        {{ item.measure.description|safe }}
+    </div>
+
+
+    {% if item.valuedomain_set.all %}
+        <h3>Value Domains using this measure</h3>
+        <ul>
+        {% for vd in item.valuedomain_set.all|can_view_iter:request.user %}
+            <li>
+                {% include "aristotle_mdr/helpers/inlineDetails.html" with item=vd %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
