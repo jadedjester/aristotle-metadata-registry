@@ -888,7 +888,7 @@ def new_comment_created(sender, **kwargs):
     notify.send(comment.author, recipient=post.author, verb="made a comment on your post", target=post)
 
 # Loads test bed of data
-def testData():
+def exampleData():
     defaultData()
     print "configuring users"
 
