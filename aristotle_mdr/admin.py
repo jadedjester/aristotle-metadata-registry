@@ -237,6 +237,7 @@ class ValueDomainAdmin(ConceptAdmin):
 
 class GlossaryAlternateDefinitionInline(admin.TabularInline):
     model = MDR.GlossaryAdditionalDefinition
+    extra=0
 
 class GlossaryItemAdmin(admin.ModelAdmin):
     model = MDR.GlossaryItem

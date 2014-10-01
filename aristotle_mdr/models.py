@@ -684,12 +684,15 @@ class Package(concept):
         return self.items.select_subclasses()
 
 class GlossaryItem(unmanagedObject):
-    pass
+    def json_link_list(self):
+        return dict(id=self.id,name=self.name,url=reverse("aristotle:glossary_by_id",args=[self.id]))
 
 class GlossaryAdditionalDefinition(models.Model):
     glossaryItem = models.ForeignKey(GlossaryItem,related_name="alternate_definitions")
     registrationAuthority = models.ForeignKey(RegistrationAuthority)
     description = models.TextField()
+    class Meta:
+        unique_together = ('glossaryItem', 'registrationAuthority',)
 
 # Create a 1-1 user profile so we don't need to extend user
 # Thanks to http://stackoverflow.com/a/965883/764357
