@@ -1,0 +1,30 @@
+{% extends 'aristotle_mdr/base.html' %}
+
+{% block title %}Glossary{% endblock %}
+{% block content %}
+<header class="row">
+    <h1 id="objectTitle"  class="pull-left">
+        <i class="fa fa fa-book "></i>
+        <a href="#">Glossary</a>
+    </h1>
+</header>
+<section class="row">
+
+    <ul>
+        {% for term in terms %}
+        <li>
+        <a href="{% url 'aristotle:glossary_by_id' term.id %}">{{ term.name }}</a>
+        {% with c=term.alternate_definitions.count %}
+        {% if c > 0 %}
+            <small>- {{ c }} additional meaning{{ c|pluralize }}</small>
+        {% endif %}
+        {% endwith %}
+        <div>
+            {{ term.description | striptags |truncatewords:50 }}
+        </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+</section>
+{% endblock %}
