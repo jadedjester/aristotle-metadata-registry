@@ -10,8 +10,9 @@ from django.forms.extras import widgets
 conf = dict(
     toolbar=("save cancel | undo redo | bold italic | "
              "subscript superscript | " #spellchecker | "
-             "bullist numlist | link image"),
+             "bullist numlist | link image | code"),
     #plugins= "spellchecker",
+    plugins= "code",
     menubar=False)
 
 class AristotleRichTextField(AdaptorTinyMCEField):
