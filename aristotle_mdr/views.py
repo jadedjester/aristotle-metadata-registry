@@ -485,6 +485,7 @@ def allRegistrationAuthorities(request):
 def glossary(request):
     pass
     return render(request,"aristotle_mdr/unmanaged/glossary.html",)
+
 def glossaryAjaxlist(request):
     import json
     results = [g.json_link_list() for g in MDR.GlossaryItem.objects.all()] #visible(request.user).all()]

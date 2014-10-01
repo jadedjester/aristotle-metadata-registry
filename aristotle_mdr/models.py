@@ -685,7 +685,7 @@ class Package(concept):
 
 class GlossaryItem(unmanagedObject):
     def json_link_list(self):
-        return dict(title=self.name,value=reverse("aristotle:glossary_by_id",args=[self.id]))
+        return dict(id=self.id,name=self.name,url=reverse("aristotle:glossary_by_id",args=[self.id]))
 
 class GlossaryAdditionalDefinition(models.Model):
     glossaryItem = models.ForeignKey(GlossaryItem,related_name="alternate_definitions")
