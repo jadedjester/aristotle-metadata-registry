@@ -12,7 +12,8 @@ conf = dict(
              "subscript superscript | " #spellchecker | "
              "bullist numlist | link image | code"),
     #plugins= "spellchecker",
-    plugins= "code",
+    plugins= "code link",
+    link_list='/glossary/ajaxlist',
     menubar=False)
 
 class AristotleRichTextField(AdaptorTinyMCEField):

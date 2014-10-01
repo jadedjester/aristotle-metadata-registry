@@ -482,9 +482,20 @@ def allRegistrationAuthorities(request):
         {'registrationAuthorities':ras}
         )
 
+def glossary(request):
+    pass
+    return render(request,"aristotle_mdr/unmanaged/glossary.html",)
+def glossaryAjaxlist(request):
+    import json
+    results = [g.json_link_list() for g in MDR.GlossaryItem.objects.all()] #visible(request.user).all()]
+    return HttpResponse(json.dumps(results), content_type="application/json")
+
 def glossaryById(request,iid):
     term = get_object_or_404(MDR.GlossaryItem,id=iid)
-    return render(request,"aristotle_mdr/glossaryItem.html",{'item':term})
+    return render(request,"aristotle_mdr/unmanaged/glossaryItem.html",{'item':term})
+#def glossaryBySlug(request,slug):
+#    term = get_object_or_404(MDR.GlossaryItem,id=iid)
+#    return render(request,"aristotle_mdr/glossaryItem.html",{'item':term})
 
 def aboutThisSite(request):
     return render(request,"aristotle_mdr/about_this_site.html")
