@@ -9,7 +9,7 @@ setup_test_environment()
 
 class GlossaryPage(utils.LoggedInViewPages,TestCase):
     def setUp(self):
-        super(SupersedePage, self).setUp()
+        super(GlossaryPage, self).setUp()
 
         # There would be too many tests to test every item type against every other
         # But they all have identical logic, so one test should suffice
