@@ -154,6 +154,7 @@ class ConceptAdmin(CompareVersionAdmin):
     def get_queryset(self, request):
         queryset = super(ConceptAdmin, self).get_queryset(request)
         if not request.user.is_superuser:
+            """
             workgroups=request.user.profile.workgroups.all()
             # Get all objects in the users workgroups
             in_wg = queryset.filter(workgroup__in=workgroups)
@@ -169,10 +170,12 @@ class ConceptAdmin(CompareVersionAdmin):
             public = MDR.Status.objects.filter(state__in=[MDR.STATES.standard,MDR.STATES.preferred])
             is_public = queryset.filter(statuses__in=public)
             queryset = in_wg | in_ra | is_public
-
+            """
             #queryset.qs.filter(registrationAuthority__in=ra)
             if not self.has_change_permission(request):
                 queryset = queryset.none()
+            else:
+                return queryset.editable_slow(request.user).all()
         return queryset
 
     # On save or add, redirect to the live page.
