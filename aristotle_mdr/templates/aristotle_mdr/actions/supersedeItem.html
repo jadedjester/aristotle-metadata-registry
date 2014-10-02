@@ -5,24 +5,26 @@
 {% block content %}
 
 <form method="post" action="{% url 'aristotle:supersede' iid=item.id %}">{% csrf_token %}
-<header>This form allows you to supersede an item, by indicating a new version exists.
-        This will state the newest version of <em>{{ item.name }}</em> is the selected item below.
-</header>
-<section>
-{# Or you can <a href="#">clone <em>{{ item.name }}</em> and immediately supersede it.</a> #}
-{{ form }}
+    <div class="modal-body">
+        <header>This form allows you to supersede an item, by indicating a new version exists.
+                This will state the newest version of <em>{{ item.name }}</em> is the selected item below.
+        </header>
+        <section>
+        {# Or you can <a href="#">clone <em>{{ item.name }}</em> and immediately supersede it.</a> #}
+        {{ form }}
 
-{% block save %}
-{% endblock %}
+        {% block save %}
+        {% endblock %}
 
-</section>
+        </section>
+    </div>
     <div class="modal-footer">
-    {% if request.is_ajax %}
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-    {% else %}
-        <a class="btn btn-default" href="{% url 'aristotle:item' item_id=item.id%}">Cancel</a>
-    {% endif %}
-        <input type="submit" class="btn btn-primary" value="Supersede" />
+        {% if request.is_ajax %}
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        {% else %}
+            <a class="btn btn-default" href="{% url 'aristotle:item' item_id=item.id%}">Cancel</a>
+        {% endif %}
+            <input type="submit" class="btn btn-primary" value="Supersede" />
     </div>
 </form>
 {% include 'autocomplete_light/static.html' %}

@@ -81,6 +81,9 @@ BOOTSTRAP3 = {
     'base_url': '/static/aristotle_mdr/bootstrap/',
 }
 
+# We need this to make sure users can
+AUTHENTICATION_BACKENDS = ('aristotle_mdr.backends.AristotleBackend',)
+
 # Used for in place editing
 INPLACEEDIT_EDIT_EMPTY_VALUE = 'Double click to edit'
 INPLACEEDIT_AUTO_SAVE = False
