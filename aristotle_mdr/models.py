@@ -270,9 +270,9 @@ class Workgroup(registryGroup):
             }
 
     def can_edit(self,user):
-        return user.has_perm('admin_in_{name}'.format(name=self.name))
+        return user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=self.name))
     def can_view(self,user):
-        return user.has_perm('view_in_{name}'.format(name=self.name))
+        return user.has_perm('aristotle_mdr.view_in_{name}'.format(name=self.name))
 
     def giveRoleToUser(self,role,user):
         super(Workgroup, self).giveRoleToUser(role,user)
