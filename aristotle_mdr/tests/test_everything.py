@@ -348,6 +348,19 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(self.get_help_page())
         self.assertRedirects(response,reverse("aristotle:about",args=[self.item1.help_name])) # This should redirect
 
+    def test_viewer_can_view_registration_history(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_anon_cannot_view_registration_history(self):
+        self.logout()
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item1.id]))
+        self.assertEqual(response.status_code,302)
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item2.id]))
+        self.assertEqual(response.status_code,302)
 
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
