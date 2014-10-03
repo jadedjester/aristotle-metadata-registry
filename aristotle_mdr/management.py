@@ -24,5 +24,5 @@ def loadExampleData(**kwargs): # pragma: no cover
     signals.post_save.disconnect(aristotle_mdr.models.concept_saved)
     aristotle_mdr.models.exampleData()
     signals.post_save.connect(aristotle_mdr.models.concept_saved)
-if 'test' not in sys.argv and getattr(settings, 'DEBUG', "") == True:
+if 'test' not in sys.argv and getattr(settings, 'DEBUG', "") == True:  # pragma: no cover
     signals.post_syncdb.connect(loadExampleData, sender=aristotle_mdr.models)

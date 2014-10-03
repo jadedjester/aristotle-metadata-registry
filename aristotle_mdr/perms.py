@@ -23,25 +23,7 @@ def user_can_view(user,item):
     # A user can view their own details
     if hasattr(item, "profile"):
         return item == user
-    if item.is_managed:
-        # If the above works, we have a managed Item
-        if item.is_public():
-            return True
-        else:
-            if user.is_anonymous():
-                return False
-        # If the user can view objects in this workgroup
-        if user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=item.workgroup.name)):
-            return True
-        # if the item is registered and the user is a registrar view view permissions in that authority.
-        if item.is_registered:
-            for s in item.statuses.all():
-                ra = s.registrationAuthority
-                if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
-                    return True
-        return False
-    else:
-        return True
+    return item.can_view(user)
 
 def user_is_registrar(user):
     if user.is_superuser:
@@ -80,24 +62,17 @@ def user_can_edit(user,item):
     """Can the user edit the item?"""
 
     #non-logged in users can't edit anything
-    if not user.is_active:
+    if user.is_anonymous():
         return False
     if not user_can_view(user,item):
         return False
-        #raise PermissionDenied()
     if user.is_superuser:
         return True
     # A user can edit their own details
     if hasattr(item, "profile"):
         return item == user
-    elif item.is_managed:
-        if item.is_locked():
-            return user.has_perm('aristotle_mdr.edit_locked_in_{wg}'.format(wg=item.workgroup.name))
-        else:
-            return user.has_perm('aristotle_mdr.edit_unlocked_in_{wg}'.format(wg=item.workgroup.name))
-    elif item.is_workgroup:
-        return user_is_workgroup_manager(user,item)
-    return False
+    return item.can_edit(user)
+
 
 def user_in_workgroup(user,wg):
     if user.is_superuser:

@@ -244,7 +244,7 @@ def adminEdit(item):
         <a href="{% adminEdit item %}">Advanced editor for {{item.name}}</a>
     """
     app_name = item._meta.app_label
-    return reverse("admin:%s_%s_change"%(app_name,item.url_name().lower()),args=[item.id])
+    return reverse("admin:%s_%s_change"%(app_name,item.url_name.lower()),args=[item.id])
 
 @register.simple_tag
 def clone(item):
@@ -254,18 +254,18 @@ def clone(item):
         <a href="{% clone item %}">Clone {{item.name}}</a>
     """
     app_name = item._meta.app_label
-    return reverse("admin:%s_%s_add"%(app_name,item.url_name().lower()))+"?clone=%s"%item.id
+    return reverse("admin:%s_%s_add"%(app_name,item.url_name.lower()))+"?clone=%s"%item.id
 
 @register.simple_tag
 def aboutLink(item):
     app_name = item._meta.app_label
-    return reverse("%s:about"%app_name,args=[item.url_name().lower()])
+    return reverse("%s:about"%app_name,args=[item.help_name])
 
 
 @register.simple_tag
 def itemURL(item):
     app_name = item._meta.app_label
-    return reverse("%s:%s"%(app_name,item.template_name()),args=[item.id])
+    return reverse("%s:%s"%(app_name,item.url_name),args=[item.id])
 
 @register.simple_tag
 def downloadMenu(item):
@@ -291,7 +291,7 @@ def extra_content(extension,item,user):
     try:
         from django.template.loader import get_template
         from django.template import Context
-        return get_template(extension+"/extra_content/"+item.template_name()+".html").render(
+        return get_template(extension+"/extra_content/"+item.url_name+".html").render(
             Context({'item':item,'user':user})
         )
     except template.TemplateDoesNotExist:

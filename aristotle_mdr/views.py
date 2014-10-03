@@ -94,7 +94,7 @@ def download(request,downloadType,iid=None):
 def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
     if iid is None:
         app_name = objtype._meta.app_label
-        return redirect(reverse("%s:dynamic"%app_name,args=["".join(objtype._meta.verbose_name.title().lower().split())]))
+        return redirect(reverse("%s:about"%app_name,args=["".join(objtype._meta.verbose_name.lower().split())]))
     item = get_object_or_404(objtype,pk=iid).item
     if not condition(request.user, item):
         if request.user.is_anonymous():
