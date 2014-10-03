@@ -97,9 +97,9 @@ class WorkgroupMemberTests(utils.LoggedInViewPages,TestCase):
     def test_viewer_cannot_add_or_remove_users(self):
         self.login_viewer()
         response = self.client.get(reverse('aristotle:addWorkgroupMembers',args=[self.wg1.id]))
-        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.status_code,403)
         response = self.client.get(reverse('aristotle:removeWorkgroupRole',args=[self.wg1.id,'Viewer',self.newuser.pk]))
-        self.assertEqual(response.status_code,302)
+        self.assertEqual(response.status_code,403)
 
     def test_manager_can_add_or_remove_users(self):
         self.login_manager()
