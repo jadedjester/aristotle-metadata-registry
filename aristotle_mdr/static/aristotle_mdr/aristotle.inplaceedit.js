@@ -16,8 +16,8 @@
 
             if ($(".inplaceedit").size()) {
 
-var enabledEditText = "<i class='fa fa-edit'></i> Edit";
-var disabledEditText = "<i class='fa fa-power-off'></i> Editing...";
+var enabledEditText = "<i class='fa fa-edit'></i> Enable inline editing";
+var disabledEditText = "<i class='fa fa-power-off'></i> Disable inline editing";
 var toggleInplaceEdit = function () {
     var trigger = $(this);
     if (trigger.hasClass('active')) {
@@ -42,7 +42,7 @@ var toggleInplaceEdit = function () {
 
 var toolbar = $("#ActivateInplaceEdit");
 var actions = toolbar.find(".toolbarActions");
-toolbar.replaceWith("<a class='toolbarAction btn btn-default' href='#' id=\"ActivateInplaceEdit\" accesskey='e'>" + enabledEditText + "</a>");
+toolbar.replaceWith("<a class='toolbarAction ' href='#' id=\"ActivateInplaceEdit\" accesskey='e'>" + enabledEditText + "</a>");
 $("#ActivateInplaceEdit").click(toggleInplaceEdit);
                     }
         });
