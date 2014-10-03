@@ -325,12 +325,13 @@ class AnonymousUserViewingThePages(TestCase):
         self.assertEqual(home.status_code,200)
 
 class LoggedInViewPages(utils.LoggedInViewPages):
+    defaults = {}
     def setUp(self):
         super(LoggedInViewPages, self).setUp()
 
-        self.item1 = self.itemType.objects.create(name="OC1",workgroup=self.wg1)
-        self.item2 = self.itemType.objects.create(name="OC2",workgroup=self.wg2)
-        self.item3 = self.itemType.objects.create(name="OC2",workgroup=self.wg1)
+        self.item1 = self.itemType.objects.create(name="OC1",workgroup=self.wg1,**self.defaults)
+        self.item2 = self.itemType.objects.create(name="OC2",workgroup=self.wg2,**self.defaults)
+        self.item3 = self.itemType.objects.create(name="OC2",workgroup=self.wg1,**self.defaults)
 
     def test_su_can_view(self):
         self.login_superuser()

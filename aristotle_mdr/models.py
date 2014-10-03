@@ -674,9 +674,9 @@ class RepresentationClass(unmanagedObject):
 class ValueDomain(concept):
     template = "aristotle_mdr/concepts/valueDomain.html"
     format = models.CharField(max_length=100)
-    maximumLength = models.PositiveIntegerField()
+    maximumLength = models.PositiveIntegerField(blank=True,null=True)
     unitOfMeasure = models.ForeignKey(UnitOfMeasure,blank=True,null=True)
-    dataType = models.ForeignKey(DataType)
+    dataType = models.ForeignKey(DataType,blank=True,null=True)
 
     conceptualDomain = models.ForeignKey(ConceptualDomain,blank=True,null=True)
     representationClass =  models.ForeignKey(RepresentationClass,blank=True,null=True)
