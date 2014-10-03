@@ -385,23 +385,22 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(reverse('aristotle:deprecate',args=[self.item3.id]))
         self.assertEqual(response.status_code,200)
 
+    def test_help_page_exists(self):
+        self.logout()
+        response = self.client.get(self.get_help_page())
+        self.assertRedirects(response,reverse("aristotle:about",args=[self.item1.help_name])) # This should redirect
+
 
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
     itemType=models.ObjectClass
-
 class PropertyViewPage(LoggedInViewPages,TestCase):
     url_name='property'
     itemType=models.Property
-"""class ValueDomainViewPage(LoggedInViewPages,TestCase):
+class ValueDomainViewPage(LoggedInViewPages,TestCase):
     url_name='valueDomain'
     itemType=models.ValueDomain
-    def setUp(self):
-        super(ValueDomainViewPage, self).setUp()
-        self.item1 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
-        self.item2 = models.Property.objects.create(name="OC2",workgroup=self.wg2)
-        self.item3 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
-"""
+
 
 
 class CustomConceptQuerySetTest(TestCase):

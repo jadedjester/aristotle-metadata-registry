@@ -34,7 +34,10 @@ class LoggedInViewPages(object):
         self.registrar = User.objects.get(pk=self.registrar.pk)
 
     def get_page(self,item):
-        return reverse('aristotle:%s'%self.url_name,args=[item.id])
+        return reverse('aristotle:%s'%self.item1.url_name,args=[item.id])
+
+    def get_help_page(self):
+        return reverse('aristotle:%s'%self.item1.url_name)
 
     def logout(self):
         self.client.post(reverse('django.contrib.auth.views.logout'), {})

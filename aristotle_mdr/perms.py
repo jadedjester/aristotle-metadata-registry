@@ -23,6 +23,7 @@ def user_can_view(user,item):
     # A user can view their own details
     if hasattr(item, "profile"):
         return item == user
+    return item.can_view(user)
     if item.is_managed:
         # If the above works, we have a managed Item
         if item.is_public():
@@ -90,14 +91,16 @@ def user_can_edit(user,item):
     # A user can edit their own details
     if hasattr(item, "profile"):
         return item == user
-    elif item.is_managed:
+    return item.can_edit(user)
+
+    """if item.is_managed:
         if item.is_locked():
             return user.has_perm('aristotle_mdr.edit_locked_in_{wg}'.format(wg=item.workgroup.name))
         else:
             return user.has_perm('aristotle_mdr.edit_unlocked_in_{wg}'.format(wg=item.workgroup.name))
     elif item.is_workgroup:
         return user_is_workgroup_manager(user,item)
-    return False
+    return False"""
 
 def user_in_workgroup(user,wg):
     if user.is_superuser:
