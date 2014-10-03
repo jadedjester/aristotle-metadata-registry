@@ -100,12 +100,16 @@ dl {
     border-bottom:1px solid @colors_border;
     margin-bottom:1em;
     font-size:120%;
-    word-wrap: break-word;
 }
 dl .description {
     padding-bottom:5px;
 }
-
+.description {
+    word-wrap: break-word;
+    p {
+        word-wrap: break-word;
+    }
+}
 #supersedes {
     border-top:1px solid @colors_border;
     border-bottom:1px solid @colors_border;

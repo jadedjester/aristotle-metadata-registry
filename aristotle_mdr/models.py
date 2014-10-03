@@ -57,14 +57,14 @@ class baseAristotleObject(TimeStampedModel):
         return self._meta.verbose_name.title()
     def get_verbose_name_plural(self):
         return self._meta.verbose_name_plural.title()
+    @property
     def url_name(self):
-        s = "".join(self._meta.verbose_name.title().split())
+        s = self._meta.object_name
         s = s[0].lower() + s[1:]
         return s
-    def template_name(self):
-        s = "".join(self._meta.verbose_name.title().split())
-        s = s[0].lower() + s[1:]
-        return s
+    @property
+    def help_name(self):
+        return self._meta.model_name
     # These are all overridden elsewhere, but we use them in permissions instead of inspecting objects to find type.
     @property
     def is_managed(self):
@@ -73,12 +73,32 @@ class baseAristotleObject(TimeStampedModel):
     def is_workgroup(self):
         return False
 
+    def can_edit(self,user):
+        raise NotImplementedError
+    def can_view(self,user):
+        raise NotImplementedError
+
 class unmanagedObject(baseAristotleObject):
     class Meta:
         abstract = True
+
+    def can_edit(self,user):
+        return user.is_superuser
+    def can_view(self,user):
+        return True
+
     @property
     def item(self):
         return self
+
+class aristotleComponent(models.Model):
+    class Meta:
+        abstract = True
+    def can_edit(self,user):
+        return self.parentItem.can_edit(user)
+    def can_view(self,user):
+        return self.parentItem.can_view(user)
+
 
 #Pseudo-abstract: Can't actually abstract as 'tracker' isn't pulled across into the children
 class registryGroup(unmanagedObject):
@@ -153,6 +173,11 @@ class RegistrationAuthority(registryGroup):
     class Meta:
         verbose_name_plural = _("Registration Authorities")
 
+    def can_edit(self,user):
+        return user.has_perm('promote_in_{name}'.format(name=self.name))
+    def can_view(self,user):
+        return True
+
     @property
     def unlocked_states(self):
         return range(STATES.notprogressed,self.locked_state)
@@ -206,6 +231,7 @@ class RegistrationAuthority(registryGroup):
         user.profile.registrationAuthorities.add(self)
 
 
+
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
 
@@ -242,6 +268,11 @@ class Workgroup(registryGroup):
                     ('Administrate workgroup {name}','admin_in_{name}'),
                     ]
             }
+
+    def can_edit(self,user):
+        return user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=self.name))
+    def can_view(self,user):
+        return user.has_perm('aristotle_mdr.view_in_{name}'.format(name=self.name))
 
     def giveRoleToUser(self,role,user):
         super(Workgroup, self).giveRoleToUser(role,user)
@@ -448,6 +479,31 @@ class _concept(baseAristotleObject):
 
     class Meta:
         verbose_name = "item" # So the url_name works for items we can't determine
+
+    def can_edit(self,user):
+        if self.is_locked():
+            return user.has_perm('aristotle_mdr.edit_locked_in_{wg}'.format(wg=self.workgroup.name))
+        else:
+            return user.has_perm('aristotle_mdr.edit_unlocked_in_{wg}'.format(wg=self.workgroup.name))
+
+    def can_view(self,user):
+        if self.is_public():
+            return True
+        else:
+            if user.is_anonymous():
+                return False
+        # If the user can view objects in this workgroup
+        if user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=self.workgroup.name)):
+            return True
+        # if the item is registered and the user is a registrar view view permissions in that authority.
+        if self.is_registered:
+            for s in self.statuses.all():
+                ra = s.registrationAuthority
+                if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
+                    return True
+        return False
+
+
     @property
     def item(self):
         """
@@ -618,30 +674,36 @@ class RepresentationClass(unmanagedObject):
 class ValueDomain(concept):
     template = "aristotle_mdr/concepts/valueDomain.html"
     format = models.CharField(max_length=100)
-    maximumLength = models.PositiveIntegerField()
+    maximumLength = models.PositiveIntegerField(blank=True,null=True)
     unitOfMeasure = models.ForeignKey(UnitOfMeasure,blank=True,null=True)
-    dataType = models.ForeignKey(DataType)
+    dataType = models.ForeignKey(DataType,blank=True,null=True)
 
     conceptualDomain = models.ForeignKey(ConceptualDomain,blank=True,null=True)
     representationClass =  models.ForeignKey(RepresentationClass,blank=True,null=True)
 
-class PermissibleValue(models.Model):
+class PermissibleValue(aristotleComponent):
     value = models.CharField(max_length=20)
     meaning = models.CharField(max_length=100)
     valueDomain = models.ForeignKey(ValueDomain,related_name="permissibleValues")
     order = models.PositiveSmallIntegerField("Position")
     def __unicode__(self):
         return "%s: %s - %s"%(self.valueDomain.name,self.value,self.meaning)
+    @property
+    def parentItem(self):
+        return self.valueDomain
     class Meta:
         ordering = ['order']
 
-class SupplementaryValue(models.Model):
+class SupplementaryValue(aristotleComponent):
     value = models.CharField(max_length=20)
     meaning = models.CharField(max_length=100)
     valueDomain = models.ForeignKey(ValueDomain,related_name="supplementaryValues")
     order = models.PositiveSmallIntegerField("Position")
     def __unicode__(self):
         return "%s: %s - %s"%(self.valueDomain.name,self.value,self.meaning)
+    @property
+    def parentItem(self):
+        return self.valueDomain
     class Meta:
         ordering = ['order']
 
@@ -687,10 +749,13 @@ class GlossaryItem(unmanagedObject):
     def json_link_list(self):
         return dict(id=self.id,name=self.name,url=reverse("aristotle:glossary_by_id",args=[self.id]))
 
-class GlossaryAdditionalDefinition(models.Model):
+class GlossaryAdditionalDefinition(aristotleComponent):
     glossaryItem = models.ForeignKey(GlossaryItem,related_name="alternate_definitions")
     registrationAuthority = models.ForeignKey(RegistrationAuthority)
     description = models.TextField()
+    @property
+    def parentItem(self):
+        return self.glossaryItem
     class Meta:
         unique_together = ('glossaryItem', 'registrationAuthority',)
 

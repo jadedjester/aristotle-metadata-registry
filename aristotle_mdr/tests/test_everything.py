@@ -241,49 +241,6 @@ class RegistryGroupPermissions(TestCase):
         user = User.objects.get(pk=user.pk)
         self.assertFalse(perms.user_is_registrar_in_ra(user,ra))
 
-class WorkgroupMembership(TestCase):
-    def test_userInWorkgroup(self):
-        wg = models.Workgroup.objects.create(name="Test WG 1")
-        user = User.objects.create_user('editor1','','editor1')
-        wg.addUser(user)
-        self.assertTrue(perms.user_in_workgroup(user,wg))
-    def test_RemoveUserFromWorkgroup(self):
-        #Does removing a user from a workgroup remove their permissions? It should!
-        wg = models.Workgroup.objects.create(name="Test WG 1")
-        user = User.objects.create_user('editor1','','editor1')
-        wg.addUser(user)
-        wg.giveRoleToUser("Manager",user)
-        # Caching issue, refresh from DB with correct permissions
-        user = User.objects.get(pk=user.pk)
-        self.assertTrue(perms.user_in_workgroup(user,wg))
-        self.assertTrue(perms.user_is_workgroup_manager(user,wg))
-        wg.removeUser(user)
-        # Caching issue, refresh from DB with correct permissions
-        user = User.objects.get(pk=user.pk)
-        self.assertFalse(perms.user_is_workgroup_manager(user,wg))
-    def test_managersCanEditWorkgroups(self):
-        wg = models.Workgroup.objects.create(name="Test WG 1")
-        user1 = User.objects.create_user('manager','','manager')
-        user2 = User.objects.create_user('editor','','editor')
-        wg.addUser(user1)
-        wg.addUser(user2)
-        wg.giveRoleToUser("Manager",user1)
-        wg.giveRoleToUser("Viewer",user2)
-        # Caching issue, refresh from DB with correct permissions
-        user1 = User.objects.get(pk=user1.pk)
-        user2 = User.objects.get(pk=user2.pk)
-        self.assertTrue(perms.user_in_workgroup(user1,wg))
-        self.assertTrue(perms.user_in_workgroup(user2,wg))
-        self.assertTrue(perms.user_can_edit(user1,wg))
-        self.assertFalse(perms.user_can_edit(user2,wg))
-        wg.removeUser(user1)
-        wg.removeUser(user2)
-        # Caching issue, refresh from DB with correct permissions
-        user1 = User.objects.get(pk=user1.pk)
-        user2 = User.objects.get(pk=user2.pk)
-        self.assertFalse(perms.user_can_edit(user1,wg))
-        self.assertFalse(perms.user_can_edit(user2,wg))
-
 class UserEditTesting(TestCase):
     def test_canViewProfile(self):
         u1 = User.objects.create_user('user1','','user1')
@@ -325,12 +282,13 @@ class AnonymousUserViewingThePages(TestCase):
         self.assertEqual(home.status_code,200)
 
 class LoggedInViewPages(utils.LoggedInViewPages):
+    defaults = {}
     def setUp(self):
         super(LoggedInViewPages, self).setUp()
 
-        self.item1 = self.itemType.objects.create(name="OC1",workgroup=self.wg1)
-        self.item2 = self.itemType.objects.create(name="OC2",workgroup=self.wg2)
-        self.item3 = self.itemType.objects.create(name="OC2",workgroup=self.wg1)
+        self.item1 = self.itemType.objects.create(name="OC1",workgroup=self.wg1,**self.defaults)
+        self.item2 = self.itemType.objects.create(name="OC2",workgroup=self.wg2,**self.defaults)
+        self.item3 = self.itemType.objects.create(name="OC2",workgroup=self.wg1,**self.defaults)
 
     def test_su_can_view(self):
         self.login_superuser()
@@ -385,23 +343,22 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(reverse('aristotle:deprecate',args=[self.item3.id]))
         self.assertEqual(response.status_code,200)
 
+    def test_help_page_exists(self):
+        self.logout()
+        response = self.client.get(self.get_help_page())
+        self.assertRedirects(response,reverse("aristotle:about",args=[self.item1.help_name])) # This should redirect
+
 
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
     itemType=models.ObjectClass
-
 class PropertyViewPage(LoggedInViewPages,TestCase):
     url_name='property'
     itemType=models.Property
-"""class ValueDomainViewPage(LoggedInViewPages,TestCase):
+class ValueDomainViewPage(LoggedInViewPages,TestCase):
     url_name='valueDomain'
     itemType=models.ValueDomain
-    def setUp(self):
-        super(ValueDomainViewPage, self).setUp()
-        self.item1 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
-        self.item2 = models.Property.objects.create(name="OC2",workgroup=self.wg2)
-        self.item3 = models.Property.objects.create(name="OC1",workgroup=self.wg1)
-"""
+
 
 
 class CustomConceptQuerySetTest(TestCase):
