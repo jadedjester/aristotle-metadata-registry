@@ -26,17 +26,24 @@
         </a>
         {% endif %}
     </h1>
-    <div class="btn-group pull-right" >
+    <div class="btn-group pull-right">
         {% if user_can_edit %}
-        <a id="ActivateInplaceEdit" class="btn btn-default"></a>
-        {% endif %}
-        {% if view == "technical" and user.is_active %}
-        <a class="btn btn-default hidden-xs" href="{% adminEdit item %}">
-            <i class="fa fa-sliders"></i> Advanced editor
-        </a>
-        <a class="btn btn-default hidden-xs" href="{% clone item %}">
-            <i class="fa fa-code-fork"></i> Clone
-        </a>
+            <div class="btn-group">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                Edit menu <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a id="ActivateInplaceEdit" class=""></a></li>
+                <li><a class="" href="{% adminEdit item %}">
+                    <i class="fa fa-sliders"></i> Advanced editor
+                </a></li>
+
+                <li class="divider"></li>
+                <li><a class="" href="{% clone item %}">
+                    <i class="fa fa-code-fork"></i> Clone this item
+                </a></li>
+              </ul>
+            </div>
         {% endif %}
         {% if view == "technical" %}
             <a href="?view=simple" id="viewChange" class="btn btn-default"><i class="fa fa-minus-square"></i> Simple View</a>
@@ -45,7 +52,7 @@
         {% endif %}
         <div class="btn-group">
             <button accesskey="d" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-download"></i> Download
+            <i class="fa fa-download"></i> Download <span class="caret"></span>
             </button>
             {% downloadMenu item %}
         </div>
@@ -158,7 +165,7 @@
         </div>
     {% elif item.is_public %}
         {# split the if condition as if its public and not technical, we want nothing not one of the lower alerts #}
-        <div id="progress" class='alert alert-success {% if view != "technical" %}hidden{% endif %}'>
+        <div id="progress" class='alert alert-success hidden'>
             This item is currently public.
         </div>
     {% elif item.is_locked %}
