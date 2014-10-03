@@ -5,25 +5,26 @@
 {% block content %}
 <h1>
     Registration History of
-    <a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a>
-    ({{ item.get_verbose_name }})
+    {{ item.name }}
+    ({{ item.item.get_verbose_name }})
 </h1>
 <ol class="breadcrumb">
     <li><a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a></li>
     <li><a href="#">Registration History</a></li>
 </ol>
 {% if history %}
-    {% for stat, action_list in history %}
+    {% for status, action_list in history %}
     <div>
-        <h2>History for <em>{{ stat.registrationAuthority }}</em> authority</h2>
+        <h2>History for <em><a href="{% url 'aristotle:registrationAuthority' status.registrationAuthority.id %}">{{ status.registrationAuthority }}</a></em></h2>
         <table class="table">
         <thead>
             <th>Date</th>
             <th>State</th>
-            <th>RA meaning</th>
-            {# <th>In dictionary</th> #}
+            <th>Status definition</th>
             <th>Comments</th>
-            <th>Who</th>
+            {% if item|can_edit:request.user %}
+                <th>Who</th>
+            {% endif %}
         </thead>
         <tbody>
         {% for action in action_list %}
@@ -31,17 +32,37 @@
                 <td>{{ action.field_dict.registrationDate }}</td>
                 <td>{{ action.field_dict.state|stateToText }}</td>
                 <td>{{ action.field_dict.meaning }}</td>
-                {# <td>{{ action.field_dict.inDictionary }}</td> #}
                 <td>{{ action.field_dict.changeDetails }}</td>
-                <td>
-                {% with huser=action.revision.user %}
-                    {% if huser.first_name or huser.last_name %}
-                        {{ huser.first_name }}{{ huser.last_name }}
-                    {% else %}
-                        {{ huser.username }}
-                    {% endif %}
-                {% endwith %}
-                </td>
+                {% if item|can_edit:request.user %}
+                    <td>
+                    {% with huser=action.revision.user %}
+                        {% if huser.first_name or huser.last_name %}
+                            {{ huser.first_name }}{{ huser.last_name }}
+                        {% else %}
+                            {{ huser.username }}
+                        {% endif %}
+                    {% endwith %}
+                    </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            {# if its empty it must have been imported and something weird has happened so show the current one #}
+            <tr>
+                <td>{{ status.registrationDate }}</td>
+                <td>{{ status.state|stateToText }}</td>
+                <td>{{ status.meaning }}</td>
+                <td>{{ status.changeDetails }}</td>
+                {% if item|can_edit:request.user %}
+                    <td>
+                    {% with huser=action.revision.user %}
+                        {% if huser.first_name or huser.last_name %}
+                            {{ huser.first_name }}{{ huser.last_name }}
+                        {% else %}
+                            {{ huser.username }}
+                        {% endif %}
+                    {% endwith %}
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>
