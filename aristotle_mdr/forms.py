@@ -244,9 +244,9 @@ class AddWorkgroupMembers(forms.Form):
             choices=zip(sorted(MDR.Workgroup.roles.keys()),sorted(MDR.Workgroup.roles.keys())),
             widget=forms.CheckboxSelectMultiple
             )
-    users = forms.MultipleChoiceField(
+    users = forms.ModelMultipleChoiceField(
             label="Select users",
-            choices=[(user.id,"%s %s (%s)"%(user.first_name,user.last_name,user.username)) for user in User.objects.all()],
+            queryset=User.objects.all(),
             widget=forms.CheckboxSelectMultiple
             )
 
@@ -255,9 +255,6 @@ class AddWorkgroupMembers(forms.Form):
         roles = [role for role in roles if role in MDR.Workgroup.roles.keys()]
         return roles
 
-    def clean_users(self):
-        users = self.cleaned_data['users']
-        return User.objects.filter(id__in=users)
 
 # Thanks http://stackoverflow.com/questions/6958708/grappelli-to-hide-sortable-field-in-inline-sortable-django-admin
 class PermissibleValueForm(forms.ModelForm):

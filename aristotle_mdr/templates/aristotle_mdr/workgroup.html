@@ -1,5 +1,6 @@
 {% extends "aristotle_mdr/user/userHome.html" %}
 {% load inplace_edit %}
+{% load humanize %}
 
 {% block collapse-link%}
     <i class="fa fa-users fa-fw"></i> {{ workgroup.name }}</a>
@@ -18,28 +19,35 @@
 
 {% block page %}
 <h1>{% block title %}{{ workgroup.name }}{% endblock %}</h1>
+<div class="row">
+
 <aside id="infoBox" class="col-xs-12 col-sm-4 pull-right">
 <section id="items">
 <header>Recently changed items</header>
     <ul>
         {% for item in recent %}
-        <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %} ({{ item.get_verbose_name }})</li>
+        <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %} ({{ item.get_verbose_name }})
+            <br><small>Modified {{ item.modified|naturaltime }}</small>
+        </li>
         {% endfor %}
     </ul>
 </section>
 </aside>
+
+<div class="col-sm-8">
 <header>Details</header>
 <dl>
-<dt>Managers</dt>
-<dd>
-{% for member in workgroup.managers %}
-    {{ member.first_name }} {{ member.last_name }}
-    {% if member.profile.is_registrar %}*{% endif %}
-    {% if not forloop.last %},{% endif %}
-{% endfor %}
+<dt>Managers
 {% if user_is_admin %}
     <a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}" class="inline_action">Add</a>
 {% endif %}
+</dt>
+<dd>
+{% for member in workgroup.managers %}
+    {{ member.first_name }} {{ member.last_name }}{% if member.profile.is_registrar %}*{% endif %}{% if not forloop.last %},{% endif %}
+{% empty %}
+    <em>No active managers</em>
+{% endfor %}
 </dd>
 <dt>Members</dt>
 <dd>
@@ -62,24 +70,11 @@
 </dl>
 
 <h2>Recent conversations</h2>
-<a href="/forum?workgroup={{ wg.id }}">View all posts.</a>
-<table>
-    <thead>
-        <tr>
-            <td>Title</td>
-            <td>Author</td>
-            <td>Last comment</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+<a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
+{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=item.discussionpost_set.all|slice:":5" %}
 
+</div>
+</div>
 <div id="addMember" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content"></div>

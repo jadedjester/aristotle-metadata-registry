@@ -8,7 +8,7 @@
     <h1>Showing all discussions</h1>
 
     <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}">New discussion</a>
-    {% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=discussions %}
+    {% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=discussions showWorkgroups=True %}
     <a class="btn btn-default" href="{% url 'aristotle:discussionsNew' %}">New discussion</a>
 
 {% endblock %}

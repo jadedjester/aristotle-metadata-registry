@@ -8,10 +8,13 @@ from django.utils.translation import ugettext as _
 from django.forms.extras import widgets
 
 conf = dict(
-    toolbar=("save cancel | undo redo | bold italic | "
+    toolbar1=(" | undo redo | bold italic | "
              "subscript superscript | " #spellchecker | "
-             "bullist numlist | link image"),
+             "bullist numlist | link image glossary"),
+    toolbar2=("save cancel | code |  "),
     #plugins= "spellchecker",
+    plugins= "code link image",
+    #link_list='/glossary/ajaxlist',
     menubar=False)
 
 class AristotleRichTextField(AdaptorTinyMCEField):

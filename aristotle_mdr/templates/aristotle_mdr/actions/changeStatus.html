@@ -3,74 +3,70 @@
 {% block title %}Change state for {{ item.name }}{% endblock %}
 {% block content %}
 <form method="post" action="{% url 'aristotle:changeStatus' item.id %}">{% csrf_token %}
-
-{% if item and not request.is_ajax %}
-<ol class="breadcrumb">
-  <li><a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a></li>
-  <li class="active">Change registation status</li>
-</ol>
-{% endif %}
-<header>This form allows you to change the status of items in the registratation authorities you are a registrar.
-</header>
-<section>
-
-
-{% if request.is_ajax %}
-    If you need to alter the date use the <a href="{% url 'aristotle:changeStatus' item.id %}">advanced registration page</a>.
-{% else %}
-    <div id="changeStatusDate">
-        <span>
-            {{ form.registrationDate.label }}:
-            {{ form.registrationDate.errors }}
-        </span>
-        <span>
-            {{ form.registrationDate }}
-        </span>
+    <div class="modal-body">
+        {% if item and not request.is_ajax %}
+        <ol class="breadcrumb">
+          <li><a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a></li>
+          <li class="active">Change registation status</li>
+        </ol>
+        {% endif %}
+        <header>This form allows you to change the status of items in the registratation authorities you are a registrar.
+        </header>
+        <section>
+        {% if request.is_ajax %}
+            If you need to alter the date use the <a href="{% url 'aristotle:changeStatus' item.id %}">advanced registration page</a>.
+        {% else %}
+            <div id="changeStatusDate">
+                <span>
+                    {{ form.registrationDate.label }}:
+                    {{ form.registrationDate.errors }}
+                </span>
+                <span>
+                    {{ form.registrationDate }}
+                </span>
+            </div>
+        {% endif %}
+        <div id="cascadeRegistration">
+            <span>
+                {{ form.cascadeRegistration.label }}:
+                {{ form.cascadeRegistration.errors }}
+            </span>
+            <span>
+                {{ form.cascadeRegistration }}
+            </span>
+        </div>
+        <div id="changeStatus">
+            <div>
+                <span>
+                    {{ form.state.label }}
+                    {{ form.state.errors }}
+                </span>
+                <span>
+                    {{ form.registrationAuthorities.label }}
+                    {{ form.registrationAuthorities.errors }}
+                </span>
+            </div>
+            <div>
+                {{ form.state }}
+                {{ form.registrationAuthorities }}
+            </div>
+        </div>
+        <div>
+            {{ form.changeDetails.label }} (optional):
+        </div>
+        <div>
+            {{ form.changeDetails }}
+        </div>
+        {% block save %}
+        {% endblock %}
+        </section>
     </div>
-{% endif %}
-<div id="cascadeRegistration">
-    <span>
-        {{ form.cascadeRegistration.label }}:
-        {{ form.cascadeRegistration.errors }}
-    </span>
-    <span>
-        {{ form.cascadeRegistration }}
-    </span>
-</div>
-<div id="changeStatus">
-    <div>
-        <span>
-            {{ form.state.label }}
-            {{ form.state.errors }}
-        </span>
-        <span>
-            {{ form.registrationAuthorities.label }}
-            {{ form.registrationAuthorities.errors }}
-        </span>
-    </div>
-    <div>
-        {{ form.state }}
-        {{ form.registrationAuthorities }}
-    </div>
-</div>
-
-<div>
-    {{ form.changeDetails.label }} (optional):
-</div>
-<div>
-    {{ form.changeDetails }}
-</div>
-
-{% block save %}
-{% endblock %}
-
-</section>
     <div class="modal-footer">
-    {% if request.is_ajax %}
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-    {% else %}
-        <a class="btn btn-default" href="{% url 'aristotle:item' item.id %}">Cancel</a>
-    {% endif %}
+        {% if request.is_ajax %}
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        {% else %}
+            <a class="btn btn-default" href="{% url 'aristotle:item' item.id %}">Cancel</a>
+        {% endif %}
         <input type="submit" class="btn btn-primary" value="Update Status" />
     </div>
 </form>

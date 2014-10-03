@@ -16,11 +16,8 @@
 </p>
 <dl>
 <dt>Managers {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Manager" class="inline_action">Add</a>{% endif %}</dt>
-<dd>
-Workgroup managers can add and remove users from a workgroup, delete workgroup
-conversations and retire a workgroup. They can also create and edit content
-<em>that has been not progressed to a locked state</em>.
-<ul>
+<dd class="row">
+<ul class="col-sm-5 col-sm-offset-1">
 {% for member in workgroup.managers %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
         {% if user_is_admin %}
@@ -29,11 +26,15 @@ conversations and retire a workgroup. They can also create and edit content
     </li>
 {% endfor %}
 </ul>
+<p class="col-sm-6">
+Workgroup managers can add and remove users from a workgroup, delete workgroup
+conversations and retire a workgroup. They can also create and edit content
+<em>that has been not progressed to a locked state</em>.
+</p>
 </dd>
 <dt>Super-editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Super-Editor" class="inline_action">Add</a>{% endif %}</dt>
-<dd>
-Super-editors are trusted editors that can create and edit content that has been progressed to a locked state, but cannot edit content that is public. They also have the permissions of editors.
-<ul>
+<dd class="row">
+<ul class="col-sm-5 col-sm-offset-1">
 {% for member in workgroup.super_editors %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
         {% if user_is_admin %}
@@ -42,11 +43,14 @@ Super-editors are trusted editors that can create and edit content that has been
     </li>
 {% endfor %}
 </ul>
+<p class="col-sm-6">
+Super-editors are trusted editors that can create and edit content that has been
+progressed to a locked state, but cannot edit content that is public. They also have
+the permissions of editors.</p>
 </dd>
 <dt>Editors {% if user_is_admin %}<a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Editor" class="inline_action">Add</a>{% endif %}</dt>
-<dd>
-Editors can edit content that has not been progressed by a registrar to a locked state. They can view all content in a workgroup and can set the flag that an item is ready for review by a registrar.
-<ul>
+<dd class="row">
+<ul class="col-sm-5 col-sm-offset-1">
 {% for member in workgroup.editors %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
         {% if user_is_admin %}
@@ -55,15 +59,18 @@ Editors can edit content that has not been progressed by a registrar to a locked
     </li>
 {% endfor %}
 </ul>
+<p class="col-sm-6">
+Editors can edit content that has not been progressed by a registrar to a locked state.
+They can view all content in a workgroup and can set the flag that an item is ready for review by a registrar.
+</p>
 </dd>
 <dt>Viewers {% if user_is_admin %}
     <a  data-toggle="modal" data-target="#addMember"
         href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}?role=Viewer" class="inline_action">Add
     </a>{% endif %}
 </dt>
-<dd>
-Viewers are only able to view content in a workgroup. They may also participate in workgroup conversations.
-<ul>
+<dd class="row">
+<ul class="col-sm-5 col-sm-offset-1">
 {% for member in workgroup.viewers %}
     <li>{{ member.first_name }} {{ member.last_name }} ({{ member.username }})
         {% if user_is_admin %}
@@ -72,6 +79,9 @@ Viewers are only able to view content in a workgroup. They may also participate 
     </li>
 {% endfor %}
 </ul>
+<p class="col-sm-6">
+Viewers are only able to view content in a workgroup. They may also participate in workgroup conversations.
+</p>
 </dd>
 </dl>
 

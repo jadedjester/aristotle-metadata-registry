@@ -81,6 +81,9 @@ BOOTSTRAP3 = {
     'base_url': '/static/aristotle_mdr/bootstrap/',
 }
 
+# We need this to make sure users can
+AUTHENTICATION_BACKENDS = ('aristotle_mdr.backends.AristotleBackend',)
+
 # Used for in place editing
 INPLACEEDIT_EDIT_EMPTY_VALUE = 'Double click to edit'
 INPLACEEDIT_AUTO_SAVE = False
@@ -91,7 +94,9 @@ INPLACEEDIT_SUCCESS_TEXT = 'Successfully saved'
 INPLACEEDIT_UNSAVED_TEXT = 'You have unsaved changes'
 INPLACE_ENABLE_CLASS = 'enable'
 DEFAULT_INPLACE_EDIT_OPTIONS = {
-'menubar_item':"file"
+'menubar_item':"file",
+'auto_height':True,
+'auto_width':True,
 } # dictionnary of the optionals parameters that the templatetag can receive to change its behavior (see the Advanced usage section)
 DEFAULT_INPLACE_EDIT_OPTIONS_ONE_BY_ONE = True # modify the behavior of the DEFAULT_INPLACE_EDIT_OPTIONS usage, if True then it use the default values not specified in your template, if False it uses these options only when the dictionnary is empty (when you do put any options in your template)
 #ADAPTOR_INPLACEEDIT_EDIT = 'app_name.perms.MyAdaptorEditInline' # Explain in Permission Adaptor API

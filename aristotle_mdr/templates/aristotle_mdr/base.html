@@ -16,14 +16,17 @@
       <script src="{% static 'aristotle_mdr/possum.js' %}" type="text/javascript"></script>
       <script src="{% static 'aristotle_mdr/dropit/dropit.js' %}" type="text/javascript"></script>
 
-    <link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" />
+    <!-- link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" / -->
+    <!-- link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" / -->
     {{ form.media }}
 
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.less' %}" />
+    {% if user_can_edit %}
+        <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.inplaceedit.less' %}" />
+    {% endif %}
     <script src="{% static 'aristotle_mdr/aristotle.js' %}" type="text/javascript"></script>
 
     {% block extra_head_scripts %}
@@ -37,7 +40,8 @@
 <script src="/static/js/jquery.json.js" type="text/javascript"></script>
 {% if user_can_edit %}
 {# This block is copied from django-inplaceedit with minor tweaks #}
-<script type="text/javascript" src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+<link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.inplaceedit.less' %}" />
+<script type="text/javascript" src="//tinymce.cachefly.net/4.1/tinymce.min.js"></script>
 <script src="/static/js/jquery.inplaceeditform.js" type="text/javascript"></script>
 <script src="/static/js/jquery.inplaceeditform.hooks.js" type="text/javascript"></script>
 

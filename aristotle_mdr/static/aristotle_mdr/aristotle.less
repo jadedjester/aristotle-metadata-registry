@@ -63,6 +63,22 @@ tbody.newRa {
     }
 }
 
+.inline_action {
+    &:before {content: "["}
+    &:after  {content: "]"}
+    margin-left:2px;
+    font-size:80%;
+    font-weight:normal;
+    color:darkblue;
+    text-decoration:none;
+    &:hover {
+        text-decoration:underline;
+    }
+    &.enable {
+        font-weight:bold;
+    }
+}
+
 dl.quickkeys {
     dt {
         float:left;
@@ -84,6 +100,7 @@ dl {
     border-bottom:1px solid @colors_border;
     margin-bottom:1em;
     font-size:120%;
+    word-wrap: break-word;
 }
 dl .description {
     padding-bottom:5px;
@@ -127,22 +144,6 @@ table.mceLayout iframe {
     }
     h3 {
         font-size:1.3em;
-    }
-}
-
-.inline_action {
-    &:before {content: "["}
-    &:after  {content: "]"}
-    margin-left:2px;
-    font-size:80%;
-    font-weight:normal;
-    color:darkblue;
-    text-decoration:none;
-    &:hover {
-        text-decoration:underline;
-    }
-    &.enable {
-        font-weight:bold;
     }
 }
 
@@ -411,13 +412,6 @@ table.codeList {
     }
 }
 
-.inplaceedit.enable, .inline_action.enable {
-    padding:2px;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    background-color: #f7f7f7 !important;
-}
 
 table.dssInclusions {
     tr>*:nth-child(4),tr>*:nth-child(5) {

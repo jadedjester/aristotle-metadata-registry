@@ -203,6 +203,10 @@ class RegistrationAuthority(registryGroup):
                    self.register(i,state,user,registrationDate=registrationDate,cascade=cascade,changeDetails=changeDetails)
         return reg
 
+    def giveRoleToUser(self,role,user):
+        super(RegistrationAuthority, self).giveRoleToUser(role,user)
+        user.profile.registrationAuthorities.add(self)
+
 
 """
 A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
@@ -241,6 +245,11 @@ class Workgroup(registryGroup):
                     ]
             }
 
+    def giveRoleToUser(self,role,user):
+        super(Workgroup, self).giveRoleToUser(role,user)
+        if self not in user.profile.workgroups.all():
+            user.profile.workgroups.add(self)
+
     def addUser(self,user):
         if self not in user.profile.workgroups.all():
             user.profile.workgroups.add(self)
@@ -277,7 +286,7 @@ class discussionAbstract(TimeStampedModel):
     body = models.TextField()
     author = models.ForeignKey(User)
     class Meta:
-        ordering = ['modified']
+        ordering = ['-modified']
         abstract = True
     @property
     def edited(self):
@@ -594,8 +603,10 @@ class Property(concept):
 class Measure(unmanagedObject):
     pass
 class UnitOfMeasure(unmanagedObject):
+    template="aristotle_mdr/unmanaged/unitOfMeasure.html"
+
     measure = models.ForeignKey(Measure)
-    symbol =  models.CharField(max_length=20)
+    symbol =  models.CharField(max_length=20,blank=True)
 class DataType(concept):
     template = "aristotle_mdr/concepts/dataType.html"
     pass
@@ -675,12 +686,15 @@ class Package(concept):
         return self.items.select_subclasses()
 
 class GlossaryItem(unmanagedObject):
-    pass
+    def json_link_list(self):
+        return dict(id=self.id,name=self.name,url=reverse("aristotle:glossary_by_id",args=[self.id]))
 
 class GlossaryAdditionalDefinition(models.Model):
     glossaryItem = models.ForeignKey(GlossaryItem,related_name="alternate_definitions")
     registrationAuthority = models.ForeignKey(RegistrationAuthority)
     description = models.TextField()
+    class Meta:
+        unique_together = ('glossaryItem', 'registrationAuthority',)
 
 # Create a 1-1 user profile so we don't need to extend user
 # Thanks to http://stackoverflow.com/a/965883/764357
@@ -722,6 +736,10 @@ class PossumProfile(models.Model):
     @property
     def is_registrar(self):
         return perms.user_is_registrar(self.user)
+
+    @property
+    def discussions(self):
+        return DiscussionPost.objects.filter(workgroup__in=self.myWorkgroups.all())
 
     @property
     def registrarAuthorities(self):
@@ -823,10 +841,10 @@ def defaultData():
         ]),
     ]
     for measure,units in unitsOfMeasure:
-        m,created = Measure.objects.get_or_create(name=name,description="")
+        m,created = Measure.objects.get_or_create(name=measure,description="")
         print "making measure: {name}".format(name=name)
-        for name,description in units:
-            u,created = UnitOfMeasure.objects.get_or_create(name=name,description=desc,measure=m)
+        for name,symbol in units:
+            u,created = UnitOfMeasure.objects.get_or_create(name=name,symbol=symbol,measure=m)
             print "   making unit of measure: {name}".format(name=name)
 
 
@@ -874,8 +892,8 @@ def new_comment_created(sender, **kwargs):
         return # We don't need to tell someone they replied to themselves
     notify.send(comment.author, recipient=post.author, verb="made a comment on your post", target=post)
 
-# Loads test bed of data
-def testData():
+# Loads example data, this is never used in formal testing.
+def exampleData(): # pragma: no cover
     defaultData()
     print "configuring users"
 

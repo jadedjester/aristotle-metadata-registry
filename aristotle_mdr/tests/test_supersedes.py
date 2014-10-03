@@ -27,12 +27,12 @@ class SupersededProperty(TestCase):
                 state=self.ra.public_state
                 )
         #self.item1=models.ObjectClass.objects.get(id=self.item1.id)
-        
+
         self.assertFalse(self.item1.is_superseded)
         s.state = models.STATES.superseded
         s.save()
         self.assertTrue(self.item1.is_superseded)
-    
+
 
 class SupersedePage(utils.LoggedInViewPages,TestCase):
     def setUp(self):
@@ -91,19 +91,19 @@ class DeprecatePage(utils.LoggedInViewPages,TestCase):
         self.assertEqual(response.status_code,200)
         self.assertListEqual(list(self.item1.supersedes.all()),[])
 
-        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id]),{'olderItems': [self.item1.id]})
+        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id,]),{'olderItems': [self.item1.id,]})
         self.assertEqual(response.status_code,200) # An item cannot deprecate itself, so it did not save and was served the form again.
         self.assertListEqual(list(self.item1.supersedes.all()),[])
 
-        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id]),{'olderItems': [self.item2.id,self.item3.id]})
+        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id,]),{'olderItems': [self.item2.id,self.item3.id]})
         self.assertEqual(response.status_code,200) #  Item 3 is a different workgroup, and the editor cannot see it , so cannot deprecate, so it did not save and was served the form again.
         self.assertListEqual(list(self.item1.supersedes.all()),[])
 
-        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id]),{'olderItems': [self.item2.id]})
+        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id,]),{'olderItems': [self.item2.id,]})
         self.assertEqual(response.status_code,302) # Item 2 can deprecate item 1, so this saved and redirected properly.
         self.assertListEqual(list(self.item1.supersedes.all()),[self.item2])
 
-        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id]),{'olderItems': [self.item3.id]})
+        response = self.client.post(reverse('aristotle:deprecate',args=[self.item1.id,]),{'olderItems': [self.item3.id,]})
         self.assertEqual(response.status_code,200) # Item 3 is a different workgroup, and the editor cannot see it , so cannot deprecate, so it did not save and was served the form again.
         self.assertListEqual(list(self.item1.supersedes.all()),[self.item2])
 

@@ -23,10 +23,14 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^valuedomain/(?P<iid>\d+)?/?$', views.valuedomain, name='valueDomain'),
     url(r'^dataelementconcept/(?P<iid>\d+)?/?$', views.dataelementconcept, name='dataElementConcept'),
     url(r'^dataelement/(?P<iid>\d+)?(?:-[a-z\-]*)?/?$', views.dataelement, name='dataElement'),
-    url(r'^glossary/(?P<iid>\d+)/?$', views.glossaryById, name='glossary_id'),
-    url(r'^datatype/(?P<iid>\d+)(?:/(?P<subpage>\w+))?/?$', views.datatype, name='dataType'),
+    url(r'^datatype/(?P<iid>\d+)/?$', views.datatype, name='dataType'),
+    url(r'^unitofmeasure/(?P<iid>\d+)/?$', views.unitofmeasure, name='unitOfMeasure'),
     url(r'^package/(?P<iid>\d+)/?$', views.package, name='package'),
-    #url(r'^glossary/(?P<slug>\w+)/?$', views.glossaryBySlug, name='glossary_slug'),
+
+    url(r'^glossary/?$', views.glossary, name='glossary'),
+    url(r'^glossary/(?P<iid>\d+)/?$', views.glossaryById, name='glossary_by_id'),
+    #url(r'^glossary/(?P<slug>\w+)/?$', views.glossaryBySlug, name='glossary_by_slug'),
+    url(r'^glossary/ajaxlist?$', views.glossaryAjaxlist, name='glossaryAjaxlist'), # For TinyMCE
 
     url(r'^workgroup/(?P<iid>\d+)/?$', views.workgroup, name='workgroup'),
     url(r'^workgroup/(?P<iid>\d+)/members/?$', views.workgroupMembers, name='workgroupMembers'),
@@ -85,7 +89,7 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 
-    url(r'^help/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
+    url(r'^about/(?P<template>.+)/?$', views.DynamicTemplateView.as_view(), name="about"),
     url(r'^about/aristotle/?$', TemplateView.as_view(template_name='aristotle_mdr/static/aristotle_mdr.html'), name="aboutMain"),
     url(r'^help/(?P<template>.+)/?$', views.HelpTemplateView.as_view(), name="help"),
     url(r'^help/?$', TemplateView.as_view(template_name='aristotle_mdr/static/help/help.html'), name="helpMain"),
