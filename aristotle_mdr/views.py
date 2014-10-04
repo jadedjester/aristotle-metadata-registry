@@ -494,8 +494,8 @@ def allRegistrationAuthorities(request):
         )
 
 def glossary(request):
-    return render(request,"aristotle_mdr/unmanaged/glossary.html",
-        {'terms':MDR.GlossaryItem.objects.all().order_by('name')
+    return render(request,"aristotle_mdr/glossary.html",
+        {'terms':MDR.GlossaryItem.objects.all().order_by('name').visible(request.user)
         })
 
 def glossaryAjaxlist(request):
@@ -503,9 +503,8 @@ def glossaryAjaxlist(request):
     results = [g.json_link_list() for g in MDR.GlossaryItem.objects.all()] #visible(request.user).all()]
     return HttpResponse(json.dumps(results), content_type="application/json")
 
-def glossaryById(request,iid):
-    term = get_object_or_404(MDR.GlossaryItem,id=iid)
-    return render(request,"aristotle_mdr/unmanaged/glossaryItem.html",{'item':term})
+def glossaryById(*args,**kwargs):
+    return render_if_user_can_view(MDR.GlossaryItem,*args,**kwargs)
 #def glossaryBySlug(request,slug):
 #    term = get_object_or_404(MDR.GlossaryItem,id=iid)
 #    return render(request,"aristotle_mdr/glossaryItem.html",{'item':term})

@@ -1,11 +1,12 @@
 --index-url https://pypi.python.org/simple/
 
+Django==1.6.7
+
 -e git://github.com/jedie/django-reversion-compare@ce4558ab700707d70401b89c824016e2e2584952#egg=django_reversion_compare-dev
 
 -e .
 
 #Some stuff fails on Django 1.7
-Django==1.6.7
 django-autocomplete-light==2.0.0a18
 
 Django-Select2==4.2.2

@@ -209,6 +209,12 @@ class PackageVisibility(TestCase,ManagedObjectVisibility):
         self.item = models.Package.objects.create(name="Test Package",
             workgroup=self.wg,
             )
+class GlossaryVisibility(TestCase,ManagedObjectVisibility):
+    def setUp(self):
+        self.wg = models.Workgroup.objects.create(name="Setup WG")
+        self.item = models.GlossaryItem.objects.create(name="Test Glossary",
+            workgroup=self.wg,
+            )
 
 class RegistryGroupPermissions(TestCase):
     def test_RegistrationAuthority_name_change(self):
@@ -371,6 +377,9 @@ class PropertyViewPage(LoggedInViewPages,TestCase):
 class ValueDomainViewPage(LoggedInViewPages,TestCase):
     url_name='valueDomain'
     itemType=models.ValueDomain
+class GlossaryViewPage(LoggedInViewPages,TestCase):
+    url_name='glossary'
+    itemType=models.GlossaryItem
 
 
 

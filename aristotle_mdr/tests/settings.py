@@ -2,6 +2,9 @@ import os
 from aristotle_mdr.required_settings import *
 
 project_dir = os.path.abspath('../') # or path to the dir. that the db should be in.
+SOUTH_TESTS_MIGRATE = False # To disable migrations and use syncdb instead
+SKIP_SOUTH_TESTS = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
