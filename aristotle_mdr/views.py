@@ -144,6 +144,12 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
 
 def itemPackages(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
+    if not item:
+        if request.user.is_anonymous():
+            return redirect('/accounts/login?next=%s' % request.path)
+        else:
+            raise PermissionDenied
+
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     packages = item.packages.all().visible(request.user)
     paginator = Paginator(packages, PAGES_PER_RELATED_ITEM)
@@ -162,6 +168,11 @@ def itemPackages(request, item_id):
 
 def registrationHistory(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
+    if not item:
+        if request.user.is_anonymous():
+            return redirect('/accounts/login?next=%s' % request.path)
+        else:
+            raise PermissionDenied
     from reversion.revisions import default_revision_manager
     history = []
     for s in item.statuses.all():
@@ -732,12 +743,13 @@ def changeStatus(request, iid):
             state = form.cleaned_data['state']
             regDate = form.cleaned_data['registrationDate']
             cascade = form.cleaned_data['cascadeRegistration']
+            changeDetails = form.cleaned_data['changeDetails']
             if regDate is None:
                 regDate = timezone.now().date()
             for ra in ras:
                 ra = MDR.RegistrationAuthority.objects.get(id=int(ra))
-                ra.register(item,state,request.user,regDate,cascade)
-            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name,args=[item.id]))
+                ra.register(item,state,request.user,regDate,cascade,changeDetails)
+            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
         form = MDRForms.ChangeStatusForm(ras=ras)
     return render(request,"aristotle_mdr/actions/changeStatus.html",
