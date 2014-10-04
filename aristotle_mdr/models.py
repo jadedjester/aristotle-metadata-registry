@@ -65,13 +65,6 @@ class baseAristotleObject(TimeStampedModel):
     @property
     def help_name(self):
         return self._meta.model_name
-    # These are all overridden elsewhere, but we use them in permissions instead of inspecting objects to find type.
-    @property
-    def is_managed(self):
-        return False
-    @property
-    def is_workgroup(self):
-        return False
 
     def can_edit(self,user):
         raise NotImplementedError
@@ -297,9 +290,6 @@ class Workgroup(registryGroup):
         # Convenience class as we can't call functions in templates
         return self.items.select_subclasses()
 
-    @property
-    def is_workgroup(self):
-        return True
     @property
     def managers(self):
         return Group.objects.get(name="{name} {role}".format(name=self.name, role='Manager')).user_set.all()
@@ -530,9 +520,6 @@ class _concept(baseAristotleObject):
     @property
     def registryCascadeItems(self):
         return []
-    @property
-    def is_managed(self):
-        return True
     @property
     def is_registered(self):
         return self.statuses.count() > 0

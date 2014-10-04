@@ -317,6 +317,34 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(self.get_page(self.item2))
         self.assertEqual(response.status_code,403)
 
+    def test_su_can_download_pdf(self):
+        self.login_superuser()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,200)
+
+    def test_editor_can_download_pdf(self):
+        self.login_editor()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_viewer_can_download_pdf(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_viewer_can_download_pdf(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
     def test_viewer_cannot_view_supersede_page(self):
         self.login_viewer()
         response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))

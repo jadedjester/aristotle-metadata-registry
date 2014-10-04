@@ -53,12 +53,6 @@ def get_if_user_can_view(objtype,user,iid):
     else:
         return False
 
-def get_or_none(model, **kwargs):
-    try:
-        return model.objects.get(**kwargs)
-    except model.DoesNotExist:
-        return None
-
 def render_if_user_can_view(*args,**kwargs):
     return render_if_condition_met(user_can_view,*args,**kwargs)
 
@@ -838,8 +832,8 @@ def browse(request,oc_id=None,dec_id=None):
 def bulkFavourite(request,url="aristotle:userFavourites"):
     print request.GET.getlist('favourites',[])
     for item in request.GET.getlist('favourites',[]):
-        item = get_or_none(MDR.trebleObject,id=int(item))
-        if item and user_can_view(request.user,item):
+        item = get_if_user_can_view(MDR._concept,request.user,id=int(item))
+        if item:
             request.user.profile.favourites.add(item)
     getVars = request.GET.copy()
     if 'favourites' in getVars.keys(): getVars.pop('favourites')
