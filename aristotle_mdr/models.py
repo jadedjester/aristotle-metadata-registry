@@ -65,13 +65,6 @@ class baseAristotleObject(TimeStampedModel):
     @property
     def help_name(self):
         return self._meta.model_name
-    # These are all overridden elsewhere, but we use them in permissions instead of inspecting objects to find type.
-    @property
-    def is_managed(self):
-        return False
-    @property
-    def is_workgroup(self):
-        return False
 
     def can_edit(self,user):
         raise NotImplementedError
@@ -297,9 +290,6 @@ class Workgroup(registryGroup):
         # Convenience class as we can't call functions in templates
         return self.items.select_subclasses()
 
-    @property
-    def is_workgroup(self):
-        return True
     @property
     def managers(self):
         return Group.objects.get(name="{name} {role}".format(name=self.name, role='Manager')).user_set.all()
@@ -531,9 +521,6 @@ class _concept(baseAristotleObject):
     def registryCascadeItems(self):
         return []
     @property
-    def is_managed(self):
-        return True
-    @property
     def is_registered(self):
         return self.statuses.count() > 0
 
@@ -747,9 +734,10 @@ class Package(concept):
     def classedItems(self):
         return self.items.select_subclasses()
 
-class GlossaryItem(unmanagedObject):
+class GlossaryItem(concept):
+    template = "aristotle_mdr/concepts/glossaryItem.html"
     def json_link_list(self):
-        return dict(id=self.id,name=self.name,url=reverse("aristotle:glossary_by_id",args=[self.id]))
+        return dict(id=self.id,name=self.name,url=reverse("aristotle:glossaryItem",args=[self.id]))
 
 class GlossaryAdditionalDefinition(aristotleComponent):
     glossaryItem = models.ForeignKey(GlossaryItem,related_name="alternate_definitions")
@@ -959,7 +947,7 @@ def new_comment_created(sender, **kwargs):
 
 # Loads example data, this is never used in formal testing.
 def exampleData(): # pragma: no cover
-    defaultData()
+    #defaultData()
     print "configuring users"
 
     if not User.objects.filter(username__iexact='possum').first():
@@ -1070,6 +1058,13 @@ def exampleData(): # pragma: no cover
         user.profile.registrationAuthorities.add(ra)
         ra.giveRoleToUser(role,user)
         user.save()
+    gi,c  = GlossaryItem.objects.get_or_create(name="Person",
+            workgroup=pw,description="A human being, whether man, woman or child.")
+    gad,c = GlossaryAdditionalDefinition.objects.get_or_create(
+        glossaryItem = gi,
+        registrationAuthority = ra,
+        description = "A person, who is probably not healthy"
+        )
 
     #Lets register a thing :/
     reg,c = Status.objects.get_or_create(

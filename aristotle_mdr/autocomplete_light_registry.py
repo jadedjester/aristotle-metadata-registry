@@ -39,6 +39,7 @@ autocompletesToRegister = [
         MDR.ValueDomain,
         MDR.DataElementConcept,
         MDR.DataType,
+        MDR.GlossaryItem,
     ]
 for cls in autocompletesToRegister:
     # This will generate a PersonAutocomplete class

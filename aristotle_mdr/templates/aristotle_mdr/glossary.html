@@ -13,7 +13,7 @@
     <ul>
         {% for term in terms %}
         <li>
-        <a href="{% url 'aristotle:glossary_by_id' term.id %}">{{ term.name }}</a>
+        <a href="{% url 'aristotle:glossaryItem' term.id %}">{{ term.name }}</a>
         {% with c=term.alternate_definitions.count %}
         {% if c > 0 %}
             <small>- {{ c }} additional meaning{{ c|pluralize }}</small>
