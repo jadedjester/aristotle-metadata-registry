@@ -7,10 +7,13 @@ from django.db.models import Q
 from tinymce.widgets import TinyMCE
 from django.contrib.auth.models import User
 from django.contrib.admin import widgets
+from django.utils.translation import ugettext_lazy as _
 
-from haystack.forms import ModelSearchForm
+from haystack.forms import SearchForm, model_choices
+#from haystack.forms import ModelSearchForm, model_choices
 from haystack.query import SearchQuerySet
 from aristotle_mdr.perms import user_can_view, user_can_edit
+from aristotle_mdr.widgets import BootstrapDropdownCheckboxWidget
 from django.utils.safestring import mark_safe
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.utils import timezone
@@ -288,7 +291,8 @@ class DEC_Results(forms.Form):
                                         choices=oc_options, widget=forms.RadioSelect())
 
 
-class PermissionSearchForm(ModelSearchForm):
+#class PermissionSearchForm(ModelSearchForm):
+class PermissionSearchForm(SearchForm):
     """
         We need to make a new form as permissions to view objects are few finicky.
         This form allows us to perform the base query then restrict it to just those
@@ -314,6 +318,10 @@ class PermissionSearchForm(ModelSearchForm):
     myWorkgroups_only = forms.BooleanField(required=False,
         label="items in my workgroups"
     )
+    models = forms.MultipleChoiceField(choices=model_choices(),
+                required=False, label=_('Search In'),
+                widget=BootstrapDropdownCheckboxWidget
+                )
 
     def search(self,repeat_search=False):
         # First, store the SearchQuerySet received from other processing.
