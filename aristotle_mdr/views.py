@@ -53,12 +53,6 @@ def get_if_user_can_view(objtype,user,iid):
     else:
         return False
 
-def get_or_none(model, **kwargs):
-    try:
-        return model.objects.get(**kwargs)
-    except model.DoesNotExist:
-        return None
-
 def render_if_user_can_view(*args,**kwargs):
     return render_if_condition_met(user_can_view,*args,**kwargs)
 
@@ -144,6 +138,12 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
 
 def itemPackages(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
+    if not item:
+        if request.user.is_anonymous():
+            return redirect('/accounts/login?next=%s' % request.path)
+        else:
+            raise PermissionDenied
+
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     packages = item.packages.all().visible(request.user)
     paginator = Paginator(packages, PAGES_PER_RELATED_ITEM)
@@ -162,6 +162,11 @@ def itemPackages(request, item_id):
 
 def registrationHistory(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
+    if not item:
+        if request.user.is_anonymous():
+            return redirect('/accounts/login?next=%s' % request.path)
+        else:
+            raise PermissionDenied
     from reversion.revisions import default_revision_manager
     history = []
     for s in item.statuses.all():
@@ -483,8 +488,8 @@ def allRegistrationAuthorities(request):
         )
 
 def glossary(request):
-    return render(request,"aristotle_mdr/unmanaged/glossary.html",
-        {'terms':MDR.GlossaryItem.objects.all().order_by('name')
+    return render(request,"aristotle_mdr/glossary.html",
+        {'terms':MDR.GlossaryItem.objects.all().order_by('name').visible(request.user)
         })
 
 def glossaryAjaxlist(request):
@@ -492,9 +497,8 @@ def glossaryAjaxlist(request):
     results = [g.json_link_list() for g in MDR.GlossaryItem.objects.all()] #visible(request.user).all()]
     return HttpResponse(json.dumps(results), content_type="application/json")
 
-def glossaryById(request,iid):
-    term = get_object_or_404(MDR.GlossaryItem,id=iid)
-    return render(request,"aristotle_mdr/unmanaged/glossaryItem.html",{'item':term})
+def glossaryById(*args,**kwargs):
+    return render_if_user_can_view(MDR.GlossaryItem,*args,**kwargs)
 #def glossaryBySlug(request,slug):
 #    term = get_object_or_404(MDR.GlossaryItem,id=iid)
 #    return render(request,"aristotle_mdr/glossaryItem.html",{'item':term})
@@ -732,12 +736,13 @@ def changeStatus(request, iid):
             state = form.cleaned_data['state']
             regDate = form.cleaned_data['registrationDate']
             cascade = form.cleaned_data['cascadeRegistration']
+            changeDetails = form.cleaned_data['changeDetails']
             if regDate is None:
                 regDate = timezone.now().date()
             for ra in ras:
                 ra = MDR.RegistrationAuthority.objects.get(id=int(ra))
-                ra.register(item,state,request.user,regDate,cascade)
-            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name,args=[item.id]))
+                ra.register(item,state,request.user,regDate,cascade,changeDetails)
+            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
         form = MDRForms.ChangeStatusForm(ras=ras)
     return render(request,"aristotle_mdr/actions/changeStatus.html",
@@ -827,8 +832,8 @@ def browse(request,oc_id=None,dec_id=None):
 def bulkFavourite(request,url="aristotle:userFavourites"):
     print request.GET.getlist('favourites',[])
     for item in request.GET.getlist('favourites',[]):
-        item = get_or_none(MDR.trebleObject,id=int(item))
-        if item and user_can_view(request.user,item):
+        item = get_if_user_can_view(MDR._concept,request.user,id=int(item))
+        if item:
             request.user.profile.favourites.add(item)
     getVars = request.GET.copy()
     if 'favourites' in getVars.keys(): getVars.pop('favourites')

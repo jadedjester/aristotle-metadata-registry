@@ -209,6 +209,12 @@ class PackageVisibility(TestCase,ManagedObjectVisibility):
         self.item = models.Package.objects.create(name="Test Package",
             workgroup=self.wg,
             )
+class GlossaryVisibility(TestCase,ManagedObjectVisibility):
+    def setUp(self):
+        self.wg = models.Workgroup.objects.create(name="Setup WG")
+        self.item = models.GlossaryItem.objects.create(name="Test Glossary",
+            workgroup=self.wg,
+            )
 
 class RegistryGroupPermissions(TestCase):
     def test_RegistrationAuthority_name_change(self):
@@ -311,6 +317,27 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(self.get_page(self.item2))
         self.assertEqual(response.status_code,403)
 
+    def test_su_can_download_pdf(self):
+        self.login_superuser()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,200)
+
+    def test_editor_can_download_pdf(self):
+        self.login_editor()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_viewer_can_download_pdf(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:download',args=['pdf',self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
     def test_viewer_cannot_view_supersede_page(self):
         self.login_viewer()
         response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))
@@ -348,6 +375,19 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(self.get_help_page())
         self.assertRedirects(response,reverse("aristotle:about",args=[self.item1.help_name])) # This should redirect
 
+    def test_viewer_can_view_registration_history(self):
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item2.id]))
+        self.assertEqual(response.status_code,403)
+
+    def test_anon_cannot_view_registration_history(self):
+        self.logout()
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item1.id]))
+        self.assertEqual(response.status_code,302)
+        response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item2.id]))
+        self.assertEqual(response.status_code,302)
 
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
@@ -358,6 +398,9 @@ class PropertyViewPage(LoggedInViewPages,TestCase):
 class ValueDomainViewPage(LoggedInViewPages,TestCase):
     url_name='valueDomain'
     itemType=models.ValueDomain
+class GlossaryViewPage(LoggedInViewPages,TestCase):
+    url_name='glossary'
+    itemType=models.GlossaryItem
 
 
 

@@ -75,10 +75,16 @@ function(editor) {
                     name: 'term',
                     label: 'Select a term',
                     'values':getGlossaryList()
+                },
+                {
+                    type: 'textbox',
+                    name: 'text',
+                    label: 'Link text (leave blank to use to the glossary name)'
                 }],
                 onsubmit: function( e ) {
                     i = e.data.term;
-                    editor.insertContent( '<a class="aristotle_glossary" href=\"'+glossaryLookup[i].url+'\">' + glossaryLookup[i].name + '</a>');
+                    text = e.data.text || glossaryLookup[i].name;
+                    editor.insertContent( '<a class="aristotle_glossary" data-aristotle_glossary_id="'+i+'" href="'+glossaryLookup[i].url+'">' + text + '</a>');
                 }
             });
         }
