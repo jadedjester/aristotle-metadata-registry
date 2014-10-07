@@ -29,120 +29,78 @@
           <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#advSearch">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#"><small>Advanced options:</small></a>
+              <a class="navbar-brand" accesskey="a" href="#"><small>Advanced:</small></a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li class="dropdown dropdown-menu-form">
-                    <a href="#" type="button" accesskey="i" class="dropdown-toggle"
-                    data-toggle="dropdown">
-                        Item type <span class="caret"></span>
-                    </a>
-                    {{ form.models }}
-                </li>
-                        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-form" role="menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
-
-            </ul>
-          </div>
-        </nav>
-            <!-- nav id="searchAdvanced" class="col-sm-4 col-md-3 navbar navbar-default">
-                <div class="navbar-header">
-                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#searchOptions">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </button>
-                  <a href="#" class="navbar-brand">
-                    <i class="fa fa-cogs fa-fw"></i>Advanced Options
-                  </a>
-                </div>
-                <dl class="collapse navbar-collapse" id="searchOptions">
-                    {% if user.is_active %}
-                    {% comment %}
-                        Only logged in users have workgroups.
-                        If you aren't logged in you can *only* see public items.
-                    {% endcomment %}
-                    <dt>Only show</dt>
-                    <dd>
-                        <ul>
-                            <li>
-                            {{ form.public_only }}
-                            {{ form.public_only.label }}
+            <div class="collapse navbar-collapse" id="advSearch">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            Item type <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.models }}
+                    </li>
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            State <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.state }}
+                    </li>
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            Authority <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.ra }}
+                    </li>
+                    <li class="dropdown dropdown-menu-date">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-calendar"></i> Modified <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            {{ form.modifyQuickDate }}
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Custom start date...
+                                {{ form.modifyCustomStartDate }}</label>
                             </li>
-                            <li>
-                            {{ form.myWorkgroups_only }}
-                            {{ form.myWorkgroups_only.label }}
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Custom end date...</a>
+                                {{ form.modifyCustomEndDate }}</label>
                             </li>
                         </ul>
-                    </dd>
-                    {% endif %}
-                    {% comment %}
-                    {% with show=form.models.data %}
-                        <dt data-toggle="collapse" accesskey="i"  data-target="#search-models"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            Item type
-                        </dt>
-                        <dd id="search-models" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.models }}
-                        </dd>
-                    {% endwith %}
-                    {% endcomment %}
-                    {% with show=form.state.data %}
-                        <dt data-toggle="collapse" data-target="#search-states"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            State
-                        </dt>
-                        <dd id="search-states" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.state }}
-                        </dd>
-                    {% endwith %}
-                    {% with show=form.ra.data %}
-                        <dt data-toggle="collapse" data-target="#search-ras"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            Registration Authority
-                        </dt>
-                        <dd id="search-ras" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.ra }}
-                        </dd>
-                    {% endwith %}
-                    {% comment %}
-                    <div>
-                    Modified:
-                    <ul></ul>
-                    Custom range:
-                    {{ form.startDate }}
-                    </div>
-                    <div>
-                    Created:
-                    <ul></ul>
-                    Custom range:
-                    {{ form.startDate }}
-                    </div>
-                    {% endcomment %}
-                </dl>
-            </nav -->
-    <!-- /form -->
-            <div class="col-sm-8 col-md-9">
-
+                    </li>
+                    <!-- li class="dropdown dropdown-menu-date">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-calendar"></i> Create <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            {{ form.createQuickDate }}
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Custom start date...
+                                {{ form.createCustomStartDate }}</label>
+                            </li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Custom end date...</a>
+                                {{ form.createCustomEndDate }}</label>
+                            </li>
+                        </ul>
+                    </li -->
+                </ul>
+              </div>
+            </nav>
+            <div class="col-md-10 col-md-offset-1">
         {% if query or page.object_list %}
             {% if page.object_list %}
                 {% if form.auto_broaden_search %}

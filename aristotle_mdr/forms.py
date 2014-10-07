@@ -8,16 +8,18 @@ from tinymce.widgets import TinyMCE
 from django.contrib.auth.models import User
 from django.contrib.admin import widgets
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 
 from haystack.forms import SearchForm, model_choices
 #from haystack.forms import ModelSearchForm, model_choices
 from haystack.query import SearchQuerySet
-from aristotle_mdr.perms import user_can_view, user_can_edit
-from aristotle_mdr.widgets import BootstrapDropdownCheckboxWidget
+from aristotle_mdr.perms import user_can_edit
+from aristotle_mdr.widgets import BootstrapDropdownSelectMultiple, BootstrapDropdownIntelligentDate
 from django.utils.safestring import mark_safe
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.utils import timezone
 from django.forms import model_to_dict
+import datetime
 
 class AdminConceptForm(forms.ModelForm):
     # Thanks: http://stackoverflow.com/questions/6034047/one-to-many-inline-select-with-django-admin
@@ -295,6 +297,13 @@ class DEC_Results(forms.Form):
             self.fields['oc_options'] = forms.ChoiceField(verbose_name="Similar Object Classes",
                                         choices=oc_options, widget=forms.RadioSelect())
 
+QUICK_DATES = Choices (
+       (0,'hour',_('Last hour')),
+       (1,'today',_('Today')),
+       (2,'week',_('This week')),
+       (3,'month',_('This month')),
+       (4,'year',_('This year')),
+     )
 
 #class PermissionSearchForm(ModelSearchForm):
 class PermissionSearchForm(SearchForm):
@@ -305,18 +314,22 @@ class PermissionSearchForm(SearchForm):
 
         TODO: This might not scale well, so it may need to be looked at in production.
     """
-    startDate = forms.DateField(required=False,
+
+    modifyQuickDate=forms.ChoiceField(required=False,
+        choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
+
+    modifyCustomStartDate = forms.DateField(required=False,
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
-    endDate = forms.DateField(required=False,
+    modifyCustomEndDate = forms.DateField(required=False,
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
     # Use short singular names as they look more semantic in the URL.
     ras = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
     ra = forms.MultipleChoiceField(required=False,
-        choices=ras,widget=forms.CheckboxSelectMultiple)
+        choices=ras,widget=BootstrapDropdownSelectMultiple)
     state = forms.MultipleChoiceField(required=False,
-        choices=MDR.STATES,widget=forms.CheckboxSelectMultiple)
+        choices=MDR.STATES,widget=BootstrapDropdownSelectMultiple)
     public_only = forms.BooleanField(required=False,
         label="public items"
     )
@@ -324,8 +337,8 @@ class PermissionSearchForm(SearchForm):
         label="items in my workgroups"
     )
     models = forms.MultipleChoiceField(choices=model_choices(),
-                required=False, label=_('Search In'),
-                widget=BootstrapDropdownCheckboxWidget
+                required=False, label=_('Item type'),
+                widget=BootstrapDropdownSelectMultiple
                 )
 
     def search(self,repeat_search=False):
@@ -342,7 +355,8 @@ class PermissionSearchForm(SearchForm):
         query_text = self.cleaned_data['q']
         states = self.cleaned_data['state']
         ras = self.cleaned_data['ra']
-        has_filter = states or ras
+        modify_quick_date = self.cleaned_data['modifyQuickDate']
+        has_filter = states or ras or modify_quick_date
         if has_filter and not query_text:
             # If there is a filter, but no `q`uery then we'll force some results.
             sqs = SearchQuerySet().order_by('-modified')
@@ -377,6 +391,16 @@ class PermissionSearchForm(SearchForm):
             # items with those statuses in those ras
             terms = ["%s___%s"%(str(r),str(s)) for r in ras for s in states]
             sqs = sqs.filter(ra_statuses__in=terms)
+
+        if modify_quick_date:
+            quick_date = datetime.datetime.now() - \
+                {QUICK_DATES.hour : datetime.timedelta(hours=1),
+                 QUICK_DATES.today : datetime.timedelta(days=1),
+                 QUICK_DATES.week  : datetime.timedelta(days=7),
+                 QUICK_DATES.month : datetime.timedelta(days=31),
+                 QUICK_DATES.year  : datetime.timedelta(days=366)
+                }.get(modify_quick_date,datetime.timedelta(days=1))
+            sqs = sqs.filter_and(modified__gte=quick_date)
 
         if user.is_anonymous():
             # Regular users can only see public items, so boot them off now.

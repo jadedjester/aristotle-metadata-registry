@@ -9,46 +9,48 @@
         padding:15px 0;
     }
 }
-
+a:focus {
+    outline: -webkit-focus-ring-color auto 5px !important;
+}
 .searchAdvanced {
-    li.dropdown-menu-form {
-        &:focus {
-            text-decoration: none;
-            color: #262626;
-            background-color: whiteSmoke;
-            outline: -webkit-focus-ring-color auto 5px;
-        }
+    li.dropdown-menu-form,li.dropdown-menu-date {
         label {
             font-weight:normal;
-            padding:0 10px;
+            padding:3px 10px;
+            margin:0px;
         }
         li {
             display:block;
 
-            [type="checkbox"] {
+            [type="checkbox"],[type="radio"] {
               position: absolute;
               left: -9999px;
+
+                &:focus + label {
+                   outline: -webkit-focus-ring-color auto 5px;
+                   background-color: whiteSmoke
+                }
+
+                &:hover + label {
+                   background-color: whiteSmoke;
+                }
+                & + label:before {
+                    font-family: 'FontAwesome';
+                    display: table-cell;
+                    box-sizing: border-box;
+                    width: 16px;
+                }
+                & ~ label >  span {
+                    display: table-cell;
+                    padding-left: 5px;
+                }
             }
-            /*Align the icon and the label text to same height using tabl-cell display*/
-            /*If you change the font-size of the text, you may also want to do som padding or alignhment changes here*/
-            [type="checkbox"] ~ label >  span {
-              display: table-cell;
-              padding-left: 5px;
-            }
+
             /*The label will contain the icon and the text, will grab the focus*/
             label {
                 width:100%;
                 cursor: pointer;
                 display: table;
-            }
-            /*The icon container, set it to fixed size and font size, the padding is to align the border*/
-            /*If you change the font-size of this icon, be sure to adjust the min-width as well*/
-            [type="checkbox"] + label:before {
-              font-family: 'FontAwesome';
-              display: table-cell;
-              box-sizing: border-box;
-              border: 1px solid transparent;
-              width: 28px;
             }
             /* toggle font awsome icon*/
             [type="checkbox"]:checked + label:before {
@@ -57,13 +59,12 @@
             [type="checkbox"]:not(:checked) + label:before {
               content: "\f096";
             }
-            /*Do something on focus, in this case show dashed border*/
-            [type="checkbox"]:focus + label {
-               outline: -webkit-focus-ring-color auto 5px;
+
+            [type="radio"]:checked + label:before {
+              content: "\f05d";
             }
-            /*Do something on hover, in this case change the image color*/
-            [type="checkbox"]:hover + label {
-               background-color: whiteSmoke;
+            [type="radio"]:not(:checked) + label:before {
+              content: "\f1db";
             }
         }
     }
