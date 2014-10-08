@@ -1,14 +1,51 @@
+function updateCheckboxBadge(menu) {
+    x = $(menu).find("input:checked").length;
+    if (x > 0) {
+        $(menu).parent().find(".badge").text(x);
+    } else {
+        $(menu).parent().find(".badge").text('');   
+    }
+}
+
+function updateAdvancedDateDetails(menu) {
+    x = $(menu).find("input:checked");
+    if (x.length > 0 && x[0].value != 'a') {
+        x=x[0];
+        $(menu).parent().find(".details").text($("label[for='"+x.id+"']").text());
+    } else {
+        $(menu).parent().find(".details").text('');
+    }
+}
+
 $( document ).ready( function() {
     $('.dropdown-menu-form .dropdown-menu').on('click', function(e) {
         e.stopPropagation();
-        x = $(this).find("input:checked").length;
-        if (x > 0) {
-            $(this).parent().find(".badge").text(x);
-        } else {
-            $(this).parent().find(".badge").text('');   
-        }
+        updateCheckboxBadge(this);
+    });
+    $('.dropdown-menu-form .dropdown-menu').each( function() {
+        updateCheckboxBadge(this);
+    });
+    $('.dropdown-menu-date .dropdown-menu').on('click', function(e) {
+        e.stopPropagation();
+        updateAdvancedDateDetails(this);
+    });
+    $('.dropdown-menu-date .dropdown-menu').each( function() {
+        updateAdvancedDateDetails(this);
     });
     
+    $('.dropdown-menu-date .dropdown-menu .input-group.date').each( function() {
+        console.log(this)
+        $(this).on("dp.change", function() {
+            // change(this);
+            console.log(this)
+            $(self).parents(".dropdown-menu").first().find("[value='X']").prop("checked", true);
+        
+    
+        });
+    });
+    
+
+
     $("#search-input").keydown(function(e){
         if(e.which == 13) { // enter
             setTimeout(function(){
@@ -40,21 +77,6 @@ $( document ).ready( function() {
         }
     });
 
-    $('.dropdown-menu-form .dropdown-menu').each( function() {
-        x = $(this).find("input:checked").length;
-        if (x > 0) {
-            $(this).parent().find(".badge").text(x);
-        }
-    });
-    
-    $('.dropdown-menu-date .dropdown-menu').on('click', function(e) {
-        e.stopPropagation();
-        x = $(this).find("input:checked").length;
-        if (x > 0) {
-            $(this).parent().find(".badge").text(x);
-        } else {
-            $(this).parent().find(".badge").text('');   
-        }
-    });
+
 
 });

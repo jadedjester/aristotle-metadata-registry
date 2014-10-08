@@ -1,5 +1,6 @@
 {% extends 'aristotle_mdr/base.html' %}
 {% load i18n %}
+{% load humanize %}
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load aristotle_tags %}
@@ -43,6 +44,7 @@
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
+                            <i class="fa fa-puzzle-piece"></i>
                             Item type <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.models }}
@@ -50,6 +52,7 @@
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
+                            <i class="fa fa-unlock-alt"></i>
                             State <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.state }}
@@ -57,6 +60,7 @@
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
+                            <i class="fa fa-university"></i>
                             Authority <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.ra }}
@@ -64,39 +68,43 @@
                     <li class="dropdown dropdown-menu-date">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-calendar"></i> Modified <span class="caret"></span>
+                            <i class="fa fa-calendar"></i>
+                            Modified <span class="caret"></span>
+                            <small class="details"></small>
                         </a>
                         <ul class="dropdown-menu" role="menu">
-                            {{ form.modifyQuickDate }}
+                            {{ form.mq }}
                             <li role="presentation" class="divider"></li>
                             <li role="presentation">
-                                <label role="menuitem" href="#">Custom start date...
-                                {{ form.modifyCustomStartDate }}</label>
+                                <label role="menuitem" href="#">Modified after...
+                                {{ form.mds }}</label>
                             </li>
                             <li role="presentation">
-                                <label role="menuitem" href="#">Custom end date...</a>
-                                {{ form.modifyCustomEndDate }}</label>
+                                <label role="menuitem" href="#">Modified before...</a>
+                                {{ form.mde }}</label>
                             </li>
                         </ul>
                     </li>
-                    <!-- li class="dropdown dropdown-menu-date">
+                    <li class="dropdown dropdown-menu-date">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-calendar"></i> Create <span class="caret"></span>
+                            <i class="fa fa-calendar"></i>
+                            Created <span class="caret"></span>
+                            <small class="details"></small>
                         </a>
                         <ul class="dropdown-menu" role="menu">
-                            {{ form.createQuickDate }}
+                            {{ form.cq }}
                             <li role="presentation" class="divider"></li>
                             <li role="presentation">
-                                <label role="menuitem" href="#">Custom start date...
-                                {{ form.createCustomStartDate }}</label>
+                                <label role="menuitem" href="#">Created after...
+                                {{ form.cds }}</label>
                             </li>
                             <li role="presentation">
-                                <label role="menuitem" href="#">Custom end date...</a>
-                                {{ form.createCustomEndDate }}</label>
+                                <label role="menuitem" href="#">Created before...</a>
+                                {{ form.cde }}</label>
                             </li>
                         </ul>
-                    </li -->
+                    </li>
                 </ul>
               </div>
             </nav>
@@ -134,7 +142,8 @@
                         {% endif %}
                         <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a> ({{ result.object.get_verbose_name }})
                         <div>
-                        <span class="attr">Last modified: {{ result.object.modified }}</span>
+                        <span class="attr">Last modified: {{ result.object.modified|naturaltime }}</span>
+                        <span class="attr">Created: {{ result.object.created }}</span>
                         <span class="attr">Statuses:
                             {% for s in result.object.statuses.all %}
                                 [{{ s.registrationAuthority }}: {{ s.state_name }}]

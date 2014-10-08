@@ -7,6 +7,7 @@ import models
 class baseObjectIndex(indexes.SearchIndex):
     text = indexes.CharField(document=True, use_template=True)
     modified = indexes.DateTimeField(model_attr='modified')
+    created = indexes.DateTimeField(model_attr='created')
     name = indexes.CharField(model_attr='name',boost=1)
     #access = indexes.MultiValueField()
 

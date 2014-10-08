@@ -1,3 +1,5 @@
+from __future__ import division
+
 import autocomplete_light
 autocomplete_light.autodiscover()
 
@@ -298,13 +300,68 @@ class DEC_Results(forms.Form):
                                         choices=oc_options, widget=forms.RadioSelect())
 
 QUICK_DATES = Choices (
-       (0,'hour',_('Last hour')),
-       (1,'today',_('Today')),
-       (2,'week',_('This week')),
-       (3,'month',_('This month')),
-       (4,'year',_('This year')),
+       ('a','anytime',_('Any time')),
+       ('h','hour',_('Last hour')),
+       ('t','today',_('Today')),
+       ('w','week',_('This week')),
+       ('m','month',_('This month')),
+       ('y','year',_('This year')),
+       ('X','custom',_('Custom period')),
      )
 
+def time_delta(delta):
+    """
+    Datetimes are expensive to search on, so this function gives approximations of the time options.
+    Absolute precision can be used using the custom ranges, but may be slower.
+    These approximations mean that similar ranges can be used in the haystack index when searching.
+    """
+    if delta == QUICK_DATES.hour:
+        """
+        The last hour, actually translates to the begin of the last hour, so
+        this returns objects between 60 and 119 mintues ago.
+        """
+        n = datetime.datetime.now()
+        n = datetime.datetime.combine(n.date(),datetime.time(hour=n.time().hour))
+        return n - datetime.timedelta(hours=1)
+    elif delta == QUICK_DATES.today:
+        """
+        Today returns everything today.
+        """
+        return datetime.date.today() #- datetime.timedelta(days=1)
+    elif delta == QUICK_DATES.week:
+        """
+        This week is pretty straight forward. SSReturns 7 days ago from the *beginning* of today.
+        """
+        return datetime.date.today() - datetime.timedelta(days=7)
+    elif delta == QUICK_DATES.month:
+        """
+        This goes back to this day last month, and then finds the prior day thats
+        divisible by 7 (not less than 1).
+          1-6 -> 1
+         7-13 -> 7
+        14-20 -> 14
+        21-27 -> 21
+        28-31 -> 28
+        """
+        t = datetime.date.today()
+        last_month = datetime.date(day=1, month=t.month, year=t.year) - datetime.timedelta(days=1)
+        days = max(((t.day)//7)*7,1)
+        last_month = datetime.date(day=days, month=last_month.month, year=last_month.year)
+        return datetime.date(day=1, month=last_month.month, year=last_month.year)
+    elif delta == QUICK_DATES.year:
+        """
+        This goes back to the beginning of this month last year.
+        So it searchs from the first of this month, last year.
+        """
+        t = datetime.date.today()
+        return datetime.date(day=1, month=t.month, year=(t.year-1))
+    return None
+DELTA ={QUICK_DATES.hour : datetime.timedelta(hours=1),
+        QUICK_DATES.today : datetime.timedelta(days=1),
+        QUICK_DATES.week  : datetime.timedelta(days=7),
+        QUICK_DATES.month : datetime.timedelta(days=31),
+        QUICK_DATES.year  : datetime.timedelta(days=366)
+        }
 #class PermissionSearchForm(ModelSearchForm):
 class PermissionSearchForm(SearchForm):
     """
@@ -315,15 +372,25 @@ class PermissionSearchForm(SearchForm):
         TODO: This might not scale well, so it may need to be looked at in production.
     """
 
-    modifyQuickDate=forms.ChoiceField(required=False,
+    mq=forms.ChoiceField(required=False,
         choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
 
-    modifyCustomStartDate = forms.DateField(required=False,
+    mds = forms.DateField(required=False,
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
-    modifyCustomEndDate = forms.DateField(required=False,
+    mde = forms.DateField(required=False,
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
+    cq=forms.ChoiceField(required=False,
+        choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
+
+    cds = forms.DateField(required=False,
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        )
+    cde = forms.DateField(required=False,
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        )
+
     # Use short singular names as they look more semantic in the URL.
     ras = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
     ra = forms.MultipleChoiceField(required=False,
@@ -355,10 +422,15 @@ class PermissionSearchForm(SearchForm):
         query_text = self.cleaned_data['q']
         states = self.cleaned_data['state']
         ras = self.cleaned_data['ra']
-        modify_quick_date = self.cleaned_data['modifyQuickDate']
-        has_filter = states or ras or modify_quick_date
+        modify_quick_date = self.cleaned_data['mq']
+        create_quick_date = self.cleaned_data['cq']
+        create_date_start = self.cleaned_data['cds']
+        create_date_end   = self.cleaned_data['cde']
+        modify_date_start = self.cleaned_data['mds']
+        modify_date_end   = self.cleaned_data['mde']
+        has_filter = states or ras or modify_quick_date or create_quick_date
         if has_filter and not query_text:
-            # If there is a filter, but no `q`uery then we'll force some results.
+            # If there is a filter, but no query then we'll force some results.
             sqs = SearchQuerySet().order_by('-modified')
         if query_text and sqs.count() == 0:
             from urllib import quote_plus
@@ -392,15 +464,25 @@ class PermissionSearchForm(SearchForm):
             terms = ["%s___%s"%(str(r),str(s)) for r in ras for s in states]
             sqs = sqs.filter(ra_statuses__in=terms)
 
-        if modify_quick_date:
-            quick_date = datetime.datetime.now() - \
-                {QUICK_DATES.hour : datetime.timedelta(hours=1),
-                 QUICK_DATES.today : datetime.timedelta(days=1),
-                 QUICK_DATES.week  : datetime.timedelta(days=7),
-                 QUICK_DATES.month : datetime.timedelta(days=31),
-                 QUICK_DATES.year  : datetime.timedelta(days=366)
-                }.get(modify_quick_date,datetime.timedelta(days=1))
-            sqs = sqs.filter_and(modified__gte=quick_date)
+        if modify_quick_date and modify_quick_date is not QUICK_DATES.anytime:
+            delta = time_delta(modify_quick_date)
+            if delta is not None:
+                sqs = sqs.filter(modifed__gte=delta)
+        elif modify_date_start or modify_date_end:
+            if modify_date_start:
+                sqs = sqs.filter(modifed__gte=modify_date_start)
+            if modify_date_end:
+                sqs = sqs.filter(modifed__lte=modify_date_end)
+
+        if create_quick_date and create_quick_date is not QUICK_DATES.anytime:
+            delta = time_delta(create_quick_date)
+            if delta is not None:
+                sqs = sqs.filter(created__gte=delta)
+        elif create_date_start or create_date_end:
+            if create_date_start:
+                sqs = sqs.filter(created__gte=create_date_start)
+            if create_date_end:
+                sqs = sqs.filter(created__lte=create_date_end)
 
         if user.is_anonymous():
             # Regular users can only see public items, so boot them off now.
