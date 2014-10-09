@@ -16,7 +16,8 @@ from haystack.forms import SearchForm, model_choices
 #from haystack.forms import ModelSearchForm, model_choices
 from haystack.query import SearchQuerySet
 from aristotle_mdr.perms import user_can_edit
-from aristotle_mdr.widgets import BootstrapDropdownSelectMultiple, BootstrapDropdownIntelligentDate
+from aristotle_mdr.search_indexes import conceptIndex
+from aristotle_mdr.widgets import BootstrapDropdownSelectMultiple, BootstrapDropdownIntelligentDate, BootstrapDropdownSelect
 from django.utils.safestring import mark_safe
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.utils import timezone
@@ -309,6 +310,16 @@ QUICK_DATES = Choices (
        ('X','custom',_('Custom period')),
      )
 
+SORT_OPTIONS = Choices (
+       ('n','natural',_('Ranking')),
+       ('ma','modified_ascending',_('Modified ascending')),
+       ('md','modified_descending',_('Modified descending')),
+       ('ma','created_ascending',_('Created ascending')),
+       ('md','created_descending',_('Created descending')),
+       ('aa','alphabetical',_('Alphabetical')),
+       #('s','state',_('Registration state')),
+     )
+
 def time_delta(delta):
     """
     Datetimes are expensive to search on, so this function gives approximations of the time options.
@@ -362,17 +373,59 @@ DELTA ={QUICK_DATES.hour : datetime.timedelta(hours=1),
         QUICK_DATES.month : datetime.timedelta(days=31),
         QUICK_DATES.year  : datetime.timedelta(days=366)
         }
-#class PermissionSearchForm(ModelSearchForm):
-class PermissionSearchForm(SearchForm):
+
+from haystack.constants import DEFAULT_ALIAS
+from haystack import connections
+class TokenSearchForm(SearchForm):
+    def prepare_tokens(self):
+        try:
+            query = self.cleaned_data.get('q')
+        except:
+            return {}
+        opts = connections[DEFAULT_ALIAS].get_unified_index().fields.keys()
+        kwargs = {}
+        query_text = []
+        for word in query.split(" "):
+            if ":" in word:
+                opt,arg = word.split(":",1)
+                if opt in opts:
+                    kwargs[str(opt)]=arg
+            else:
+                query_text.append(word)
+        self.query_text = " ".join(query_text)
+        self.kwargs = kwargs
+        return kwargs
+
+    def search(self):
+        self.query_text = None
+        kwargs = self.prepare_tokens()
+        if not self.is_valid():
+            return self.no_query_found()
+
+        if not self.cleaned_data.get('q'):
+            return self.no_query_found()
+
+        sqs = self.searchqueryset.auto_query(self.query_text)
+
+        if kwargs:
+            sqs = sqs.filter(**kwargs)
+
+        if self.load_all:
+            sqs = sqs.load_all()
+
+        return sqs
+
+
+class PermissionSearchForm(TokenSearchForm):
     """
-        We need to make a new form as permissions to view objects are few finicky.
+        We need to make a new form as permissions to view objects are a bit finicky.
         This form allows us to perform the base query then restrict it to just those
         of interest.
 
         TODO: This might not scale well, so it may need to be looked at in production.
     """
 
-    mq=forms.ChoiceField(required=False,
+    mq=forms.ChoiceField(required=False,initial=QUICK_DATES.anytime,
         choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
 
     mds = forms.DateField(required=False,
@@ -381,7 +434,7 @@ class PermissionSearchForm(SearchForm):
     mde = forms.DateField(required=False,
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
-    cq=forms.ChoiceField(required=False,
+    cq=forms.ChoiceField(required=False,initial=QUICK_DATES.anytime,
         choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
 
     cds = forms.DateField(required=False,
@@ -391,10 +444,14 @@ class PermissionSearchForm(SearchForm):
         widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
         )
 
-    # Use short singular names as they look more semantic in the URL.
+    # Use short singular names
     ras = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
     ra = forms.MultipleChoiceField(required=False,
         choices=ras,widget=BootstrapDropdownSelectMultiple)
+
+    sort = forms.ChoiceField(required=False,initial=SORT_OPTIONS.natural,
+        choices=SORT_OPTIONS,widget=BootstrapDropdownSelect)
+
     state = forms.MultipleChoiceField(required=False,
         choices=MDR.STATES,widget=BootstrapDropdownSelectMultiple)
     public_only = forms.BooleanField(required=False,
@@ -412,14 +469,10 @@ class PermissionSearchForm(SearchForm):
         # First, store the SearchQuerySet received from other processing.
         sqs = super(PermissionSearchForm, self).search()
 
-        #Whoosh workaround
-        #if self.get_models():
-        #    for model in ['%s.%s'%(m._meta.app_label,m._meta.object_name) for m in self.get_models()]:
-        #        sqs = sqs.filter_or(django_ct=model)
-
         if not self.is_valid():
             return self.no_query_found()
-        query_text = self.cleaned_data['q']
+
+        query_text = self.query_text
         states = self.cleaned_data['state']
         ras = self.cleaned_data['ra']
         modify_quick_date = self.cleaned_data['mq']
@@ -428,10 +481,14 @@ class PermissionSearchForm(SearchForm):
         create_date_end   = self.cleaned_data['cde']
         modify_date_start = self.cleaned_data['mds']
         modify_date_end   = self.cleaned_data['mde']
+        sort_order   = self.cleaned_data['sort']
         has_filter = states or ras or modify_quick_date or create_quick_date
-        if has_filter and not query_text:
+        if has_filter and not query_text and not self.kwargs:
             # If there is a filter, but no query then we'll force some results.
             sqs = SearchQuerySet().order_by('-modified')
+            self.filter_search = True
+            self.attempted_filter_search = True
+        self.has_spelling_suggestions = False
         if query_text and sqs.count() == 0:
             from urllib import quote_plus
             suggestions = []
@@ -484,39 +541,54 @@ class PermissionSearchForm(SearchForm):
             if create_date_end:
                 sqs = sqs.filter(created__lte=create_date_end)
 
+        q = Q()
         if user.is_anonymous():
             # Regular users can only see public items, so boot them off now.
-            return sqs.filter_and(is_public=True)
-
-        q = Q()
-
-        if user.is_superuser:
-            pass
-        elif not user.profile.is_registrar:
-            # Non-registrars can only see public things or things in their workgroup
-            q |= Q(workgroup__in=user.profile.workgroups.all())
-        elif user.profile.is_registrar:
-            q |= Q(workgroup__in=user.profile.workgroups.all())
-            q |= Q(registrationAuthorities__in=user.profile.registrarAuthorities)
-        else:
-            #I'm paranoid...
             q = Q(is_public=True)
-            return sqs.filter(q)
+            sqs = sqs.filter(q)
+        else:
+            if user.is_superuser:
+                pass
+            elif not user.profile.is_registrar:
+                # Non-registrars can only see public things or things in their workgroup
+                q |= Q(workgroup__in=user.profile.workgroups.all())
+            elif user.profile.is_registrar:
+                q |= Q(workgroup__in=user.profile.workgroups.all())
+                q |= Q(registrationAuthorities__in=user.profile.registrarAuthorities)
+            else:
+                #I'm paranoid...
+                q = Q(is_public=True)
+                sqs = sqs.filter(q)
 
-        if self.cleaned_data['public_only'] == True:
-            q &= Q(is_public=True)
-        if self.cleaned_data['myWorkgroups_only'] == True:
-            q &= Q(workgroup__in=user.profile.workgroups.all())
+            if self.cleaned_data['public_only'] == True:
+                q &= Q(is_public=True)
+            if self.cleaned_data['myWorkgroups_only'] == True:
+                q &= Q(workgroup__in=user.profile.workgroups.all())
 
         sqs = sqs.filter(q)
 
-        if repeat_search == False and (states or ras) and sqs.count() == 0:
-            # If there are 0 results, and filters, lets be nice and remove them.
+        if repeat_search == False and (states or ras) and sqs.count() == 0 and self.cleaned_data['q']:
+            # If there are 0 results with a search term, and filters applied lets be nice and remove the filters and try again.
             # There will be a big message on the search page that says what we did.
             self.cleaned_data['state'] = None
             self.cleaned_data['ra'] = None
             self.auto_broaden_search = True
             sqs = self.search(repeat_search=True)
+
+        if repeat_search == False and self.has_spelling_suggestions:
+            pass
+
+        if sort_order == SORT_OPTIONS.modified_ascending:
+            sqs = sqs.order_by('-modified')
+        elif sort_order == SORT_OPTIONS.modified_descending:
+            sqs = sqs.order_by('modified')
+        elif sort_order == SORT_OPTIONS.created_ascending:
+            sqs = sqs.order_by('-created')
+        elif sort_order == SORT_OPTIONS.created_descending:
+            sqs = sqs.order_by('created')
+        elif sort_order == SORT_OPTIONS.alphabetical:
+            sqs = sqs.order_by('name')
+
 
         return sqs
 

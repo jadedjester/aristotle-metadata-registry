@@ -45,6 +45,7 @@ class conceptIndex(baseObjectIndex):
     registrationAuthorities = indexes.MultiValueField()
     workgroup = indexes.CharField(model_attr="workgroup")
     is_public = indexes.BooleanField()
+    version = indexes.CharField(model_attr="version")
 
     def prepare_registrationAuthorities (self, obj):
         ras = [s.registrationAuthority.id for s in obj.statuses.all()]

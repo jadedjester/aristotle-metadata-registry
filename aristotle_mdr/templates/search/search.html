@@ -13,6 +13,10 @@
 {% block search %}{% endblock %}
 {% block title %}Search{% if query %} results{% endif %}{% endblock %}
 {% block content %}
+            <!--
+                Sam is testing - ||{{ form.query_text }}||
+            -->
+
     <form method="get">
         <div id="searchbar" class="row">
             <div class="col-sm-8 col-sm-offset-2">
@@ -109,7 +113,19 @@
               </div>
             </nav>
             <div class="col-md-10 col-md-offset-1">
-        {% if query or page.object_list %}
+        {% if query or form.filter_search %}
+            {% if form.has_spelling_suggestions %}
+                Did you mean:
+                <a href="?q={{ form.suggested_query }}">
+                {% for word,suggestion in form.spelling_suggestions %}
+                    {% if suggestion %}
+                        <em>{{ suggestion }}</em>
+                    {% else %}
+                        {{ word }}
+                    {% endif %}
+                {% endfor %}
+                </a>
+            {% endif %}
             {% if page.object_list %}
                 {% if form.auto_broaden_search %}
                     <div class="alert alert-warning" role="alert">
@@ -120,6 +136,15 @@
                         </p>
                     </div>
                 {% endif %}
+                <div class="dropdown pull-right sort-order-box">
+                    <button  href="#" type="button" class="btn btn-default dropdown-toggle "
+                    data-toggle="dropdown">
+                        <i class="fa fa-sort"></i>
+                        Sort by... <span class="caret"></span>
+                        <small class="details"></small>
+                    </button>
+                    {{ form.sort }}
+                </div>
                 <h3>Results</h3>
                 <p>
                     {% if page.has_other_pages %}
@@ -142,11 +167,12 @@
                         {% endif %}
                         <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a> ({{ result.object.get_verbose_name }})
                         <div>
-                        <span class="attr">Last modified: {{ result.object.modified|naturaltime }}</span>
-                        <span class="attr">Created: {{ result.object.created }}</span>
+                        <span class="attr">Created: {{ result.object.created }} | Last modified: {{ result.object.modified|naturaltime }}</span>
                         <span class="attr">Statuses:
                             {% for s in result.object.statuses.all %}
                                 [{{ s.registrationAuthority }}: {{ s.state_name }}]
+                            {% empty %}
+                            <em>Unregistered</em>
                             {% endfor %}</span>
                         {{ result.object.description|truncatewords:20|striptags }}</div>
                     </li>
@@ -200,24 +226,21 @@
             {% else %}
                 <h3>No results found.</h3>
                 <p>
-                    {% if form.has_spelling_suggestions %}
-                        Did you mean:
-                        <a href="?q={{ form.suggested_query }}">
-                        {% for word,suggestion in form.spelling_suggestions %}
-                            {% if suggestion %}
-                                <em>{{ suggestion }}</em>
-                            {% else %}
-                                {{ word }}
-                            {% endif %}
-                        {% endfor %}
-                        </a>
-                    {% endif %}
                 {% if form.auto_broaden_search %}
                     <div class="alert alert-warning" role="alert">
                         <p>There were no results for "{{ form.q.value }}" with your requested filters.
                         </p>
                         <p>
                             We removed the filters and re-ran your search, but there were still zero results.
+                        </p>
+                    </div>
+                {% endif %}
+                {% if form.attempted_filter_search %}
+                    <div class="alert alert-warning" role="alert">
+                        <p>There were no results for your requested filters.
+                        </p>
+                        <p>
+                            Please change your search parameters and try again.
                         </p>
                     </div>
                 {% endif %}
