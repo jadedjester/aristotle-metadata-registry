@@ -13,10 +13,6 @@
 {% block search %}{% endblock %}
 {% block title %}Search{% if query %} results{% endif %}{% endblock %}
 {% block content %}
-            <!--
-                Sam is testing - ||{{ form.query_text }}||
-            -->
-
     <form method="get">
         <div id="searchbar" class="row">
             <div class="col-sm-8 col-sm-offset-2">
@@ -29,6 +25,24 @@
                     </span>
                 </div>
             </div>
+        </div>
+        <div id="userSearchTools" class="row text-center">
+            {% if user.is_active %}
+                {% comment %}
+                    Only logged in users have workgroups.
+                    If you aren't logged in you can *only* see public items.
+                {% endcomment %}
+                <label>
+                    <i class="fa fa-eye fa-fw"></i>
+                    {{ form.public_only }}
+                    {{ form.public_only.label }}
+                </label>
+                <label>
+                    <i class="fa fa-users fa-fw"></i>
+                    {{ form.myWorkgroups_only }}
+                    {{ form.myWorkgroups_only.label }}
+                </label>
+            {% endif %}
         </div>
         <nav class="navbar navbar-default searchAdvanced" role="navigation">
           <div class="container-fluid">
@@ -48,7 +62,7 @@
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-puzzle-piece"></i>
+                            <i class="fa fa-puzzle-piece fa-fw"></i>
                             Item type <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.models }}
@@ -56,15 +70,15 @@
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-unlock-alt"></i>
-                            State <span class="badge"></span><span class="caret"></span>
+                            <i class="fa fa-unlock-alt fa-fw"></i>
+                            Status <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.state }}
                     </li>
                     <li class="dropdown dropdown-menu-form">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-university"></i>
+                            <i class="fa fa-university fa-fw"></i>
                             Authority <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.ra }}
@@ -72,7 +86,7 @@
                     <li class="dropdown dropdown-menu-date">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-calendar"></i>
+                            <i class="fa fa-calendar fa-fw"></i>
                             Modified <span class="caret"></span>
                             <small class="details"></small>
                         </a>
@@ -92,7 +106,7 @@
                     <li class="dropdown dropdown-menu-date">
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
-                            <i class="fa fa-calendar"></i>
+                            <i class="fa fa-calendar fa-fw"></i>
                             Created <span class="caret"></span>
                             <small class="details"></small>
                         </a>
@@ -113,8 +127,23 @@
               </div>
             </nav>
             <div class="col-md-10 col-md-offset-1">
-        {% if query or form.filter_search %}
-            {% if form.has_spelling_suggestions %}
+            {#  ----- If there are spelling suggestions, show them. ----- #}
+            {% if form.auto_correct_spell_search %}
+                {% if page.object_list %}
+                    <p><strong>No results for:</strong> {{ form.original_query }}
+                    </p>
+                    <strong>Searching instead for:</strong>
+                    <span>
+                    {% for word,suggestion in form.spelling_suggestions %}
+                        {% if suggestion %}
+                            <em>{{ suggestion }}</em>
+                        {% else %}
+                            {{ word }}
+                        {% endif %}
+                    {% endfor %}
+                    </span>
+                {% endif %}
+            {% elif form.has_spelling_suggestions  %}
                 Did you mean:
                 <a href="?q={{ form.suggested_query }}">
                 {% for word,suggestion in form.spelling_suggestions %}
@@ -126,6 +155,8 @@
                 {% endfor %}
                 </a>
             {% endif %}
+        {#  ----- MAIN RESULTS PAGE STARTS HERE ----- #}
+        {% if query or form.filter_search %}
             {% if page.object_list %}
                 {% if form.auto_broaden_search %}
                     <div class="alert alert-warning" role="alert">
@@ -136,14 +167,22 @@
                         </p>
                     </div>
                 {% endif %}
-                <div class="dropdown pull-right sort-order-box">
-                    <button  href="#" type="button" class="btn btn-default dropdown-toggle "
-                    data-toggle="dropdown">
-                        <i class="fa fa-sort"></i>
-                        Sort by... <span class="caret"></span>
-                        <small class="details"></small>
+                <div class="btn-group pull-right">
+                    {% if user.is_active %}
+                    <button class="btn btn-primary" type="submit" name="addFavourites">
+                        <i class="fa fa-bookmark"></i> Add selected to
+                        <small class="details">favourites</small>
                     </button>
-                    {{ form.sort }}
+                    {% endif %}
+                    <div class="btn-group sort-order-box">
+                        <button  href="#" type="button" class="btn btn-default dropdown-toggle "
+                        data-toggle="dropdown">
+                            <i class="fa fa-sort"></i>
+                            Sort by... <span class="caret"></span>
+                            <small class="details"></small>
+                        </button>
+                        {{ form.sort }}
+                    </div>
                 </div>
                 <h3>Results</h3>
                 <p>
@@ -181,12 +220,16 @@
                     <li>No results found.</li>
                 {% endfor %}
                 </ol>
-                {% if user.is_active %}
-                <button class="btn btn-primary" type="submit" name="addFavourites">
-                    <i class="fa fa-bookmark"></i> Add selected to favourites
-                </button>
-                {% endif %}
+                <div class="btn-group pull-right">
+                    {% if user.is_active %}
+                    <button class="btn btn-primary" type="submit" name="addFavourites">
+                        <i class="fa fa-bookmark"></i> Add selected to
+                        <small class="details">favourites</small>
+                    </button>
+                    {% endif %}
+                </div>
                 {% if page.has_previous or page.has_next %}
+                    <div class="row text-center">
                     {% if page.paginator.num_pages <= 10 %}
                     <ul class="pagination pagination-sm searchResults">
                         {% if page.has_previous %}
@@ -222,6 +265,7 @@
                         {% endif %}
                     </ul>
                     {% endif %}
+                    </div>
                 {% endif %}
             {% else %}
                 <h3>No results found.</h3>

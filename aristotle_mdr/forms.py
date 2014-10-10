@@ -317,7 +317,7 @@ SORT_OPTIONS = Choices (
        ('ma','created_ascending',_('Created ascending')),
        ('md','created_descending',_('Created descending')),
        ('aa','alphabetical',_('Alphabetical')),
-       #('s','state',_('Registration state')),
+       ('s','state',_('Registration state')),
      )
 
 def time_delta(delta):
@@ -455,10 +455,10 @@ class PermissionSearchForm(TokenSearchForm):
     state = forms.MultipleChoiceField(required=False,
         choices=MDR.STATES,widget=BootstrapDropdownSelectMultiple)
     public_only = forms.BooleanField(required=False,
-        label="public items"
+        label="Only show public items"
     )
     myWorkgroups_only = forms.BooleanField(required=False,
-        label="items in my workgroups"
+        label="Only show items in my workgroups"
     )
     models = forms.MultipleChoiceField(choices=model_choices(),
                 required=False, label=_('Item type'),
@@ -468,33 +468,53 @@ class PermissionSearchForm(TokenSearchForm):
     def search(self,repeat_search=False):
         # First, store the SearchQuerySet received from other processing.
         sqs = super(PermissionSearchForm, self).search()
+        self.repeat_search = repeat_search
 
         if not self.is_valid():
             return self.no_query_found()
 
-        query_text = self.query_text
-        states = self.cleaned_data['state']
-        ras = self.cleaned_data['ra']
-        modify_quick_date = self.cleaned_data['mq']
-        create_quick_date = self.cleaned_data['cq']
-        create_date_start = self.cleaned_data['cds']
-        create_date_end   = self.cleaned_data['cde']
-        modify_date_start = self.cleaned_data['mds']
-        modify_date_end   = self.cleaned_data['mde']
-        sort_order   = self.cleaned_data['sort']
-        has_filter = states or ras or modify_quick_date or create_quick_date
-        if has_filter and not query_text and not self.kwargs:
+        filters = "mq cq cds cde mds mde state ra".split()
+        has_filter = any([self.cleaned_data.get(f,False) for f in filters])
+        if has_filter and not self.query_text and not self.kwargs:
             # If there is a filter, but no query then we'll force some results.
             sqs = SearchQuerySet().order_by('-modified')
             self.filter_search = True
             self.attempted_filter_search = True
-        self.has_spelling_suggestions = False
-        if query_text and sqs.count() == 0:
+
+        if not repeat_search:
+            self.has_spelling_suggestions = False
+            self.check_spelling(sqs)
+
+        sqs = self.apply_registration_status_filters(sqs)
+        sqs = self.apply_date_filtering(sqs)
+        sqs = self.apply_permission_checks(sqs)
+
+        if not self.repeat_search:
+            if sqs.count() == 0:
+                if has_filter and self.cleaned_data['q']:
+                    # If there are 0 results with a search term, and filters applied
+                    # lets be nice and remove the filters and try again.
+                    # There will be a big message on the search page that says what we did.
+                    for f in filters:
+                        self.cleaned_data[f] = None
+                    self.auto_broaden_search = True
+                elif sqs.count() == 0 and self.has_spelling_suggestions:
+                    self.auto_correct_spell_search = True
+                    self.cleaned_data['q'] = self.suggested_query
+                # Re run the query with the updated details
+                sqs = self.search(repeat_search=True)
+            # Only apply sorting on the first pass through
+            sqs = self.apply_sorting(sqs)
+
+        return sqs
+
+    def check_spelling(self,sqs):
+        if self.query_text:
             from urllib import quote_plus
             suggestions = []
             has_suggestions = False
             suggested_query = []
-            for token in query_text.split(" "):
+            for token in self.cleaned_data.get('q',"").split(" "):
                 if token: # remove blanks
                     suggestion = SearchQuerySet().spelling_suggestion(token)
                     if suggestion:
@@ -505,10 +525,12 @@ class PermissionSearchForm(TokenSearchForm):
                     suggestions.append((token,suggestion))
             self.spelling_suggestions = suggestions
             self.has_spelling_suggestions = has_suggestions
+            self.original_query = self.cleaned_data.get('q')
             self.suggested_query = quote_plus(' '.join(suggested_query),safe="")
 
-        user = self.request.user
-
+    def apply_registration_status_filters(self,sqs):
+        states = self.cleaned_data['state']
+        ras = self.cleaned_data['ra']
         if states and not ras:
             states = [MDR.STATES[int(s)] for s in self.cleaned_data['state']]
             sqs = sqs.filter(statuses__in=states)
@@ -520,12 +542,28 @@ class PermissionSearchForm(TokenSearchForm):
             # items with those statuses in those ras
             terms = ["%s___%s"%(str(r),str(s)) for r in ras for s in states]
             sqs = sqs.filter(ra_statuses__in=terms)
+        return sqs
 
-        if modify_quick_date and modify_quick_date is not QUICK_DATES.anytime:
+    def apply_date_filtering(self,sqs):
+        modify_quick_date = self.cleaned_data['mq']
+        create_quick_date = self.cleaned_data['cq']
+        create_date_start = self.cleaned_data['cds']
+        create_date_end   = self.cleaned_data['cde']
+        modify_date_start = self.cleaned_data['mds']
+        modify_date_end   = self.cleaned_data['mde']
+
+        """
+        Modified filtering is really hard to do formal testing for as the modified
+        dates are altered on save, so its impossible to alter the modified dates
+        to check the search is working.
+        However, this is the exact same process as creation date (which we can alter),
+        so if creation filtering is working, modified filtering should work too.
+        """
+        if modify_quick_date and modify_quick_date is not QUICK_DATES.anytime: # pragma: no cover
             delta = time_delta(modify_quick_date)
             if delta is not None:
                 sqs = sqs.filter(modifed__gte=delta)
-        elif modify_date_start or modify_date_end:
+        elif modify_date_start or modify_date_end: # pragma: no cover
             if modify_date_start:
                 sqs = sqs.filter(modifed__gte=modify_date_start)
             if modify_date_end:
@@ -540,6 +578,29 @@ class PermissionSearchForm(TokenSearchForm):
                 sqs = sqs.filter(created__gte=create_date_start)
             if create_date_end:
                 sqs = sqs.filter(created__lte=create_date_end)
+
+        return sqs
+
+    def apply_sorting(self,sqs):
+        sort_order  = self.cleaned_data['sort']
+        if sort_order == SORT_OPTIONS.modified_ascending:
+            sqs = sqs.order_by('-modified')
+        elif sort_order == SORT_OPTIONS.modified_descending:
+            sqs = sqs.order_by('modified')
+        elif sort_order == SORT_OPTIONS.created_ascending:
+            sqs = sqs.order_by('-created')
+        elif sort_order == SORT_OPTIONS.created_descending:
+            sqs = sqs.order_by('created')
+        elif sort_order == SORT_OPTIONS.alphabetical:
+            sqs = sqs.order_by('name')
+        elif sort_order == SORT_OPTIONS.state:
+            sqs = sqs.order_by('-highest_state')
+
+        return sqs
+
+    def apply_permission_checks(self,sqs):
+
+        user = self.request.user
 
         q = Q()
         if user.is_anonymous():
@@ -566,29 +627,6 @@ class PermissionSearchForm(TokenSearchForm):
                 q &= Q(workgroup__in=user.profile.workgroups.all())
 
         sqs = sqs.filter(q)
-
-        if repeat_search == False and (states or ras) and sqs.count() == 0 and self.cleaned_data['q']:
-            # If there are 0 results with a search term, and filters applied lets be nice and remove the filters and try again.
-            # There will be a big message on the search page that says what we did.
-            self.cleaned_data['state'] = None
-            self.cleaned_data['ra'] = None
-            self.auto_broaden_search = True
-            sqs = self.search(repeat_search=True)
-
-        if repeat_search == False and self.has_spelling_suggestions:
-            pass
-
-        if sort_order == SORT_OPTIONS.modified_ascending:
-            sqs = sqs.order_by('-modified')
-        elif sort_order == SORT_OPTIONS.modified_descending:
-            sqs = sqs.order_by('modified')
-        elif sort_order == SORT_OPTIONS.created_ascending:
-            sqs = sqs.order_by('-created')
-        elif sort_order == SORT_OPTIONS.created_descending:
-            sqs = sqs.order_by('created')
-        elif sort_order == SORT_OPTIONS.alphabetical:
-            sqs = sqs.order_by('name')
-
 
         return sqs
 

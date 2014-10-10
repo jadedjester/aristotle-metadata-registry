@@ -7,7 +7,7 @@ function updateCheckboxBadge(menu) {
     }
 }
 
-function updateRadioDetails(menu) {
+function updateDateRadioDetails(menu) {
     x = $(menu).find("input:checked");
     if (x.length > 0 && x[0].value != 'a') {
         x=x[0];
@@ -15,6 +15,16 @@ function updateRadioDetails(menu) {
     } else {
         $(menu).parent().find(".details").text('');
     }
+}
+function updateSortRadioDetails(menu) {
+    x = $(menu).find("input:checked");
+    if (x.length == 0 ) {
+        x = $(menu).find("input[value='n']");
+        x.prop("checked", true);
+    }
+    x=x[0];
+    console.log($("label[for='"+x.id+"']").text())
+    $(menu).parent().find(".details").text($("label[for='"+x.id+"']").text());
 }
 
 $( document ).ready( function() {
@@ -27,29 +37,30 @@ $( document ).ready( function() {
     });
     $('.dropdown-menu-date .dropdown-menu').on('click', function(e) {
         e.stopPropagation();
-        updateRadioDetails(this);
+        updateDateRadioDetails(this);
     });
     $('.dropdown-menu-date .dropdown-menu').each( function() {
-        updateRadioDetails(this);
+        updateDateRadioDetails(this);
     });
 
     // Setup the sort ordering box
     $('.sort-order-box .dropdown-menu').on('click', function(e) {
         e.stopPropagation();
-        updateRadioDetails(this);
+        updateSortRadioDetails(this);
         $(this).closest("form").submit();
     });
     $('.sort-order-box .dropdown-menu').each( function() {
-        updateRadioDetails(this);
+        console.log("doing sort");
+        updateSortRadioDetails(this);
     });
 
 
     $('.dropdown-menu-date .dropdown-menu .input-group.date').each( function() {
-        console.log(this)
+        //console.log(this)
         $(this).on("dp.change", function() {
             // change(this);
             console.log(this)
-            $(self).parents(".dropdown-menu").first().find("[value='X']").prop("checked", true);
+            $(this).parents(".dropdown-menu").first().find("[value='X']").prop("checked", true);
 
 
         });
