@@ -17,6 +17,16 @@ INSTALLED_APPS = (
     'aristotle_mdr',
 ) + INSTALLED_APPS
 
+HAYSTACK_SIGNAL_PROCESSOR = 'aristotle_mdr.signals.AristotleSignalProcessor'
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'aristotle_mdr/tests/whoosh_index'),
+        'INCLUDE_SPELLING':True,
+    },
+}
+
 # https://docs.djangoproject.com/en/1.6/topics/testing/overview/#speeding-up-the-tests
 # We do a lot of user log in testing, this should speed stuff up.
 PASSWORD_HASHERS = (

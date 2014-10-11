@@ -1,11 +1,13 @@
 {% extends 'aristotle_mdr/base.html' %}
 {% load i18n %}
+{% load humanize %}
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load aristotle_tags %}
 
 {% block extra_head_scripts %}
     <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle_search.less' %}" />
+    <script src="{% static 'aristotle_mdr/aristotle.search.js' %}" type="text/javascript"></script>
 {% endblock %}
 
 {% block search %}{% endblock %}
@@ -24,85 +26,137 @@
                 </div>
             </div>
         </div>
-            <nav id="searchAdvanced" class="col-sm-4 col-md-3 navbar navbar-default pull-left;">
-                <div class="navbar-header">
-                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#searchOptions">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </button>
-                  <a href="#" class="navbar-brand">
-                    <i class="fa fa-cogs fa-fw"></i>Advanced Options
-                  </a>
-                </div>
-                <dl class="collapse navbar-collapse" id="searchOptions">
-                    {% if user.is_active %}
-                    {% comment %}
-                        Only logged in users have workgroups.
-                        If you aren't logged in you can *only* see public items.
-                    {% endcomment %}
-                    <dt>Only show</dt>
-                    <dd>
-                        <ul>
-                            <li>
-                            {{ form.public_only }}
-                            {{ form.public_only.label }}
+        <div id="userSearchTools" class="row text-center">
+            {% if user.is_active %}
+                {% comment %}
+                    Only logged in users have workgroups.
+                    If you aren't logged in you can *only* see public items.
+                {% endcomment %}
+                <label>
+                    <i class="fa fa-eye fa-fw"></i>
+                    {{ form.public_only }}
+                    {{ form.public_only.label }}
+                </label>
+                <label>
+                    <i class="fa fa-users fa-fw"></i>
+                    {{ form.myWorkgroups_only }}
+                    {{ form.myWorkgroups_only.label }}
+                </label>
+            {% endif %}
+        </div>
+        <nav class="navbar navbar-default searchAdvanced" role="navigation">
+          <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#advSearch">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" accesskey="a" id="advanced_nav_link" href="#"><small id="advanced_label">Advanced:</small><small id="clear_filters">Clear filters</small></a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="advSearch">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-puzzle-piece fa-fw"></i>
+                            Item type <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.models }}
+                    </li>
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-unlock-alt fa-fw"></i>
+                            Status <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.state }}
+                    </li>
+                    <li class="dropdown dropdown-menu-form">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-university fa-fw"></i>
+                            Authority <span class="badge"></span><span class="caret"></span>
+                        </a>
+                        {{ form.ra }}
+                    </li>
+                    <li class="dropdown dropdown-menu-date">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-calendar fa-fw"></i>
+                            Modified <span class="caret"></span>
+                            <small class="details"></small>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            {{ form.mq }}
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Modified after...
+                                {{ form.mds }}</label>
                             </li>
-                            <li>
-                            {{ form.myWorkgroups_only }}
-                            {{ form.myWorkgroups_only.label }}
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Modified before...</a>
+                                {{ form.mde }}</label>
                             </li>
                         </ul>
-                    </dd>
-                    {% endif %}
-                    {% with show=form.models.data %}
-                        <dt data-toggle="collapse" accesskey="i"  data-target="#search-models"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            Item type
-                        </dt>
-                        <dd id="search-models" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.models }}
-                        </dd>
-                    {% endwith %}
-                    {% with show=form.state.data %}
-                        <dt data-toggle="collapse" data-target="#search-states"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            State
-                        </dt>
-                        <dd id="search-states" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.state }}
-                        </dd>
-                    {% endwith %}
-                    {% with show=form.ra.data %}
-                        <dt data-toggle="collapse" data-target="#search-ras"
-                            {% if not show %}class="collapsed"{% endif %}>
-                            Registration Authority
-                        </dt>
-                        <dd id="search-ras" {% if not show %}class="collapse"{% endif %}>
-                            {{ form.ra }}
-                        </dd>
-                    {% endwith %}
-                    {% comment %}
-                    <div>
-                    Modified:
-                    <ul></ul>
-                    Custom range:
-                    {{ form.startDate }}
-                    </div>
-                    <div>
-                    Created:
-                    <ul></ul>
-                    Custom range:
-                    {{ form.startDate }}
-                    </div>
-                    {% endcomment %}
-                </dl>
+                    </li>
+                    <li class="dropdown dropdown-menu-date">
+                        <a href="#" type="button" class="dropdown-toggle"
+                        data-toggle="dropdown">
+                            <i class="fa fa-calendar fa-fw"></i>
+                            Created <span class="caret"></span>
+                            <small class="details"></small>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            {{ form.cq }}
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Created after...
+                                {{ form.cds }}</label>
+                            </li>
+                            <li role="presentation">
+                                <label role="menuitem" href="#">Created before...</a>
+                                {{ form.cde }}</label>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+              </div>
             </nav>
-    <!-- /form -->
-            <div class="col-sm-8 col-md-9">
-
-        {% if query or page.object_list %}
+            <div class="col-md-10 col-md-offset-1">
+            {#  ----- If there are spelling suggestions, show them. ----- #}
+            {% if form.auto_correct_spell_search %}
+                {% if page.object_list %}
+                    <p><strong>No results for:</strong> {{ form.original_query }}
+                    </p>
+                    <strong>Searching instead for:</strong>
+                    <span>
+                    {% for word,suggestion in form.spelling_suggestions %}
+                        {% if suggestion %}
+                            <em>{{ suggestion }}</em>
+                        {% else %}
+                            {{ word }}
+                        {% endif %}
+                    {% endfor %}
+                    </span>
+                {% endif %}
+            {% elif form.has_spelling_suggestions  %}
+                Did you mean:
+                <a href="?q={{ form.suggested_query }}">
+                {% for word,suggestion in form.spelling_suggestions %}
+                    {% if suggestion %}
+                        <em>{{ suggestion }}</em>
+                    {% else %}
+                        {{ word }}
+                    {% endif %}
+                {% endfor %}
+                </a>
+            {% endif %}
+        {#  ----- MAIN RESULTS PAGE STARTS HERE ----- #}
+        {% if query or form.filter_search %}
             {% if page.object_list %}
                 {% if form.auto_broaden_search %}
                     <div class="alert alert-warning" role="alert">
@@ -113,6 +167,23 @@
                         </p>
                     </div>
                 {% endif %}
+                <div class="btn-group pull-right">
+                    {% if user.is_active %}
+                    <button class="btn btn-primary" type="submit" name="addFavourites">
+                        <i class="fa fa-bookmark"></i> Add selected to
+                        <small class="details">favourites</small>
+                    </button>
+                    {% endif %}
+                    <div class="btn-group sort-order-box">
+                        <button  href="#" type="button" class="btn btn-default dropdown-toggle "
+                        data-toggle="dropdown">
+                            <i class="fa fa-sort"></i>
+                            Sort by... <span class="caret"></span>
+                            <small class="details"></small>
+                        </button>
+                        {{ form.sort }}
+                    </div>
+                </div>
                 <h3>Results</h3>
                 <p>
                     {% if page.has_other_pages %}
@@ -133,12 +204,15 @@
                         {% if user.is_active %}
                             <input type='checkbox' value='{{ result.object.id }}' title='select to add to favourites' name='favourites'></input>
                         {% endif %}
-                        <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a> ({{ result.object.get_verbose_name }})
+                        <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a>
+                        <span class="item_type">({{ result.object.get_verbose_name }})</span>
                         <div>
-                        <span class="attr">Last modified: {{ result.object.modified }}</span>
+                        <span class="attr"><span class="time">Created: {{ result.object.created }}</span> | <span class="time">Last modified: {{ result.object.modified|naturaltime }}</span></span>
                         <span class="attr">Statuses:
                             {% for s in result.object.statuses.all %}
                                 [{{ s.registrationAuthority }}: {{ s.state_name }}]
+                            {% empty %}
+                            <em>Unregistered</em>
                             {% endfor %}</span>
                         {{ result.object.description|truncatewords:20|striptags }}</div>
                     </li>
@@ -147,12 +221,16 @@
                     <li>No results found.</li>
                 {% endfor %}
                 </ol>
-                {% if user.is_active %}
-                <button class="btn btn-primary" type="submit" name="addFavourites">
-                    <i class="fa fa-bookmark"></i> Add selected to favourites
-                </button>
-                {% endif %}
+                <div class="btn-group pull-right">
+                    {% if user.is_active %}
+                    <button class="btn btn-primary" type="submit" name="addFavourites">
+                        <i class="fa fa-bookmark"></i> Add selected to
+                        <small class="details">favourites</small>
+                    </button>
+                    {% endif %}
+                </div>
                 {% if page.has_previous or page.has_next %}
+                    <div class="row text-center">
                     {% if page.paginator.num_pages <= 10 %}
                     <ul class="pagination pagination-sm searchResults">
                         {% if page.has_previous %}
@@ -188,28 +266,26 @@
                         {% endif %}
                     </ul>
                     {% endif %}
+                    </div>
                 {% endif %}
             {% else %}
                 <h3>No results found.</h3>
                 <p>
-                    {% if form.has_spelling_suggestions %}
-                        Did you mean:
-                        <a href="?q={{ form.suggested_query }}">
-                        {% for word,suggestion in form.spelling_suggestions %}
-                            {% if suggestion %}
-                                <em>{{ suggestion }}</em>
-                            {% else %}
-                                {{ word }}
-                            {% endif %}
-                        {% endfor %}
-                        </a>
-                    {% endif %}
                 {% if form.auto_broaden_search %}
                     <div class="alert alert-warning" role="alert">
                         <p>There were no results for "{{ form.q.value }}" with your requested filters.
                         </p>
                         <p>
                             We removed the filters and re-ran your search, but there were still zero results.
+                        </p>
+                    </div>
+                {% endif %}
+                {% if form.attempted_filter_search %}
+                    <div class="alert alert-warning" role="alert">
+                        <p>There were no results for your requested filters.
+                        </p>
+                        <p>
+                            Please change your search parameters and try again.
                         </p>
                     </div>
                 {% endif %}

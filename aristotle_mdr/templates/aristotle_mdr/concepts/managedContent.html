@@ -117,13 +117,14 @@
             {% endif %}</dt>
             <dd class="large">
             <ul>
-                <li>{{ total }} {% pluralmodel item total %}</li>
                 {% for sup in item.supersedes.all|can_view_iter:user %}
                     <li>
                       <a href="{% url 'aristotle:item' item_id=sup.id %}/">
                         {{ sup }}
                       </a>
                     </li>
+                {% empty %}
+                    <li><em>None</em></li>
                 {% endfor %}
             </ul>
             </dd>
