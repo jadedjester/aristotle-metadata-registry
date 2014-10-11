@@ -1,3 +1,42 @@
+function showClearFilters() {
+    $("#advanced_nav_link").addClass("clearFilters")
+    $("#advanced_label").hide();
+    $("#clear_filters").show();
+}
+
+function hideClearFilters() {
+    $("#advanced_nav_link").removeClass("clearFilters")
+    $("#advanced_label").show();
+    $("#clear_filters").hide();
+}
+
+function clearFilters() {
+    $(".searchAdvanced input:checked").each( function() {
+        $(this).prop("checked", false);
+    });
+    $(".searchAdvanced .badge").text('');
+}
+
+function checkFilters() {
+    // Disgregard "any time" filters.
+    x = $(".searchAdvanced input:checked[value != 'a']").length;
+    y = 0
+    if (x==0) {
+        y = $(".searchAdvanced .date input[type='text']").each( function() {
+            if (this.value) {
+                y++;
+                //console.log(this);
+            }
+        });
+    }
+    //console.log(x,y);
+    if ( (x+y) > 0) {
+        showClearFilters();
+    } else {
+        hideClearFilters();
+    }
+}
+
 function updateCheckboxBadge(menu) {
     x = $(menu).find("input:checked").length;
     if (x > 0) {
@@ -5,6 +44,7 @@ function updateCheckboxBadge(menu) {
     } else {
         $(menu).parent().find(".badge").text('');
     }
+    checkFilters();
 }
 
 function updateDateRadioDetails(menu) {
@@ -15,6 +55,7 @@ function updateDateRadioDetails(menu) {
     } else {
         $(menu).parent().find(".details").text('');
     }
+    checkFilters();
 }
 function updateSortRadioDetails(menu) {
     x = $(menu).find("input:checked");
@@ -53,7 +94,12 @@ $( document ).ready( function() {
         console.log("doing sort");
         updateSortRadioDetails(this);
     });
-
+    $('#advanced_nav_link').on('click', function(e) {
+        if ($(this).hasClass("clearFilters")) {
+            clearFilters();
+            hideClearFilters();
+        }
+    });
 
     $('.dropdown-menu-date .dropdown-menu .input-group.date').each( function() {
         //console.log(this)

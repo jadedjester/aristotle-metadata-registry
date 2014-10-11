@@ -481,15 +481,16 @@ class PermissionSearchForm(TokenSearchForm):
             self.filter_search = True
             self.attempted_filter_search = True
 
-        if not repeat_search:
-            self.has_spelling_suggestions = False
-            self.check_spelling(sqs)
-
         sqs = self.apply_registration_status_filters(sqs)
         sqs = self.apply_date_filtering(sqs)
         sqs = self.apply_permission_checks(sqs)
 
+        self.has_spelling_suggestions = False
         if not self.repeat_search:
+
+            if sqs.count() < 5:
+                self.check_spelling(sqs)
+
             if sqs.count() == 0:
                 if has_filter and self.cleaned_data['q']:
                     # If there are 0 results with a search term, and filters applied
