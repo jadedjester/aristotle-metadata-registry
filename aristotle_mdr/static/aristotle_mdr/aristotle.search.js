@@ -15,6 +15,7 @@ function clearFilters() {
         $(this).prop("checked", false);
     });
     $(".searchAdvanced .badge").text('');
+    $(".searchAdvanced .details").text('');
 }
 
 function checkFilters() {
@@ -112,6 +113,9 @@ $( document ).ready( function() {
         });
     });
 
+    $( "input[type='text']" ).change(function() {
+      console.log($(this).val());
+    });
 
 
     $("#search-input").keydown(function(e){
