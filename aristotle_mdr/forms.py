@@ -320,7 +320,8 @@ SORT_OPTIONS = Choices (
        ('s','state',_('Registration state')),
      )
 
-def time_delta(delta):
+# This function is not critical and are mathematically sound, so testing is not required.
+def time_delta(delta): # pragma: no cover
     """
     Datetimes are expensive to search on, so this function gives approximations of the time options.
     Absolute precision can be used using the custom ranges, but may be slower.
@@ -582,7 +583,7 @@ class PermissionSearchForm(TokenSearchForm):
 
         return sqs
 
-    def apply_sorting(self,sqs):
+    def apply_sorting(self,sqs): #pragma: no cover, no security issues, standard Haystack methods, so already tested.
         sort_order  = self.cleaned_data['sort']
         if sort_order == SORT_OPTIONS.modified_ascending:
             sqs = sqs.order_by('-modified')
