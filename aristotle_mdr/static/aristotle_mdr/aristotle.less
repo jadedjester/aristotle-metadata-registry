@@ -33,8 +33,6 @@
 @media (max-width:@screen-sm-max)  {
     #infobox {
         border:none;
-        dl * {float:none!important;}
-        dl dd {margin-left:20px!important; }
         div.status ul {padding-left:20px;}
     }
 }
@@ -97,9 +95,12 @@ dl {
 }
 #description {
     padding-bottom:1em;
-    border-bottom:1px solid @colors_border;
+    /*border-bottom:1px solid @colors_border; */
     margin-bottom:1em;
     font-size:120%;
+    h2 {
+        font-size:1.2em;
+    }
 }
 dl .description {
     padding-bottom:5px;
@@ -108,6 +109,19 @@ dl .description {
     word-wrap: break-word;
     p {
         word-wrap: break-word;
+    }
+}
+#alternate_names {
+    dt {
+        min-width:200px;
+        padding-right:5px;
+    }
+    dt, dd {
+        display: inline;
+    }
+    dd:after {
+        content:"\a";
+        white-space: pre;
     }
 }
 #supersedes {
@@ -137,14 +151,33 @@ table.mceLayout iframe {
         > span {
             font-size:80%;
         }
+        small, .version {
+            display:inline-block;
+        }
         a, a:visited {
             color:inherit;
         }
+        input {
+            font-size:1em;
+        }
+        .version {
+            color:black;
+            font-size:70%;
+            margin-left:0px;
+            padding-left:0px;
+            padding-right:3px;
+            &:before {
+                display:inline;
+                color:gray;
+                content:'v';
+                padding-right:0px;
+            }
+        }
     }
     h2 {
-        font-size:1.6em;
-        color:navy;
+        font-size:1.5em;
         margin-top: 10px;
+        border-bottom:1px solid lightgray;
     }
     h3 {
         font-size:1.3em;
@@ -243,7 +276,7 @@ li.viewHistory {
             &.large {float:none;}
         }
         dd {
-            margin-left:120px;
+            margin-left:100px;
             &.large {
                 margin-left:0px;
                 ul {
