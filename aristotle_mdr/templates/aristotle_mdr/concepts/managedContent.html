@@ -3,7 +3,13 @@
 {% load inplace_edit %}
 {% load aristotle_tags %}
 
-{% block title %}{{ item.name }} ({{ item.get_verbose_name }}){% endblock %}
+{% block title %}
+    {{ item.name }}
+    {% if item.version %}
+        - v{{ item.version }}
+    {% endif %}
+    ({{ item.get_verbose_name }})
+{% endblock %}
 {% block content %}
 <header class="row">
     <h1 id="objectTitle"  class="pull-left">
