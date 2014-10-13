@@ -1,9 +1,15 @@
 {% extends 'aristotle_mdr/base.html' %}
-
+{% load humanize %}
 {% load inplace_edit %}
 {% load aristotle_tags %}
 
-{% block title %}{{ item.name }} ({{ item.get_verbose_name }}){% endblock %}
+{% block title %}
+    {{ item.name }}
+    {% if item.version %}
+        - v{{ item.version }}
+    {% endif %}
+    ({{ item.get_verbose_name }})
+{% endblock %}
 {% block content %}
 <header class="row">
     <h1 id="objectTitle"  class="pull-left">
@@ -19,6 +25,11 @@
         </a>
         {% endif %}
         <a href="#">{% inplace_edit 'item.name' %}</a>
+        {% if item.version %}
+        <em class="version" title="Version {{ item.version }}">
+            {% inplace_edit 'item.version' %}
+        </em>
+        {% endif %}
         <small>({{ item.get_verbose_name }})</small>
         {% if item|can_edit:request.user %}
         <a class="sr-only" accesskey="p" href="{% adminEdit item %}">
@@ -79,10 +90,13 @@
             <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
             <dt>Aristotle ID</dt><dd>{{ item.id }}</dd>
             {% if item.shortName %}
-            <dt>Short name</dt><dd>{{ item.shortName }}</dd>
+            <dt class="visible-xs">Short name</dt><dd class="visible-xs">{{ item.shortName }}</dd>
+            {% endif %}
+            {% if item.version %}
+            <dt class="visible-xs">Version</dt><dd class="visible-xs">{{ item.version }}</dd>
             {% endif %}
             {% if item.synonyms %}
-            <dt>Synonyms</dt><dd>{{ item.synonyms }}</dd>
+            <dt class="visible-xs">Synonyms</dt><dd class="visible-xs">{{ item.synonyms }}</dd>
             {% endif %}
             <dt>Included in</dt>
             <dd>
@@ -97,7 +111,8 @@
             {% include "aristotle_mdr/statuses.html" with statuses=item.statuses infoBox=True %}
             <dt>Last updated</dt>
             <dd>
-                <a href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified}}</a>
+                <a title ="{{item.modified}}"
+                href="{% url 'admin:aristotle_mdr_valuedomain_history' item.id %}">{{item.modified|naturaltime}}</a>
                 {% if request.user.is_active %}
                 <span style="display:inline-block">By {% with name=last_edit.revision.user.get_username %}
                         {% if name %}{{ name }}{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
@@ -105,7 +120,7 @@
                 </span>
                 {% endif %}
             </dd>
-            <dt>Created</dt><dd>{{item.created}}</dd>
+            <dt>Created</dt><dd title="{{ item.created }}">{{item.created|date}}</dd>
 
         {% block asideContent %}{% endblock %}
 
@@ -194,8 +209,19 @@
         {% inplace_edit 'item.readyToReview' adaptor='booleanYesNo' %}
     </div>
     {% endif %}
+    <dl id="alternate_names" class="hidden-xs">
+        {% if item.shortName %}
+        <dt>Short name</dt><dd>{% inplace_edit 'item.shortName' %}</dd>
+        {% endif %}
+        {% if item.version %}
+        <dt class="visible-xs">Version</dt><dd class="visible-xs">{{ item.version }}</dd>
+        {% endif %}
+        {% if item.synonyms %}
+        <dt>Synonyms</dt><dd>{% inplace_edit 'item.synonyms' %}</dd>
+        {% endif %}
+    </dl>
     <div id="description" class="description">
-        <h2 class="sr-only">Description</h2>
+        <h2>Definition</h2>
         {% inplace_edit 'item.description' adaptor='aristotle' %}
     </div>
     {% block objSpecific %}
