@@ -2,6 +2,7 @@
 
 {% block title %}Change state for {{ item.name }}{% endblock %}
 {% block content %}
+{{ form.media }}
 <form method="post" action="{% url 'aristotle:changeStatus' item.id %}">{% csrf_token %}
     <div class="modal-body">
         {% if item and not request.is_ajax %}
@@ -13,19 +14,15 @@
         <header>This form allows you to change the status of items in your registration authorities.
         </header>
         <section>
-        {% if request.is_ajax %}
-            If you need to alter the date use the <a href="{% url 'aristotle:changeStatus' item.id %}">advanced registration page</a>.
-        {% else %}
-            <div id="changeStatusDate">
-                <span>
-                    {{ form.registrationDate.label }}:
-                    {{ form.registrationDate.errors }}
-                </span>
-                <span>
-                    {{ form.registrationDate }}
-                </span>
-            </div>
-        {% endif %}
+        <div id="changeStatusDate">
+            <span>
+                {{ form.registrationDate.label }}:
+                {{ form.registrationDate.errors }}
+            </span>
+            <span>
+                {{ form.registrationDate }}
+            </span>
+        </div>
         <div id="cascadeRegistration">
             <span>
                 {{ form.cascadeRegistration.label }}:
@@ -51,10 +48,8 @@
                 {{ form.registrationAuthorities }}
             </div>
         </div>
-        <div>
+        <div class="status_change_description">
             {{ form.changeDetails.label }} (optional):
-        </div>
-        <div>
             {{ form.changeDetails }}
         </div>
         {% block save %}

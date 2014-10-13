@@ -1,13 +1,9 @@
-import os,sys
+import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 FIXTURES_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
 STATIC_ROOT =os.path.join(BASE_DIR, "static")
-
-# This MUST be overridden in a particular install of Aristotle in the projects own settings.py file.
-SECRET_KEY = '1cdd5u%@#z%eg8+tc(jd@i*nf=ae5d+c!2=irfs=)h%1b2&a&o'
-
 
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 # This provides for quick easy set up, but should be changed to a production
@@ -50,9 +46,14 @@ INSTALLED_APPS = (
     'notifications',
 )
 
+USE_L10N = True
+USE_TZ = True
+USE_I18N = True
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

@@ -1,10 +1,6 @@
 {% if infoBox %}<dt class="large">{% endif %}
 <span>Registration status</span>
 {% if user.profile.is_registrar %}
-    <a class="inline_action" href="{% url 'aristotle:changeStatus' item.id %}">Change</a>
-    {% comment %}
-    To be reimplemented when this pull-request is done:
-       https://github.com/nkunihiko/django-bootstrap3-datetimepicker/pull/16
     <a class="inline_action" href="{% url 'aristotle:changeStatus' item.id %}"
         data-toggle="modal" data-target="#statusChange">Change</a>
     <div id="statusChange" class="modal fade">
@@ -12,7 +8,7 @@
             <div class="modal-content"></div>
         </div>
     </div>
-    {% endcomment %}
+
 {% endif %}
 {% if infoBox %}</dt><dd class="large">{% else %}:{% endif %}
 <ul>

@@ -48,6 +48,12 @@ function updateCheckboxBadge(menu) {
     checkFilters();
 }
 
+function clearCustomDates(menu) {
+    $(menu).find("input[type='text']").each(function() {
+        this.value = "";
+    });
+}
+
 function updateDateRadioDetails(menu) {
     x = $(menu).find("input:checked");
     if (x.length > 0 && x[0].value != 'a') {
@@ -77,9 +83,10 @@ $( document ).ready( function() {
     $('.dropdown-menu-form .dropdown-menu').each( function() {
         updateCheckboxBadge(this);
     });
+
     $('.dropdown-menu-date .dropdown-menu').on('click', function(e) {
-        e.stopPropagation();
         updateDateRadioDetails(this);
+        clearCustomDates(this);
     });
     $('.dropdown-menu-date .dropdown-menu').each( function() {
         updateDateRadioDetails(this);
@@ -92,29 +99,23 @@ $( document ).ready( function() {
         $(this).closest("form").submit();
     });
     $('.sort-order-box .dropdown-menu').each( function() {
-        console.log("doing sort");
         updateSortRadioDetails(this);
     });
+
+    // Setup the advance/clear toggle button in the navbar
     $('#advanced_nav_link').on('click', function(e) {
         if ($(this).hasClass("clearFilters")) {
             clearFilters();
+            clearCustomDates();
             hideClearFilters();
         }
     });
 
+    // When a custom date changes, auto-tick the custom range box
     $('.dropdown-menu-date .dropdown-menu .input-group.date').each( function() {
-        //console.log(this)
         $(this).on("dp.change", function() {
-            // change(this);
-            console.log(this)
             $(this).parents(".dropdown-menu").first().find("[value='X']").prop("checked", true);
-
-
         });
-    });
-
-    $( "input[type='text']" ).change(function() {
-      console.log($(this).val());
     });
 
 

@@ -178,6 +178,9 @@
                         <li><a href="{% url 'aristotle:discussions' %}">
                             <i class="fa fa-comments fa-fw"></i> {% trans 'Discussions'%}
                         </a></li>
+                        <li <a href="{% url 'aristotle:userWorkgroups' %}">
+                            <i class="fa fa-users fa-fw"></i> Workgroups
+                        </a></li>
                         {% if user.has_usable_password %}
                             <li><a href="{% url 'admin:password_change' %}">
                             <i class="fa fa-cog fa-fw"></i> {% trans 'Change password' %}

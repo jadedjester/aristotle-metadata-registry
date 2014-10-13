@@ -26,6 +26,5 @@
 
 <h2>Recent conversations</h2>
 <a href="{% url 'aristotle:discussions' %}">View all posts.</a>
-{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=request.user.profile.discussions.all|slice:":5" %}
-
+{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=request.user.profile.discussions.all|slice:":5" showWorkgroups=True%}
 {% endblock %}
