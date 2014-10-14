@@ -65,7 +65,7 @@ def download(request,downloadType,iid=None):
     item = get_if_user_can_view(item.__class__,request.user, iid)
     if not item:
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     p,t = item.template.split("/",1)
@@ -92,7 +92,7 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
     item = get_object_or_404(objtype,pk=iid).item
     if not condition(request.user, item):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
 
@@ -140,7 +140,7 @@ def itemPackages(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
     if not item:
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
 
@@ -164,7 +164,7 @@ def registrationHistory(request, item_id):
     item = get_if_user_can_view(MDR._concept,request.user,item_id)
     if not item:
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     from reversion.revisions import default_revision_manager
@@ -525,7 +525,7 @@ def createDataElementConcept(request):
 
 def createManagedObject(request,f):
     if request.user.is_anonymous():
-        return redirect('/accounts/login?next=%s' % request.path)
+        return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
     similar = None # We keep track of any similar items to prompt users to reuse
     prompt = False # Has the user tried to pass through again after being told to check other items?
     initial = {'workgroup':request.user.profile.activeWorkgroup,
@@ -680,7 +680,7 @@ def removeWorkgroupRole(request,iid,role,userid):
     workgroup = get_object_or_404(MDR.Workgroup,pk=iid)
     if not (workgroup and user_is_workgroup_manager(request.user,workgroup)):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     try:
@@ -694,7 +694,7 @@ def addWorkgroupMembers(request,iid):
     workgroup = get_object_or_404(MDR.Workgroup,pk=iid)
     if not (workgroup and user_is_workgroup_manager(request.user,workgroup)):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     if request.method == 'POST': # If the form has been submitted...
@@ -722,7 +722,7 @@ def changeStatus(request, iid):
     item = MDR._concept.objects.get_subclass(pk=iid)
     if not (item and user_can_change_status(request.user,item)):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     # There would be an else here, but both branches above return,
@@ -755,7 +755,7 @@ def supersede(request, iid):
     item = get_object_or_404(MDR._concept,pk=iid).item
     if not (item and user_can_edit(request.user,item)):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     qs=item.__class__.objects.all()
@@ -777,7 +777,7 @@ def deprecate(request, iid):
     item = get_object_or_404(MDR._concept,pk=iid).item
     if not (item and user_can_edit(request.user,item)):
         if request.user.is_anonymous():
-            return redirect('/accounts/login?next=%s' % request.path)
+            return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
     qs=item.__class__.objects.filter().editable_slow(request.user)

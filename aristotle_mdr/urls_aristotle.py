@@ -73,19 +73,19 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^remove/WorkgroupRole/(?P<iid>\d+)/(?P<role>[A-Za-z\-]+)/(?P<userid>\d+)/?$', views.removeWorkgroupRole, name='removeWorkgroupRole'),
     #url(r'^remove/WorkgroupUser/(?P<iid>\d+)/(?P<userid>\d+)$', views.removeWorkgroupUser, name='removeWorkgroupUser'),
 
-    url(r'^account/home/?', views.userHome, name='userHome'),
-    url(r'^account/userAdminTools/?', views.userAdminTools, name='userAdminTools'),
-    url(r'^account/edit/?', views.userEdit, name='userEdit'),
-    url(r'^account/inbox(?:/(?P<folder>all))?/?', views.userInbox, name='userInbox'),
+    url(r'^account/home/?$', views.userHome, name='userHome'),
+    url(r'^account/userAdminTools/?$', views.userAdminTools, name='userAdminTools'),
+    url(r'^account/edit/?$', views.userEdit, name='userEdit'),
     url(r'^account/favourites/?$', views.userFavourites, name='userFavourites'),
     url(r'^account/workgroups/?$', views.userWorkgroups, name='userWorkgroups'),
+    url(r'^account/notifications(?:/folder/(?P<folder>all))?/?$', views.userInbox, name='userInbox'),
 
     url(r'^account/registrartools/?$', views.userRegistrarTools, name='userRegistrarTools'),
     url(r'^account/registrartools/readyforreview/?$', views.userReadyForReview, name='userReadyForReview'),
 
     url(r'^registrationauthority/(?P<iid>\d+)/?$', views.registrationauthority, name='registrationAuthority'),
     url(r'^registrationauthorities/?$', views.allRegistrationAuthorities, name='allRegistrationAuthorities'),
-    url(r'^account/toggleFavourite/(?P<item_id>\d+)/?', views.toggleFavourite, name='toggleFavourite'),
+    url(r'^account/toggleFavourite/(?P<item_id>\d+)/?$', views.toggleFavourite, name='toggleFavourite'),
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 
