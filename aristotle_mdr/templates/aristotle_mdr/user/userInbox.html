@@ -17,6 +17,7 @@
 
 <a class="btn btn-default" href="{% url 'notifications:mark_all_as_read' %}"><i class="fa fa-envelope-o"></i> Mark all as read</a>
 
+<h1>{{ folder }}</h1>
 <table class="notifications table">
   <thead>
       <tr>
@@ -58,7 +59,7 @@
         </td>
         <td>{{ notice.timesince }} ago</td>
         <td>
-            <a href="{% url 'notifications:mark_as_read' notice.slug %}">
+            <a href="{% url 'notifications:delete' slug=notice.slug %}?next={{ request.path }}">
                 <i class="fa fa-trash"></i>
             </a>
         </td>

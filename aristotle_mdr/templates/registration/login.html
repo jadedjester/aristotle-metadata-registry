@@ -25,24 +25,24 @@
             <label>Username or Email:</label>
             <div class="input-group">
               <span class="input-group-addon"><i class="fa fa-user fa-lg fa-fw"></i></span>
-              <input name="username" type="text" class="form-control"
+              <input name="username" type="text" class="form-control" tabindex="1"
                 {% if form.username.value %}
                 value="{{ form.username.value }}"
                 {% endif %}
                 required autofocus>
             </div>
             <label>Password:</label>
-            <a href="#" class="forgot">(Forgotten your password)</a>
+            <a href="#" class="forgot" tabindex="3">(Forgotten your password?)</a>
             <div class="input-group">
               <span class="input-group-addon"><i class="fa fa-lock fa-lg fa-fw"></i></span>
-              <input name="password" type="password" class="form-control" required>
+              <input name="password" type="password" class="form-control" tabindex="2" required>
             </div>
 
             <!-- label class="remember">
                 <input type="checkbox" value="remember-me">
                 Remember me
             </label -->
-            <button class="btn btn-lg btn-primary btn-block" type="submit">
+            <button tabindex="4" class="btn btn-lg btn-primary btn-block" type="submit">
                 Sign in</button>
             <input type="hidden" name="next" value="{{ next }}" />
             </form>
