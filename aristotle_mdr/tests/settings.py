@@ -1,6 +1,7 @@
 import os
 from aristotle_mdr.required_settings import *
 
+SECRET_KEY = 'inara+vtkprm7@0(fsc$+grbz9-s+tmo9d)e#k(9uf8m281&$7xhdkjr'
 project_dir = os.path.abspath('../') # or path to the dir. that the db should be in.
 SOUTH_TESTS_MIGRATE = False # To disable migrations and use syncdb instead
 SKIP_SOUTH_TESTS = True

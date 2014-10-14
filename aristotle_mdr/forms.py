@@ -416,6 +416,13 @@ class TokenSearchForm(SearchForm):
 
         return sqs
 
+datePickerOptions={
+    "format": "YYYY-MM-DD",
+    "pickTime": False,
+    "pickDate": True,
+    "defaultDate":"",
+    "useCurrent": False,
+}
 
 class PermissionSearchForm(TokenSearchForm):
     """
@@ -425,24 +432,23 @@ class PermissionSearchForm(TokenSearchForm):
 
         TODO: This might not scale well, so it may need to be looked at in production.
     """
-
     mq=forms.ChoiceField(required=False,initial=QUICK_DATES.anytime,
         choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
 
     mds = forms.DateField(required=False,
-        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        widget=DateTimePicker(options=datePickerOptions),
         )
     mde = forms.DateField(required=False,
-        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        widget=DateTimePicker(options=datePickerOptions),
         )
     cq=forms.ChoiceField(required=False,initial=QUICK_DATES.anytime,
         choices=QUICK_DATES,widget=BootstrapDropdownIntelligentDate)
 
     cds = forms.DateField(required=False,
-        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        widget=DateTimePicker(options=datePickerOptions),
         )
     cde = forms.DateField(required=False,
-        widget=DateTimePicker(options={"format": "YYYY-MM-DD","pickTime": False}),
+        widget=DateTimePicker(options=datePickerOptions),
         )
 
     # Use short singular names

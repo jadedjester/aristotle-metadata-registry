@@ -1,11 +1,16 @@
 {% extends "aristotle_mdr/base.html" %}
 {% load inplace_edit %}
+{% load staticfiles %}
 
 {% block title %}My Dashboard{% endblock %}
+{% block extra_head_scripts %}
+<link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.dashboard.less' %}" />
+{% endblock %}
+
 {% block content %}
 <div class="row">
 
-<nav class="col-sm-4 col-md-3 navbar navbar-default">
+<nav class="col-sm-3 col-md-2 navbar navbar-default" id="user_sidebar">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#dashboard-nav">
         <span class="sr-only">Toggle navigation</span>
@@ -25,7 +30,7 @@
         {% endblock %}
     </div>
 </nav>
-<div class="col-sm-8">
+<div class="col-sm-9 col-md-10">
     {% block page %}
     <h1><a href="#">My Dashboard</a> <small>- {{ user.first_name }} {{ user.last_name }} ({{ user.username }})</small></h1>
     <div class='row'>

@@ -3,7 +3,13 @@
 <ul class="nav nav-pills nav-stacked nav-collapse dashMenu">
     <li {% ifequal activeTab "home" %}class="active"{% endifequal %}>
         <a href="{% url 'aristotle:userHome' %}">
-        <i class="fa fa-home fa-fw"></i> My Dashboard</a></li>
+        <i class="fa fa-home fa-fw"></i> My Dashboard</a>
+    </li>
+    <li {% ifequal activeTab "favourites" %}class="active"{% endifequal %}>
+        <a href="{% url 'aristotle:userFavourites' %}">
+        <i class="fa fa-bookmark fa-fw"></i> Favourites
+        <span class="badge pull-right">{{ user.profile.favourites.count }}</span></a>
+    </li>
     <li {% ifequal inboxFolder "unread" %}class="active"{% endifequal %}>
         <a href="{% url 'aristotle:userInbox' %}">
         <i class="fa fa-envelope fa-fw"></i> Notifications
@@ -21,42 +27,6 @@
         </ul>
         {% endif %}
     </li>
-    {% if request.user.is_superuser %}
-    <li {% ifequal activeTab "adminTools" %}class="active"{% endifequal %}>
-        <a href="{% url 'aristotle:userAdminTools' %}">
-        <i class="fa fa-user-md fa-fw"></i> Super user tools
-        </a>
-    </li>
-    {% endif %}
-    <li {% ifequal activeTab "edit" %}class="active"{% endifequal %}>
-        <a href="{% url 'aristotle:userEdit' %}">
-        <i class="fa fa-user fa-fw"></i> Edit details</a>
-        {% ifequal activeTab "edit" %}
-        <ul class="nav nav-pills nav-stacked nav-collapse dashSubMenu">
-            <li><a href="{% url 'admin:password_change' %}">
-                <i class="fa fa-cog fa-fw"></i> {% trans 'Change password' %}
-            </a></li>
-        </ul>
-        {% endifequal %}
-    <li {% ifequal activeTab "favourites" %}class="active"{% endifequal %}>
-        <a href="{% url 'aristotle:userFavourites' %}">
-        <i class="fa fa-bookmark fa-fw"></i> Favourites
-        <span class="badge pull-right">{{ user.profile.favourites.count }}</span></a>
-    </li>
-    {% if request.user.profile.is_registrar %}
-    <li {% ifequal activeTab "registrarTools" %}class="active"{% endifequal %}>
-        <a href="{% url 'aristotle:userRegistrarTools' %}">
-        <i class="fa fa-institution fa-fw"></i> Registrar tools
-        </a>
-        {% ifequal activeTab "registrarTools" %}
-        <ul class="nav nav-pills nav-stacked nav-collapse dashSubMenu">
-            <li><a href="{% url 'aristotle:userReadyForReview' %}">
-                <i class="fa fa-cog fa-fw"></i> {% trans 'Review list' %}
-            </a></li>
-        </ul>
-        {% endifequal %}
-    </li>
-    {% endif %}
     <li {% ifequal activeTab "workgroups" %}class="active"{% endifequal %}>
         <a href="{% url 'aristotle:userWorkgroups' %}">
         <i class="fa fa-users fa-fw"></i> Workgroups
@@ -78,5 +48,42 @@
         </ul>
         {% endif %}
     </li>
+    <li {% ifequal activeTab "discussions" %}class="active"{% endifequal %}>
+        <a href="{% url 'aristotle:discussions' %}">
+        <i class="fa fa-comments fa-fw"></i> {% trans 'Discussions'%}
+    </a></li>
+    <li {% ifequal activeTab "edit" %}class="active"{% endifequal %}>
+        <a href="{% url 'aristotle:userEdit' %}">
+        <i class="fa fa-user fa-fw"></i> Edit details</a>
+        {% ifequal activeTab "edit" %}
+        <ul class="nav nav-pills nav-stacked nav-collapse dashSubMenu">
+            <li><a href="{% url 'admin:password_change' %}">
+                <i class="fa fa-cog fa-fw"></i> {% trans 'Change password' %}
+            </a></li>
+        </ul>
+        {% endifequal %}
+    </li>
+    <li role="presentation" class="nav-divider"></li>
+    {% if request.user.profile.is_registrar %}
+    <li {% ifequal activeTab "registrarTools" %}class="active"{% endifequal %}>
+        <a href="{% url 'aristotle:userRegistrarTools' %}">
+        <i class="fa fa-institution fa-fw"></i> Registrar tools
+        </a>
+        {% ifequal activeTab "registrarTools" %}
+        <ul class="nav nav-pills nav-stacked nav-collapse dashSubMenu">
+            <li><a href="{% url 'aristotle:userReadyForReview' %}">
+                <i class="fa fa-cog fa-fw"></i> {% trans 'Review list' %}
+            </a></li>
+        </ul>
+        {% endifequal %}
+    </li>
+    {% endif %}
+    {% if request.user.is_superuser %}
+    <li {% ifequal activeTab "adminTools" %}class="active"{% endifequal %}>
+        <a href="{% url 'aristotle:userAdminTools' %}">
+        <i class="fa fa-user-md fa-fw"></i> Super user tools
+        </a>
+    </li>
+    {% endif %}
 </ul>
 
