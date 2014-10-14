@@ -69,16 +69,14 @@
 </table>
 {% if notifications.count == 0 and folder == 'unread' %}
 <div  class="text-center well well-lg">
+    <p><i class="fa fa-inbox fa-3x"></i></p>
     <p><strong>You have no unread notifications.</strong></p>
     <p>Good job!</p>
-
-    <p><i class="fa fa-heart fa-3x"></i></p>
-
 </div>
 {% elif notifications.count == 0 %}
 <div class="text-center well well-lg">
+    <p><i class="fa fa-inbox fa-3x"></i></p>
     <p><strong>You have no notifications.</strong></p>
-    <p><i class="fa fa-heart fa-3x"></i></p>
 </div>
 {% endif %}
 
