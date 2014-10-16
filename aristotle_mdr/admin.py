@@ -93,7 +93,7 @@ class ConceptAdmin(CompareVersionAdmin):
     def compare_workgroup(self, obj_compare):
         return ""
 
-    form = MDRForms.AdminConceptForm
+    form = MDRForms.admin.AdminConceptForm
     list_display = ['name', 'description','created','modified', 'workgroup','is_public','is_locked','readyToReview']#,'status']
     list_filter = ['created','modified',('workgroup',WorkgroupFilter)] #,'statuses']
     search_fields = ['name','synonyms']
@@ -116,9 +116,10 @@ class ConceptAdmin(CompareVersionAdmin):
             })
     ]
 
-    raw_id_fields = ('workgroup','superseded_by')
-    autocomplete_lookup_fields = {
-        'fk': ['workgroup','superseded_by'],
+    raw_id_fields = ('workgroup',)
+    autocomplete_lookup_fields = {'fk':['workgroup',]}
+    light_autocomplete_lookup_fields = {
+        'fk': [],
     }
     actions_on_top = True; actions_on_bottom = False
 
@@ -135,6 +136,7 @@ class ConceptAdmin(CompareVersionAdmin):
         class ModelFormMetaClass(conceptForm):
             def __new__(cls, *args, **kwargs):
                 kwargs['request'] = request
+                kwargs['auto_fields'] = self.light_autocomplete_lookup_fields
                 return conceptForm(*args, **kwargs)
         return ModelFormMetaClass
 
@@ -198,17 +200,23 @@ class DataElementAdmin(ConceptAdmin):
             ('Components', {'fields': ['dataElementConcept','valueDomain']}),
     ]
     raw_id_fields = ConceptAdmin.raw_id_fields + ('dataElementConcept','valueDomain')
-    autocomplete_lookup_fields = {
-        'fk': ['dataElementConcept','valueDomain']+ConceptAdmin.autocomplete_lookup_fields['fk'],
+    light_autocomplete_lookup_fields = {
+        'fk': [
+            ('dataElementConcept',MDR.DataElementConcept ),
+            ('valueDomain',MDR.ValueDomain ),
+            ] +ConceptAdmin.light_autocomplete_lookup_fields['fk'],
     }
 
 class DataElementConceptAdmin(ConceptAdmin):
     fieldsets = ConceptAdmin.fieldsets + [
             ('Components', {'fields': ['objectClass','property']}),
     ]
-    raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
-    autocomplete_lookup_fields = {
-        'fk': ['objectClass','property']+ConceptAdmin.autocomplete_lookup_fields['fk'],
+    #raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
+    light_autocomplete_lookup_fields = {
+        'fk': [
+            ('objectClass',MDR.ObjectClass ),
+            ('property',MDR.Property ),
+            ] +ConceptAdmin.light_autocomplete_lookup_fields['fk'],
     }
 
 class ObjectClassAdmin(ConceptAdmin):

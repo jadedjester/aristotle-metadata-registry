@@ -6,7 +6,9 @@
     {{ choice }} <small>Aristotle id: {{ choice.id }}</small>
     {% with choice.get_absolute_url as url %}
         {% if url %}
-        <a href="{{ url }}" target="_blank" class="choice-detail" title="{% trans 'Open in a new window' %}"><i class="fa fa-angle-double-right"></i></a>
+        <a href="{{ url }}" target="_blank" class="choice-" title="{% trans 'Open in a new window' %}">
+            <i class="fa fa-external-link-square"></i>
+        </a>
         {% endif %}
     {% endwith %}
     </span>

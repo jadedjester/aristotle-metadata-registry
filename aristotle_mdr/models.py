@@ -507,11 +507,12 @@ class _concept(baseAristotleObject):
     def relatedItems(self,user=None):
         return []
 
+    @classmethod
     def get_autocomplete_name(self):
         return 'Autocomplete'+"".join(self._meta.verbose_name.title().split())
-    """@staticmethod
+    @staticmethod
     def autocomplete_search_fields(self):
-        return ("name__icontains",) # Is this right?"""
+        return ("name__icontains",)
     def get_absolute_url(self):
         return reverse("aristotle:item",args=[self.id])
 
