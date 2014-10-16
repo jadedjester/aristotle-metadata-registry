@@ -184,8 +184,8 @@ class ConceptAdmin(CompareVersionAdmin):
     # Implementing this would be nice:
     #      http://www.szotten.com/david/custom-redirects-in-the-django-admin.html
     def response_add(self, request, obj, post_url_continue=None):
-        response = super(ConceptAdmin, self).response_change(request, obj)
-        if request.POST.has_key('_save'):
+        response = super(ConceptAdmin, self).response_add(request, obj)
+        if request.POST.has_key('_save') and post_url_continue is None:
             response['location'] = reverse("aristotle:item",args=(obj.id,))
         return response
     def response_change(self, request, obj, post_url_continue=None):
