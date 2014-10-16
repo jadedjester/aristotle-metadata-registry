@@ -106,7 +106,7 @@ urlpatterns = patterns('aristotle_mdr.views',
      view_class=views.PermissionSearchView,
      template='search/search.html',
      searchqueryset=sqs,
-     form_class=forms.PermissionSearchForm
+     form_class=forms.search.PermissionSearchForm
      ), name='search'),
 )
 
