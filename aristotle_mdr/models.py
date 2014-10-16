@@ -227,13 +227,13 @@ class RegistrationAuthority(registryGroup):
 
 
 
-"""
-A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
-
-Workgroup owners may choose to 'archive' a workgroup. All content remains visible,
-but the workgroup is hidden in lists.
-"""
 class Workgroup(registryGroup):
+    """
+    A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
+
+    Workgroup owners may choose to 'archive' a workgroup. All content remains visible,
+    but the workgroup is hidden in lists.
+    """
     template = "aristotle_mdr/workgroup.html"
     archived = models.BooleanField(default=False)
     registrationAuthorities = models.ManyToManyField(

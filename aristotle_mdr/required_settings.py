@@ -16,8 +16,10 @@ DATABASES = {
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
-TEMPLATE_DEBUG = True
+# Required for admindocs, see: https://code.djangoproject.com/ticket/21386
+SITE_ID=None
 
 ALLOWED_HOSTS = []
 SOUTH_TESTS_MIGRATE = False
@@ -25,6 +27,7 @@ SOUTH_TESTS_MIGRATE = False
 INSTALLED_APPS = (
     'grappelli',
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
