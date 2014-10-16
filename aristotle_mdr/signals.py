@@ -12,7 +12,7 @@ class AristotleSignalProcessor(RealtimeSignalProcessor):
         post_delete.connect(self.handle_status_change, sender=Status)
         super(AristotleSignalProcessor,self).setup()
 
-    def teardown(self):
+    def teardown(self): # pragma: no cover
         post_save.disconnect(self.handle_status_change, sender=Status)
         post_delete.disconnect(self.handle_status_change, sender=Status)
         super(AristotleSignalProcessor,self).teardown()

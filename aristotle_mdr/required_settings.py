@@ -13,6 +13,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'pos.db3'),
     }
 }
+SECRET_KEY = "OVERRIDE_THIS_IN_PRODUCTION"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

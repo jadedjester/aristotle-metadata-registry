@@ -268,7 +268,7 @@ def discussionsPost(request,pid):
     if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
         raise PermissionDenied
     #Show all discussions for a workgroups
-    comment_form = MDRForms.DiscussionCommentForm(initial={'post':pid})
+    comment_form = MDRForms.discussions.CommentForm(initial={'post':pid})
     page = render(request,"aristotle_mdr/discussions/post.html",{
         'workgroup':post.workgroup,
         'post':post,
@@ -288,7 +288,7 @@ def discussionsPostToggle(request,pid):
 @login_required
 def discussionsNew(request):
     if request.method == 'POST': # If the form has been submitted...
-        form = MDRForms.DiscussionNewPostForm(request.POST,user=request.user) # A form bound to the POST data
+        form = MDRForms.discussions.NewPostForm(request.POST,user=request.user) # A form bound to the POST data
         if form.is_valid():
             # process the data in form.cleaned_data as required
             new = MDR.DiscussionPost(
@@ -304,7 +304,7 @@ def discussionsNew(request):
         initial = {}
         if request.GET.get('workgroup') and request.user.profile.myWorkgroups.filter(id=request.GET.get('workgroup')).exists():
             initial={'workgroup':request.GET.get('workgroup')}
-        form = MDRForms.DiscussionNewPostForm(user=request.user,initial=initial)
+        form = MDRForms.discussions.NewPostForm(user=request.user,initial=initial)
     return render(request,"aristotle_mdr/discussions/new.html",
             {"item":item,
              "form":form,
@@ -317,7 +317,7 @@ def discussionsPostNewComment(request,pid):
     if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
         raise PermissionDenied
     if request.method == 'POST':
-        form = MDRForms.DiscussionCommentForm(request.POST)
+        form = MDRForms.discussions.CommentForm(request.POST)
         if form.is_valid():
             new = MDR.DiscussionComment(
                 post = post,
@@ -327,7 +327,7 @@ def discussionsPostNewComment(request,pid):
             new.save()
             return HttpResponseRedirect(reverse("aristotle:discussionsPost",args=[new.post.pk])+"#comment_%s"%new.id)
     else:
-        form = MDRForms.DiscussionCommentForm(initial={'post':pid})
+        form = MDRForms.discussions.CommentForm(initial={'post':pid})
     return render(request,"aristotle_mdr/discussions/new.html",{"form":form,})
 
 @login_required
@@ -622,8 +622,8 @@ TEMPLATES = {
 
 class DataElementConceptWizard(SessionWizardView):
     template_name = "aristotle_mdr/create/dec_template_wrapper.html"
-    form_list = [("initial", MDRForms.DEC_Initial_Search),
-                  ("results", MDRForms.DEC_Results),
+    form_list = [("initial", MDRForms.wizards.DEC_Initial_Search),
+                  ("results", MDRForms.wizards.DEC_Results),
                  ]
 
     def get_template_names(self):
