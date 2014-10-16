@@ -12,7 +12,7 @@ class baseObjectIndex(indexes.SearchIndex):
     #access = indexes.MultiValueField()
 
     def get_model(self):
-        return models.basePossumObject
+        return models.baseAristotleObject
 
     # From http://unfoldthat.com/2011/05/05/search-with-row-level-permissions.html
     def index_queryset(self, using=None):
