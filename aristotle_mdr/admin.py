@@ -151,13 +151,18 @@ class ConceptAdmin(CompareVersionAdmin):
         else:
             return True
     def has_add_permission(self, request):
-        return True
+        return perms.user_is_editor(request.user)
 
     def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return super(ConceptAdmin, self).has_delete_permission(request,obj=None)
+        if obj is not None:
+            print "-"*100
+            print perms.user_can_edit(request.user,obj)
+            if obj.is_registered:
+                return request.user.is_superuser
+            else:
+                return perms.user_can_edit(request.user,obj)
         else:
-            return perms.user_can_edit(request.user,obj) and not obj.is_registered
+            return perms.user_is_editor(request.user)
 
     def get_queryset(self, request):
         queryset = super(ConceptAdmin, self).get_queryset(request)
