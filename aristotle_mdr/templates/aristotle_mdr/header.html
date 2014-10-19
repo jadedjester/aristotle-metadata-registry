@@ -135,7 +135,7 @@
                     {% endif %}
                     <li role="presentation" class="divider"></li>
                     <li>
-                        <a href="/accounts/logout">
+                        <a href="{% url 'django.contrib.auth.views.logout' %}?next={{request.path}}">
                             <i class="fa fa-sign-out fa-fw"></i> {% trans 'Log out'%}
                         </a>
                     </li>
@@ -144,7 +144,7 @@
             </li>
         {% else %}
             <li accesskey="l">
-            <a href="/accounts/login?next={{request.path}}">
+            <a href="{% url 'django.contrib.auth.views.login' %}?next={{request.path}}">
                 <i class="fa fa-sign-in fa-lg"></i>  {% trans 'Log in'%}
             </a>
             </li>

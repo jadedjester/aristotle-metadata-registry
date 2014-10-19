@@ -153,6 +153,12 @@ class ConceptAdmin(CompareVersionAdmin):
     def has_add_permission(self, request):
         return True
 
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return super(ConceptAdmin, self).has_delete_permission(request,obj=None)
+        else:
+            return perms.user_can_edit(request.user,obj) and not obj.is_registered
+
     def get_queryset(self, request):
         queryset = super(ConceptAdmin, self).get_queryset(request)
         if not request.user.is_superuser:
@@ -219,32 +225,28 @@ class DataElementConceptAdmin(ConceptAdmin):
             ] +ConceptAdmin.light_autocomplete_lookup_fields['fk'],
     }
 
-class ObjectClassAdmin(ConceptAdmin):
-    pass
+class ObjectClassAdmin(ConceptAdmin):       pass
+class ConceptualDomainAdmin(ConceptAdmin):  pass
+class PackageAdmin(ConceptAdmin):           pass
+class PropertyAdmin(ConceptAdmin):          pass
 
-class PermissibleValueInline(admin.TabularInline):
-    model = MDR.PermissibleValue
+class CodeValueInline(admin.TabularInline):
     form = MDRForms.PermissibleValueForm
     #fields = ("value","meaning")
     sortable_field_name = "order"
     extra = 1
-class PackageAdmin(ConceptAdmin):
-    pass
+
+class PermissibleValueInline(CodeValueInline):
+    model = MDR.PermissibleValue
+class SupplementaryValueInline(CodeValueInline):
+    model = MDR.SupplementaryValue
+
 
 class ValueDomainAdmin(ConceptAdmin):
     fieldsets = ConceptAdmin.fieldsets + [
             ('Representation', {'fields': ['format','maximumLength','unitOfMeasure','dataType']}),
     ]
-    inlines = ConceptAdmin.inlines + [PermissibleValueInline]
-
-## Make a proxy object for Value Domains, so we can edit just the Codelists on their own
-#class CodeList(MDR.ValueDomain):
-#    class Meta:
-#        proxy = True
-#class CodeListAdmin(admin.ModelAdmin):
-#    # Need at least one field or things break, this one makes as much sense as any.
-#    fields = ['format']
-#    inlines = [PermissibleValueInline]
+    inlines = ConceptAdmin.inlines + [PermissibleValueInline,SupplementaryValueInline]
 
 class GlossaryAlternateDefinitionInline(admin.TabularInline):
     model = MDR.GlossaryAdditionalDefinition
@@ -266,16 +268,16 @@ class RegistrationAuthorityAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
+admin.site.register(MDR.ConceptualDomain,ConceptualDomainAdmin)
 admin.site.register(MDR.DataElement,DataElementAdmin)
 admin.site.register(MDR.DataElementConcept,DataElementConceptAdmin)
-admin.site.register(MDR.Workgroup,WorkgroupAdmin)
-admin.site.register(MDR.ValueDomain,ValueDomainAdmin)
+admin.site.register(MDR.GlossaryItem,GlossaryItemAdmin)
 admin.site.register(MDR.Package,PackageAdmin)
-admin.site.register(MDR.Property,ConceptAdmin)
+admin.site.register(MDR.Property,PropertyAdmin)
 admin.site.register(MDR.ObjectClass,ObjectClassAdmin)
 admin.site.register(MDR.RegistrationAuthority,RegistrationAuthorityAdmin)
-#admin.site.register(CodeList,CodeListAdmin)
-admin.site.register(MDR.GlossaryItem,GlossaryItemAdmin)
+admin.site.register(MDR.ValueDomain,ValueDomainAdmin)
+admin.site.register(MDR.Workgroup,WorkgroupAdmin)
 
 
 class UnitOfMeasureAdmin(admin.ModelAdmin):
