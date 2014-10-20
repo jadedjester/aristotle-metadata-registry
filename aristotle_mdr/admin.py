@@ -155,12 +155,7 @@ class ConceptAdmin(CompareVersionAdmin):
 
     def has_delete_permission(self, request, obj=None):
         if obj is not None:
-            print "-"*100
-            print perms.user_can_edit(request.user,obj)
-            if obj.is_registered:
-                return request.user.is_superuser
-            else:
-                return perms.user_can_edit(request.user,obj)
+            return request.user.has_perm("aristotle_mdr.delete_concept_from_admin",obj)
         else:
             return perms.user_is_editor(request.user)
 
