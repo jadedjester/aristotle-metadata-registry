@@ -53,6 +53,7 @@ setup(
         'diff-match-patch',
 
         # Fancy UI stuff
+        'django-static-precompiler',
         'django-autocomplete-light',
         'django-bootstrap3',
         'django-bootstrap3-datetimepicker',

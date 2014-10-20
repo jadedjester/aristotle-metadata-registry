@@ -1,31 +1,22 @@
-{% load inplace_edit %}
-{% load staticfiles %}
-{% load i18n %}
-{% load bootstrap3 %}
-
 <!doctype html>
 <html lang="en">
    <head>
-      <title>{% block title %}{% endblock %} - {{ config.SITE_NAME }}</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% load inplace_edit staticfiles i18n bootstrap3 compile_static %}
+      <title>{% block title %}{% endblock %} - {{ config.SITE_NAME }}</title>
+    <!--[if lt IE 9]>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
 
-      <!-- load the jQuery and require.js libraries -->
-      <!-- script src="{% static 'aristotle_mdr/jquery.min.js' %}" type="text/javascript"></script -->
+    <![endif]-->
       <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
-    <!-- link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_structure.css" / -->
-    <!-- link rel="stylesheet" type="text/css" href="/static/css/inplaceedit_toolbar_style.css" / -->
     {{ form.media }}
-
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.less' %}" />
-    {% if user_can_edit %}
-        <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.inplaceedit.less' %}" />
-        <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.autocomplete.less' %}" />
-    {% endif %}
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle.less' %}" />
     <script src="{% static 'aristotle_mdr/aristotle.js' %}" type="text/javascript"></script>
 
     {% block extra_head_scripts %}
@@ -34,12 +25,16 @@
             For example: look ups in supersedes, login, search, etc...
         {% endcomment %}
     {% endblock %}
-    <script src="{% static 'aristotle_mdr/less.min.js' %}" type="text/javascript"></script>
 
 <script src="/static/js/jquery.json.js" type="text/javascript"></script>
 {% if user_can_edit %}
+    <!--[if !IE]><!-->
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle.inplaceedit.less' %}" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle.autocomplete.less' %}" />
+    <script src="{% static 'aristotle_mdr/aristotle.inplaceedit.js' %}" type="text/javascript"></script>
+    <![endif]-->
+
     {# This block is copied from django-inplaceedit with minor tweaks #}
-    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.inplaceedit.less' %}" />
     <script type="text/javascript" src="//tinymce.cachefly.net/4.1/tinymce.min.js"></script>
     <script src="/static/js/jquery.inplaceeditform.js" type="text/javascript"></script>
     <script src="/static/js/jquery.inplaceeditform.hooks.js" type="text/javascript"></script>
@@ -62,17 +57,16 @@
                 }
             </script>
         <!--<![endif]-->
-        <script src="{% static 'aristotle_mdr/aristotle.inplaceedit.js' %}" type="text/javascript"></script>
         <script type="text/javascript">
             var csrf_token = "{{ csrf_token }}"; {# This is populated by django and needed for the inplace edit #}
         </script>
 {% endif %}
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="{% static 'aristotle_mdr/aristotle.ie8.css' %}" />
     <![endif]-->
 
    </head>
