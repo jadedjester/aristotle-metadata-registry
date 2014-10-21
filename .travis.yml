@@ -6,6 +6,8 @@ python:
 #  - "3.2"
 #  - "3.3"
 # command to install dependencies
+before_install:
+  - npm install -g less@1.7.4 # Required for static-precompiler
 install:
   - "pip install coveralls"
   - "pip install ."
