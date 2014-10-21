@@ -21,7 +21,6 @@ class AristotleBackend(ModelBackend):
         if not user_obj.is_active:
             return False
         app_label,perm_name = perm.split('.',1)
-        print app_label, perm_name, obj
         extensions = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('CONTENT_EXTENSIONS',[])
 
         if app_label in extensions or app_label == "aristotle_mdr":
