@@ -1,10 +1,11 @@
 {% extends "aristotle_mdr/base.html" %}
 {% load staticfiles %}
 {% load aristotle_tags %}
+{% load compile_static %}
 
 {% block title %}Login{% endblock %}
 {% block extra_head_scripts %}
-      <link rel="stylesheet/less" href="{% static 'aristotle_mdr/login.less' %}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/login.less' %}" />
 {% endblock %}
 {% block content %}
 

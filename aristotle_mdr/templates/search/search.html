@@ -4,10 +4,15 @@
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load aristotle_tags %}
+{% load compile_static %}
 
 {% block extra_head_scripts %}
-    <link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle_search.less' %}" />
     <script src="{% static 'aristotle_mdr/aristotle.search.js' %}" type="text/javascript"></script>
+    <!--[if !IE]> -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle_search.less' %}" />
+    <![endif]-->
+    <!--[if lt IE 9]>
+    <![endif]-->
 {% endblock %}
 
 {% block search %}{% endblock %}
@@ -124,6 +129,7 @@
                         </ul>
                     </li>
                 </ul>
+              </div>
               </div>
             </nav>
             <div class="col-md-10 col-md-offset-1">

@@ -1,10 +1,11 @@
 {% extends "aristotle_mdr/base.html" %}
 {% load inplace_edit %}
 {% load staticfiles %}
+{% load compile_static %}
 
 {% block title %}My Dashboard{% endblock %}
 {% block extra_head_scripts %}
-<link rel="stylesheet/less" type="text/css" href="{% static 'aristotle_mdr/aristotle.dashboard.less' %}" />
+<link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle.dashboard.less' %}" />
 {% endblock %}
 
 {% block content %}
