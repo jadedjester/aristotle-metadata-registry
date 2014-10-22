@@ -9,7 +9,7 @@ var glossaryLookup = {}
 function getGlossaryList() {
     $.ajax({
         url: '/glossary/ajaxlist',
-        dataType : 'json',
+        dataType : 'json'
     }).done(function(data) {
         glossaryList=[]
         for (var i = 0; i < data.length; i++) {

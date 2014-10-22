@@ -2,11 +2,9 @@
 <footer class="grp-module grp-submit-row grp-fixed-footer">
     <header style="display:none"><h1>Submit Options</h1></header>
     <ul>
-        {% comment %}
         {% if show_delete_link %}
             <li class="grp-float-left"><a href="delete/" class="grp-button grp-delete-link">{% trans "Delete" %}</a></li>
         {% endif %}
-        {% endcomment %}
         {% if original.id %}
         <li class="grp-float-left">
             <a accesskey="c" class="grp-button grp-delete-link" href="{% url 'aristotle:item' original.id %}">{% trans "Cancel editing and return to main site" %}</a></li>

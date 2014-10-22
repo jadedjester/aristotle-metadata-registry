@@ -32,30 +32,31 @@ setup(
         'django',
         'South',
         'pytz',
-        
+
         'django-model-utils',
         'django-notifications-hq',
         'django-grappelli',
-        
+        'docutils',
+
         #Search requirements
         'django-haystack',
         'Whoosh',
-        
+
         #Rich text editors
         'django-tinymce',
         'django-inplaceedit',
         'django-inplaceedit-extra-fields',
-        
+
         # Revision
         'django-reversion',
         'django-reversion-compare',
         'diff-match-patch',
-        
+
         # Fancy UI stuff
         'django-autocomplete-light',
         'django-bootstrap3',
         'django-bootstrap3-datetimepicker',
-        
+
         'xhtml2pdf'
     ],
 

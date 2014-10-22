@@ -227,13 +227,13 @@ class RegistrationAuthority(registryGroup):
 
 
 
-"""
-A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
-
-Workgroup owners may choose to 'archive' a workgroup. All content remains visible,
-but the workgroup is hidden in lists.
-"""
 class Workgroup(registryGroup):
+    """
+    A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
+
+    Workgroup owners may choose to 'archive' a workgroup. All content remains visible,
+    but the workgroup is hidden in lists.
+    """
     template = "aristotle_mdr/workgroup.html"
     archived = models.BooleanField(default=False)
     registrationAuthorities = models.ManyToManyField(
@@ -507,11 +507,12 @@ class _concept(baseAristotleObject):
     def relatedItems(self,user=None):
         return []
 
+    @classmethod
     def get_autocomplete_name(self):
         return 'Autocomplete'+"".join(self._meta.verbose_name.title().split())
-    """@staticmethod
+    @staticmethod
     def autocomplete_search_fields(self):
-        return ("name__icontains",) # Is this right?"""
+        return ("name__icontains",)
     def get_absolute_url(self):
         return reverse("aristotle:item",args=[self.id])
 

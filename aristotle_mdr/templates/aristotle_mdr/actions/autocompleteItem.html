@@ -1,24 +1,28 @@
 {% load i18n l10n %}
 {% load static %}
 
-<span class="block" data-value="{{ choice.pk|unlocalize }}">
-    <span>
-    {{ choice }} <small>Aristotle id: {{ choice.id }}</small>
+<span class="autocomplete-item block" data-value="{{ choice.pk|unlocalize }}">
+    <strong class="title">
+    {{ choice }} <small>( id: {{ choice.id }} )</small>
     {% with choice.get_absolute_url as url %}
         {% if url %}
-        <a href="{{ url }}" target="_blank" class="choice-detail" title="{% trans 'Open in a new window' %}"><i class="fa fa-angle-double-right"></i></a>
+        <a href="{{ url }}" target="_blank" class="choice-" title="{% trans 'Open in a new window' %}">
+            <i class="fa fa-external-link-square"></i>
+        </a>
         {% endif %}
     {% endwith %}
-    </span>
-    <p style="margin-left:20px;">
+    </strong>
+    <div class="details">
     <small>Statuses:
     {% for s in choice.statuses.all %}
         [{{ s.registrationAuthority }}: {{ s.state_name }}]
     {% empty %}<strong>None</strong>
     {% endfor %}</small>
         <br>
+        <p>
         {{ choice.description|truncatewords:20|striptags }}
-    </p>
+        </p>
+    </div>
 
     {% with choice.get_absolute_update_url  as url %}
         {% if url %}

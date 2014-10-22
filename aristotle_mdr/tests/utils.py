@@ -16,7 +16,11 @@ class LoggedInViewPages(object):
 
         self.su = User.objects.create_superuser('super','','user')
         self.manager = User.objects.create_user('mandy','','manager')
+        self.manager.is_staff=True
+        self.manager.save()
         self.editor = User.objects.create_user('eddie','','editor')
+        self.editor.is_staff=True
+        self.editor.save()
         self.viewer = User.objects.create_user('vicky','','viewer')
         self.registrar = User.objects.create_user('reggie','','registrar')
 
