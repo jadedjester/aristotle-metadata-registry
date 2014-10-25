@@ -13,11 +13,14 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'pos.db3'),
     }
 }
+SECRET_KEY = "OVERRIDE_THIS_IN_PRODUCTION"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
-TEMPLATE_DEBUG = True
+# Required for admindocs, see: https://code.djangoproject.com/ticket/21386
+SITE_ID=None
 
 ALLOWED_HOSTS = []
 SOUTH_TESTS_MIGRATE = False
@@ -25,6 +28,7 @@ SOUTH_TESTS_MIGRATE = False
 INSTALLED_APPS = (
     'grappelli',
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -32,12 +36,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
-    #added
     'south',
     'inplaceeditform',
     'inplaceeditform_extra_fields',
     'tinymce',
 
+    'static_precompiler',
     'bootstrap3',
     'bootstrap3_datetime',
     'reversion', # https://github.com/etianen/django-reversion
@@ -64,6 +68,7 @@ MIDDLEWARE_CLASSES = (
 TEMPLATE_CONTEXT_PROCESSORS = (
   'django.contrib.auth.context_processors.auth',
   'django.core.context_processors.request',
+  'django.core.context_processors.static',
   'aristotle_mdr.context_processors.settings',
 )
 
@@ -74,7 +79,11 @@ STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'static_precompiler.finders.StaticPrecompilerFinder',
 )
+if DEBUG:
+    STATIC_PRECOMPILER_CACHE_TIMEOUT = 1
+    STATIC_PRECOMPILER_DISABLE_AUTO_COMPILE = False
 
 GRAPPELLI_ADMIN_TITLE = "Aristotle admin interface"
 BOOTSTRAP3 = {
@@ -82,7 +91,7 @@ BOOTSTRAP3 = {
     'base_url': '/static/aristotle_mdr/bootstrap/',
 }
 
-# We need this to make sure users can
+# We need this to make sure users can see all extensions.
 AUTHENTICATION_BACKENDS = ('aristotle_mdr.backends.AristotleBackend',)
 
 # Used for in place editing

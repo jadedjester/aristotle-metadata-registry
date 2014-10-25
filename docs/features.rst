@@ -20,7 +20,6 @@ you keep a link to the Aristotle GitHub page in the footer, but even this can ca
 
 Easily extensible
 -----------------
-
 One of the core features of the ISO/IEC 11179-3 information model is the ability
 to extend the models by subclassing from the included items. Aristotle-MDR captures the
 core of the ISO/IEC 11179 as faithfully as possible, but provides a rich API to quickly
@@ -35,11 +34,15 @@ You can read more about the
 Cross-platform support
 ----------------------
 Built upon `Python <https://www.python.org/>`_ and `Django <https://www.djangoproject.com/>`_,
-the Aristotle MetaData registry can be deployed on a wide range of platform and backend databases
+the Aristotle MetaData Registry can be deployed on a wide range of platform and backend databases
 with relative ease, from traditional Linux/Unix/OSX based servers, to
 `Windows-based servers <https://docs.djangoproject.com/en/dev/howto/windows/>`_.
 The third-party `Django-MSSQL project <http://django-mssql.readthedocs.org/en/latest/>`_
 even provides support for the Microsoft MS-SQL database.
+
+On the client, Aristotle MetaData Registry has rich interactive user interface available
+on all modern browsers, but includes additional support to allow for management of
+content on common legacy browsers as far back as Internet Explorer 8.
 
 Mobile-friendly interface
 -------------------------

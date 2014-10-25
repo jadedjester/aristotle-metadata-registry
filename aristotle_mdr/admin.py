@@ -93,7 +93,7 @@ class ConceptAdmin(CompareVersionAdmin):
     def compare_workgroup(self, obj_compare):
         return ""
 
-    form = MDRForms.AdminConceptForm
+    form = MDRForms.admin.AdminConceptForm
     list_display = ['name', 'description','created','modified', 'workgroup','is_public','is_locked','readyToReview']#,'status']
     list_filter = ['created','modified',('workgroup',WorkgroupFilter)] #,'statuses']
     search_fields = ['name','synonyms']
@@ -116,9 +116,10 @@ class ConceptAdmin(CompareVersionAdmin):
             })
     ]
 
-    raw_id_fields = ('workgroup','superseded_by')
-    autocomplete_lookup_fields = {
-        'fk': ['workgroup','superseded_by'],
+    raw_id_fields = ('workgroup',)
+    autocomplete_lookup_fields = {'fk':['workgroup',]}
+    light_autocomplete_lookup_fields = {
+        'fk': [],
     }
     actions_on_top = True; actions_on_bottom = False
 
@@ -135,6 +136,7 @@ class ConceptAdmin(CompareVersionAdmin):
         class ModelFormMetaClass(conceptForm):
             def __new__(cls, *args, **kwargs):
                 kwargs['request'] = request
+                kwargs['auto_fields'] = self.light_autocomplete_lookup_fields
                 return conceptForm(*args, **kwargs)
         return ModelFormMetaClass
 
@@ -149,7 +151,13 @@ class ConceptAdmin(CompareVersionAdmin):
         else:
             return True
     def has_add_permission(self, request):
-        return True
+        return perms.user_is_editor(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None:
+            return request.user.has_perm("aristotle_mdr.delete_concept_from_admin",obj)
+        else:
+            return perms.user_is_editor(request.user)
 
     def get_queryset(self, request):
         queryset = super(ConceptAdmin, self).get_queryset(request)
@@ -182,8 +190,8 @@ class ConceptAdmin(CompareVersionAdmin):
     # Implementing this would be nice:
     #      http://www.szotten.com/david/custom-redirects-in-the-django-admin.html
     def response_add(self, request, obj, post_url_continue=None):
-        response = super(ConceptAdmin, self).response_change(request, obj)
-        if request.POST.has_key('_save'):
+        response = super(ConceptAdmin, self).response_add(request, obj)
+        if request.POST.has_key('_save') and post_url_continue is None:
             response['location'] = reverse("aristotle:item",args=(obj.id,))
         return response
     def response_change(self, request, obj, post_url_continue=None):
@@ -198,45 +206,47 @@ class DataElementAdmin(ConceptAdmin):
             ('Components', {'fields': ['dataElementConcept','valueDomain']}),
     ]
     raw_id_fields = ConceptAdmin.raw_id_fields + ('dataElementConcept','valueDomain')
-    autocomplete_lookup_fields = {
-        'fk': ['dataElementConcept','valueDomain']+ConceptAdmin.autocomplete_lookup_fields['fk'],
+    light_autocomplete_lookup_fields = {
+        'fk': [
+            ('dataElementConcept',MDR.DataElementConcept ),
+            ('valueDomain',MDR.ValueDomain ),
+            ] +ConceptAdmin.light_autocomplete_lookup_fields['fk'],
     }
 
 class DataElementConceptAdmin(ConceptAdmin):
     fieldsets = ConceptAdmin.fieldsets + [
             ('Components', {'fields': ['objectClass','property']}),
     ]
-    raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
-    autocomplete_lookup_fields = {
-        'fk': ['objectClass','property']+ConceptAdmin.autocomplete_lookup_fields['fk'],
+    #raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
+    light_autocomplete_lookup_fields = {
+        'fk': [
+            ('objectClass',MDR.ObjectClass ),
+            ('property',MDR.Property ),
+            ] +ConceptAdmin.light_autocomplete_lookup_fields['fk'],
     }
 
-class ObjectClassAdmin(ConceptAdmin):
-    pass
+class ObjectClassAdmin(ConceptAdmin):       pass
+class ConceptualDomainAdmin(ConceptAdmin):  pass
+class PackageAdmin(ConceptAdmin):           pass
+class PropertyAdmin(ConceptAdmin):          pass
 
-class PermissibleValueInline(admin.TabularInline):
-    model = MDR.PermissibleValue
+class CodeValueInline(admin.TabularInline):
     form = MDRForms.PermissibleValueForm
     #fields = ("value","meaning")
     sortable_field_name = "order"
     extra = 1
-class PackageAdmin(ConceptAdmin):
-    pass
+
+class PermissibleValueInline(CodeValueInline):
+    model = MDR.PermissibleValue
+class SupplementaryValueInline(CodeValueInline):
+    model = MDR.SupplementaryValue
+
 
 class ValueDomainAdmin(ConceptAdmin):
     fieldsets = ConceptAdmin.fieldsets + [
             ('Representation', {'fields': ['format','maximumLength','unitOfMeasure','dataType']}),
     ]
-    inlines = ConceptAdmin.inlines + [PermissibleValueInline]
-
-## Make a proxy object for Value Domains, so we can edit just the Codelists on their own
-#class CodeList(MDR.ValueDomain):
-#    class Meta:
-#        proxy = True
-#class CodeListAdmin(admin.ModelAdmin):
-#    # Need at least one field or things break, this one makes as much sense as any.
-#    fields = ['format']
-#    inlines = [PermissibleValueInline]
+    inlines = ConceptAdmin.inlines + [PermissibleValueInline,SupplementaryValueInline]
 
 class GlossaryAlternateDefinitionInline(admin.TabularInline):
     model = MDR.GlossaryAdditionalDefinition
@@ -258,16 +268,16 @@ class RegistrationAuthorityAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
+admin.site.register(MDR.ConceptualDomain,ConceptualDomainAdmin)
 admin.site.register(MDR.DataElement,DataElementAdmin)
 admin.site.register(MDR.DataElementConcept,DataElementConceptAdmin)
-admin.site.register(MDR.Workgroup,WorkgroupAdmin)
-admin.site.register(MDR.ValueDomain,ValueDomainAdmin)
+admin.site.register(MDR.GlossaryItem,GlossaryItemAdmin)
 admin.site.register(MDR.Package,PackageAdmin)
-admin.site.register(MDR.Property,ConceptAdmin)
+admin.site.register(MDR.Property,PropertyAdmin)
 admin.site.register(MDR.ObjectClass,ObjectClassAdmin)
 admin.site.register(MDR.RegistrationAuthority,RegistrationAuthorityAdmin)
-#admin.site.register(CodeList,CodeListAdmin)
-admin.site.register(MDR.GlossaryItem,GlossaryItemAdmin)
+admin.site.register(MDR.ValueDomain,ValueDomainAdmin)
+admin.site.register(MDR.Workgroup,WorkgroupAdmin)
 
 
 class UnitOfMeasureAdmin(admin.ModelAdmin):

@@ -32,6 +32,13 @@ def user_is_registrar(user):
             for r in user.profile.registrationAuthorities.all()
          )
 
+def user_is_editor(user):
+    if user.is_superuser:
+        return True
+    return True in (user.has_perm('aristotle_mdr.edit_unlocked_in_{name}'.format(name=w.name))
+            for w in user.profile.workgroups.all()
+         )
+
 def user_is_registrar_in_ra(user,ra):
     if user.is_superuser:
         return True
