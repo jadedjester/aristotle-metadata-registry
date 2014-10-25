@@ -1,0 +1,24 @@
+{% extends "aristotle_mdr/static/help/base_help.html" %}
+
+{% block title %}Help: Main{% endblock %}
+{% block heading %}Main{% endblock %}
+{% block breadcrumbs %}
+    <li><a href="{% url 'aristotle:helpMain' %}">Help</a></li>
+{% endblock %}
+
+{% block helpContent %}
+<h2>Frequently asked questions</h2>
+<ul>
+    <li><a href="about/getting_data">How can I get data?</a></li>
+    {#<li><a href="{% url 'aristotle:about' 'workgroup' %}">What is a workgroup?</a></li>#}
+    <li><a href="{% url 'aristotle:help' 'how_does_content_become_visible' %}">How does content become visible?</a></li>
+    <li><a href="{% url 'aristotle:help' 'versioning_content' %}">Versioning content</a></li>
+    <li><a href="{% url 'aristotle:about' '11179'%}">What is ISO/IEC 11179?</a></li>
+    <li><a href="{% url 'aristotle:about' 'aristotle_mdr' %}">What is the <em>Aristotle Metadata Registry</em>?</a></li>
+    <li><a href="{% url 'aristotle:about' 'metadata_registry' %}">What a metadata registry?</a></li>
+</ul>
+<h2>Helpful links</h2>
+<ul>
+    <li><a href="http://aristotle-metadata-registry.rtfd.org/en/latest/">Where is the documentation for Aristotle Metadata Registry?</a></li>
+</ul>
+{% endblock %}

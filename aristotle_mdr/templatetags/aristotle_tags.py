@@ -257,6 +257,16 @@ def clone(item):
     return reverse("admin:%s_%s_add"%(app_name,item.url_name.lower()))+"?clone=%s"%item.id
 
 @register.simple_tag
+def historyLink(item):
+    """
+    A tag for easily generating the link to an admin page for "cloning" an item. For example::
+
+        <a href="{% clone item %}">Clone {{item.name}}</a>
+    """
+    app_name = item._meta.app_label
+    return reverse("admin:%s_%s_history"%(app_name,item.url_name.lower()),args=[item.id])
+
+@register.simple_tag
 def aboutLink(item):
     app_name = item._meta.app_label
     return reverse("%s:about"%app_name,args=[item.help_name])

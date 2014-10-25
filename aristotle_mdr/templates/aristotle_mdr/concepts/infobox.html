@@ -1,0 +1,104 @@
+{% load aristotle_tags %}
+{% load humanize %}
+
+<aside id="infobox-wrap" class="col-xs-12 col-sm-4 pull-right navbar navbar-default">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#infobox">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="#" class="navbar-brand visible-xs" style="float:none;">
+        {% block collapse-link %}
+        <i class="fa fa-info-circle fa-fw"></i>More details...
+        {% endblock %}
+      </a>
+    </div>
+    <div id="infobox" class="collapse navbar-collapse" >
+        <header class="hidden-xs">{{ item.name }}</header>
+        <dl>
+            <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
+            <dt>Aristotle ID</dt><dd>{{ item.id }}</dd>
+            {% if item.shortName %}
+            <dt class="visible-xs">Short name</dt><dd class="visible-xs">{{ item.shortName }}</dd>
+            {% endif %}
+            {% if item.version %}
+            <dt class="visible-xs">Version</dt><dd class="visible-xs">{{ item.version }}</dd>
+            {% endif %}
+            {% if item.synonyms %}
+            <dt class="visible-xs">Synonyms</dt><dd class="visible-xs">{{ item.synonyms }}</dd>
+            {% endif %}
+            <dt>Included in</dt>
+            <dd>
+                {% with total=item.packages.count %}
+                {% if total > 0 %}<a href="{{ request.path }}/packages">{% endif %}
+                {{ total }} Package{{ total|pluralize }}
+                {% if total > 0 %}</a>{% endif %}
+                {% endwith %}
+            </dd>
+            {% block includes %}{% endblock %}
+
+            {% include "aristotle_mdr/statuses.html" with statuses=item.statuses infoBox=True %}
+            <dt>Last updated</dt>
+            <dd>
+                {% if request.user.is_superuser or item.workgroup in request.user.workgroups %}
+                    <a title ="{{item.modified}}"
+                    href="{% historyLink item %}">{{item.modified|naturaltime}}</a>
+                {% else %}
+                    {{item.modified|naturaltime}}
+                {% endif %}
+                {% if request.user.is_active %}
+                <span style="display:inline-block">By {% with name=last_edit.revision.user.get_username %}
+                        {% if name %}{{ name }}{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
+                        {% endwith %}
+                </span>
+                {% endif %}
+            </dd>
+            <dt>Created</dt><dd title="{{ item.created }}">{{item.created|date}}</dd>
+
+        {% block asideContent %}{% endblock %}
+
+        {% with total=item.supersedes.count %}
+            <dt class="large">Supersedes
+            {% if item|can_edit:request.user %}
+                <a class="inline_action" href="{% url 'aristotle:deprecate' iid=item.id %}"
+                    data-toggle="modal" data-target="#supersede">{% ternary total 'Change' 'Add'%}</a>
+            {% endif %}</dt>
+            <dd class="large">
+            <ul>
+                {% for sup in item.supersedes.all|can_view_iter:user %}
+                    <li>
+                      <a href="{% url 'aristotle:item' item_id=sup.id %}/">
+                        {{ sup }}
+                      </a>
+                    </li>
+                {% empty %}
+                    <li><em>None</em></li>
+                {% endfor %}
+            </ul>
+            </dd>
+        {% endwith %}
+            <dt class="large">Superseded by
+                {% if item|can_edit:request.user %}
+                    <a class="inline_action" href="{% url 'aristotle:supersede' iid=item.id %}"
+                       data-toggle="modal" data-target="#supersede">{% ternary item.superseded_by 'Change' 'Add'%}</a>
+                {% endif %}</dt>
+            <dd class="large">
+            <ul><li>
+                {% if item.superseded_by %}
+                    <a href="{% url 'aristotle:item' item_id=item.superseded_by.id %}">{{ item.superseded_by }}</a>
+                {% else %}
+                    <em>None</em>
+                {% endif %}
+            </li></ul>
+            </dd>
+        </dl>
+        <div id="supersede" class="modal fade">
+          <div class="modal-dialog">
+              <div class="modal-content">
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </div>
+</aside>
