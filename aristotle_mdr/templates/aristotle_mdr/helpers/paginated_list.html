@@ -10,7 +10,7 @@ Showing {{ page.paginator.count }} results.
 <thead>
     <tr>
         <th><input type="checkbox"></th>
-        <th>Item
+            <th>Item
             {% if sort == "name_asc" %}
             <a href="?{% paginator_get request page.number %}&sort=name_desc"><i class="fa fa-sort-asc"></i></a>
             {% elif sort == "name_desc" %}
