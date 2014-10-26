@@ -17,17 +17,13 @@
     <p>
         Use your favourites list to keep track of important items to know when they change.
     </p>
-        {% if user.profile.myFavourites %}
-        <strong><a href="?help=help">Get help on using your favourites list</a></strong>
-        <ul>
-        {% for item in user.profile.myFavourites.all %}
-          <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %} ({{ item.get_verbose_name }})</li>
-        {% endfor %}
-        </ul>
+        {% if page %}
+            <strong><a href="?help=help">Get help on using your favourites list</a></strong>
+            {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
         {% else %}
             <h3>You currently have no favourited items.</h3>
         {% endif %}
-        {% if user.profile.myFavourites.count = 0 or help %}
+        {% if user.profile.favourites.count = 0 or help %}
             <hr>
              <h3 id="using">Using your favourites list.</h3>
             <p>

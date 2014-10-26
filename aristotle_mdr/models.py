@@ -784,10 +784,6 @@ class PossumProfile(models.Model):
             return self.workgroups.filter(archived=False)
 
     @property
-    def myFavourites(self):
-        return self.favourites.select_subclasses()
-
-    @property
     def is_registrar(self):
         return perms.user_is_registrar(self.user)
 

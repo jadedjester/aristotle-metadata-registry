@@ -1,0 +1,57 @@
+{% load aristotle_tags %}
+
+{% if page.has_other_pages %}
+Showing {{ page.start_index }} - {{ page.end_index }} of {{ page.paginator.count }} results.
+{% else %}
+Showing {{ page.paginator.count }} results.
+{% endif %}
+
+<table class="table">
+<thead>
+    <tr>
+        <th><input type="checkbox"></th>
+        <th>Item
+            {% if sort == "name_asc" %}
+            <a href="?{% paginator_get request page.number %}&sort=name_desc"><i class="fa fa-sort-asc"></i></a>
+            {% elif sort == "name_desc" %}
+            <a href="?{% paginator_get request page.number %}&sort=name_asc"><i class="fa fa-sort-desc"></i></a>
+            {% else %}
+            <a href="?{% paginator_get request page.number %}&sort=name_desc"><i class="fa fa-sort"></i></a>
+            {% endif %}
+        </th>
+        <th></th>
+        <th>Type</th>
+        <th>
+        {% if sort == "mod_asc" %}
+        <a href="?{% paginator_get request page.number %}&sort=mod_desc"><i class="fa fa-sort-asc"></i></a>
+        {% elif sort == "mod_desc" %}
+        <a href="?{% paginator_get request page.number %}&sort=mod_asc"><i class="fa fa-sort-desc"></i></a>
+        {% else %}
+        <a href="?{% paginator_get request page.number %}&sort=mod_desc"><i class="fa fa-sort"></i></a>
+        {% endif %}
+        Last modified</th>
+    </tr>
+</thead>
+<tbody>
+    {% for item in page %}
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>
+            {% if item.is_registered %}
+                <i class="fa fa-university" title="Registered"></i>
+            {% elif item.ready_to_review %}
+                <i class="fa fa-flag" title="Ready to review"></i>
+            {% else %}
+                <i class="fa fa-flag-o" title="In progress"></i>
+            {% endif %}
+        </td>
+        <td>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %}</td>
+        <td>{{ item.get_verbose_name }}</td>
+        <td>{{ item.modified }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% include "aristotle_mdr/helpers/paginator.html" with page=page %}
+

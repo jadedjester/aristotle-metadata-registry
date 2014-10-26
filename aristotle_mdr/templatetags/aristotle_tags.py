@@ -165,7 +165,7 @@ def islice(itera,slice):
 
 #http://stackoverflow.com/questions/2047622/how-to-paginate-django-with-other-get-variables
 @register.simple_tag
-def search(request, pageNumber):
+def paginator_get(request, pageNumber):
     dict_ = request.GET.copy()
     dict_['page'] = pageNumber
     return dict_.urlencode()
@@ -195,7 +195,7 @@ def pluralmodel(item,value):
         return item.get_verbose_name_plural()
 
 @register.filter
-def search_paginator(page,mode):
+def paginator_range(page,mode):
     if mode=="start":
         if page.number <= 5:
             # show 4,5,6 if page is 4, 5,6,7 if page is 5...

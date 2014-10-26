@@ -235,45 +235,9 @@
                     </button>
                     {% endif %}
                 </div>
-                {% if page.has_previous or page.has_next %}
-                    <div class="row text-center">
-                    {% if page.paginator.num_pages <= 10 %}
-                    <ul class="pagination pagination-sm searchResults">
-                        {% if page.has_previous %}
-                            <li><a accesskey="p" href="?{% search request page.previous_page_number %}">&laquo; Previous</a></li>
-                        {% endif %}
-                        {% for p in page.paginator.page_range %}
-                            <li><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.has_next %}
-                            <li><a accesskey="n" href="?{% search request page.next_page_number %}">Next &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                    {% else %}
-                    <ul class="pagination pagination-sm searchResults">
-                        {% if page.has_previous %}
-                            <li><a accesskey="p" href="?{% search request page.previous_page_number %}">&laquo; Previous</a></li>
-                        {% endif %}
-                        {% for p in page|search_paginator:"start" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}" >{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.number > 6 %}
-                            <li><a>...</a></li>
-                        {% endif %}
-                        {% for p in page|search_paginator:"middle" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                         <li><a>...</a></li>
-                        {% for p in page|search_paginator:"end" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.has_next %}
-                            <li><a accesskey="n" href="?{% search request page.next_page_number %}">Next &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                    {% endif %}
-                    </div>
-                {% endif %}
+
+                {% include "aristotle_mdr/helpers/paginator.html" with page=page %}
+
             {% else %}
                 <h3>No results found.</h3>
                 <p>

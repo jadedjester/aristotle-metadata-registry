@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
@@ -27,6 +28,13 @@ from django.template import Context
 import cgi
 
 PAGES_PER_RELATED_ITEM = 15
+
+paginate_sort_opts = {  "mod_asc":"modified",
+                        "mod_desc":"-modified",
+                        "name_asc":"name",
+                        "name_desc":"-name",
+                    }
+
 
 def render_to_pdf(template_src, context_dict):
     template = get_template(template_src)
@@ -98,30 +106,7 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
 
     # We add a user_can_edit flag in addition to others as we have odd rules around who can edit objects.
     isFavourite = request.user.is_authenticated () and request.user.profile.isFavourite(item.id)
-    """
-    if subpage=="related":
-        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-        related_items = item.relatedItems(request.user)
-        paginator = Paginator(related_items, PAGES_PER_RELATED_ITEM)
 
-        page = request.GET.get('page')
-        try:
-            related_items = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            related_items = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            related_items = paginator.page(paginator.num_pages)
-
-        return render(request,"aristotle_mdr/relatedItems.html",
-            {'item':item,
-             'relatedItems':related_items,}
-            )
-    else:
-    Lets disable the related page for the time being
-    Only a handful of Object classes will be impacted.
-    """
     from reversion.revisions import default_revision_manager
     last_edit = default_revision_manager.get_for_object_reference(
             item.__class__,
@@ -144,7 +129,6 @@ def itemPackages(request, item_id):
         else:
             raise PermissionDenied
 
-    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     packages = item.packages.all().visible(request.user)
     paginator = Paginator(packages, PAGES_PER_RELATED_ITEM)
     page = request.GET.get('page')
@@ -229,10 +213,31 @@ def workgroupItems(request, iid):
     wg = get_object_or_404(MDR.Workgroup,pk=iid)
     if not user_in_workgroup(request.user,wg):
         raise PermissionDenied
-    renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
-    renderDict['items'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
-    page = render(request,"aristotle_mdr/workgroupItems.html",renderDict)
-    return page
+
+    items = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
+
+    sort_by=request.GET.get('sort',"mod_desc")
+    if sort_by not in paginate_sort_opts.keys():
+        sort_by="mod_desc"
+
+    paginator = Paginator(
+        items.order_by(paginate_sort_opts.get(sort_by)),
+        request.GET.get('pp',20) # per page
+        )
+
+    page = request.GET.get('page')
+    try:
+        items = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        items = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        items = paginator.page(paginator.num_pages)
+
+    renderDict = {"item":wg,"sort":sort_by,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
+    renderDict['page'] = items
+    return render(request,"aristotle_mdr/workgroupItems.html",renderDict)
 
 @login_required
 def workgroupMembers(request, iid):
@@ -437,8 +442,32 @@ def userEdit(request):
 
 @login_required
 def userFavourites(request):
+
+    items = request.user.profile.favourites.select_subclasses()
+
+    sort_by=request.GET.get('sort',"mod_desc")
+    if sort_by not in paginate_sort_opts.keys():
+        sort_by="mod_desc"
+
+    paginator = Paginator(
+        items.order_by(paginate_sort_opts.get(sort_by)),
+        request.GET.get('pp',20) # per page
+        )
+
+    page = request.GET.get('page')
+    try:
+        items = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        items = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        items = paginator.page(paginator.num_pages)
+
     page = render(request,"aristotle_mdr/user/userFavourites.html",
         {'help':request.GET.get("help",False),
+        'sort':sort_by,
+        'page':items,
         'favourite':request.GET.get("favourite",False),
         }
     )
