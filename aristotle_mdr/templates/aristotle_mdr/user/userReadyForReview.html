@@ -15,46 +15,12 @@
     The following items have been marked as "ready to review" by the editors in their workgroup,
     and are ready to begin the standarisation process.
 </p>
-<table class='table'>
-    <thead>
-        <tr>
-        <th>Item</th>
-        <th>Registration Authorities</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% if items %}
-        {% for item in items %}
-            <tr>
-                <td>
-                    {% include "aristotle_mdr/helpers/itemLink.html" with item=item.item showType=True %}
-                    <br>
-                    {{ item.description|striptags|truncatewords:20 }}
-                </td>
-                <td>
-                    <ul>
-                        {% for r in item.workgroup.registrationAuthorities.all %}
-                            <li>{% include "aristotle_mdr/helpers/itemLink.html" with item=r %}</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr>
-        <th>Item</th>
-        <th>Registration Authorities</th>
-        </tr>
-    </tfoot>
-</table>
-    {% else %}
-</table>
-<div class="well text-center">
-    No items.
-</div>
-
-    {% endif %}
-
-
+{% if page %}
+    <form action="{% url 'aristotle:bulk_action' %}?next={{ request.path }}" method="POST">
+    {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
+    {% include "aristotle_mdr/helpers/list_action_bar.html" with wrap=True %}
+    </form>
+{% else %}
+    <h3>You currently have no items to review.</h3>
+{% endif %}
 {% endblock %}
