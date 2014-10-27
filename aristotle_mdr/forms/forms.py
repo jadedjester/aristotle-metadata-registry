@@ -97,18 +97,25 @@ class ChangeStatusForm(forms.Form):
         widget=forms.Textarea
     )
 
-    # Thanks to http://jacobian.org/writing/dynamic-form-generation/
-    def __init__(self, *args, **kwargs):
-        ras = kwargs.pop('ras')
-        super(ChangeStatusForm, self).__init__(*args, **kwargs)
-        raChoices = [(ra.id,ra.name) for ra in ras]
+    def add_registration_authority_field(self):
+        ras = [(ra.id,ra.name) for ra in self.user.profile.registrarAuthorities]
         self.fields['registrationAuthorities']=forms.MultipleChoiceField(
                 label="Registration Authorities",
-                choices=raChoices,
+                choices=ras,
                 widget=forms.CheckboxSelectMultiple)
+
+
+    # Thanks to http://jacobian.org/writing/dynamic-form-generation/
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(ChangeStatusForm, self).__init__(*args, **kwargs)
+        self.add_registration_authority_field()
 
     def clean_cascadeRegistration(self):
         return self.cleaned_data['cascadeRegistration'] == "1"
+    def clean_registrationAuthorities(self):
+        return [MDR.RegistrationAuthority.objects.get(id=int(ra))
+                    for ra in self.cleaned_data['registrationAuthorities']]
 
     def clean_state(self):
         state = self.cleaned_data['state']

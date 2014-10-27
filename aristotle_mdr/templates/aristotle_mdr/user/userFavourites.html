@@ -17,11 +17,16 @@
     <p>
         Use your favourites list to keep track of important items to know when they change.
     </p>
-        {% if page %}
-            <strong><a href="?help=help">Get help on using your favourites list</a></strong>
-            {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
-        {% else %}
-            <h3>You currently have no favourited items.</h3>
+        {% if not help %}
+            {% if page %}
+                <strong><a href="?help=help">Get help on using your favourites list</a></strong>
+                <form action="{% url 'aristotle:bulk_action' %}?next={{ request.path }}" method="POST">
+                {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
+                {% include "aristotle_mdr/helpers/list_action_bar.html" with wrap=True %}
+                </form>
+            {% else %}
+                <h3>You currently have no favourited items.</h3>
+            {% endif %}
         {% endif %}
         {% if user.profile.favourites.count = 0 or help %}
             <hr>

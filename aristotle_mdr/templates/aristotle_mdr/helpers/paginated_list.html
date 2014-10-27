@@ -9,8 +9,9 @@ Showing {{ page.paginator.count }} results.
 <table class="table">
 <thead>
     <tr>
-        <th><input type="checkbox"></th>
-            <th>Item
+        <th></th>
+        <th></th>
+        <th>Item
             {% if sort == "name_asc" %}
             <a href="?{% paginator_get request page.number %}&sort=name_desc"><i class="fa fa-sort-asc"></i></a>
             {% elif sort == "name_desc" %}
@@ -19,7 +20,6 @@ Showing {{ page.paginator.count }} results.
             <a href="?{% paginator_get request page.number %}&sort=name_desc"><i class="fa fa-sort"></i></a>
             {% endif %}
         </th>
-        <th></th>
         <th>Type</th>
         <th>
         {% if sort == "mod_asc" %}
@@ -33,23 +33,38 @@ Showing {{ page.paginator.count }} results.
     </tr>
 </thead>
 <tbody>
+{% with favourites=request.user.profile.favourites.select_subclasses %}
     {% for item in page %}
     <tr>
-        <td><input type="checkbox"></td>
+        <td><input type="checkbox" id="id_items_{{item.id}}" name="items" value="{{item.id}}"></td>
         <td>
             {% if item.is_registered %}
-                <i class="fa fa-university" title="Registered"></i>
+                <i class="fa fa-university fa-fw" title="Registered"></i>
             {% elif item.ready_to_review %}
-                <i class="fa fa-flag" title="Ready to review"></i>
+                <i class="fa fa-flag fa-fw" title="Ready to review"></i>
             {% else %}
-                <i class="fa fa-flag-o" title="In progress"></i>
+                <i class="fa fa-flag-o fa-fw" title="In progress"></i>
             {% endif %}
+
+            {% with is_favourite=item|is_in:favourites%}
+                <a href="{% url 'aristotle:toggleFavourite' item.id %}?next={{ request.path }}"
+                    title="{% ternary is_favourite 'Remove from my favourite items' 'Add to my favourite items' %}"
+                    >
+                    {% if item in favourites %}
+                        <i class="fa fa-bookmark fa-fw"></i>
+                    {% else %}
+                        <i class="fa fa-bookmark-o fa-fw"></i>
+                    {% endif %}
+                </a>
+            {% endwith %}
         </td>
-        <td>{% include "aristotle_mdr/helpers/itemLink.html" with item=item %}</td>
+        <td>
+        {% include "aristotle_mdr/helpers/itemLink.html" with item=item %}</td>
         <td>{{ item.get_verbose_name }}</td>
         <td>{{ item.modified }}</td>
     </tr>
     {% endfor %}
+{% endwith %}
 </tbody>
 </table>
 

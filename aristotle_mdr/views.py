@@ -506,6 +506,8 @@ def userWorkgroups(request):
 @login_required
 def toggleFavourite(request, item_id):
     request.user.profile.toggleFavourite(item_id)
+    if request.GET.get('next',None):
+        return redirect(request.GET.get('next'))
     return redirect('/item/%s' % item_id)
 
 def registrationauthority(request, iid):
@@ -756,9 +758,8 @@ def changeStatus(request, iid):
             raise PermissionDenied
     # There would be an else here, but both branches above return,
     # so we've chopped it out to prevent an arrow anti-pattern.
-    ras=request.user.profile.registrarAuthorities
     if request.method == 'POST': # If the form has been submitted...
-        form = MDRForms.ChangeStatusForm(request.POST,ras=ras) # A form bound to the POST data
+        form = MDRForms.ChangeStatusForm(request.POST,user=request.user) # A form bound to the POST data
         if form.is_valid():
             # process the data in form.cleaned_data as required
             ras = form.cleaned_data['registrationAuthorities']
@@ -769,11 +770,10 @@ def changeStatus(request, iid):
             if regDate is None:
                 regDate = timezone.now().date()
             for ra in ras:
-                ra = MDR.RegistrationAuthority.objects.get(id=int(ra))
                 ra.register(item,state,request.user,regDate,cascade,changeDetails)
             return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
-        form = MDRForms.ChangeStatusForm(ras=ras)
+        form = MDRForms.ChangeStatusForm(user=request.user)
     return render(request,"aristotle_mdr/actions/changeStatus.html",
             {"item":item,
              "form":form,
@@ -868,6 +868,54 @@ def bulkFavourite(request,url="aristotle:userFavourites"):
     if 'favourites' in getVars.keys(): getVars.pop('favourites')
     if 'addFavourites' in getVars.keys(): getVars.pop('addFavourites')
     return HttpResponseRedirect(reverse(url)+'?'+urllib.urlencode(getVars))
+
+@login_required
+def bulk_action(request):
+    url = request.GET.get("next","/")
+    message = ""
+    if request.method == 'POST': # If the form has been submitted...
+        actions = {
+            "add_favourites":MDRForms.bulk_actions.FavouriteForm,
+            "change_state":MDRForms.bulk_actions.ChangeStateForm,
+            }
+        action = request.POST.get("bulkaction",None)
+        if action is None:
+            # no action, messed up, redirect
+            return HttpResponseRedirect(url)
+        if actions[action].confirm_page is None:
+            # if there is no confirm page or extra details required, do the action and redirect
+            form = actions[action](request.POST,user=request.user) # A form bound to the POST data
+            if form.is_valid():
+                message = form.make_changes()
+                messages.add_message(request, messages.INFO, message)
+            else:
+                messages.add_message(request, messages.ERROR, 'Error with action.')
+            return HttpResponseRedirect(url)
+        else:
+            form = MDRForms.bulk_actions.BulkActionForm(request.POST,user=request.user)
+            items = []
+            if form.is_valid():
+                items = form.cleaned_data['items']
+            confirmed = request.POST.get("confirmed",None)
+
+            if confirmed:
+                # We've passed the confirmation page, try and save.
+                form = actions[action](request.POST,user=request.user,items=items) # A form bound to the POST data
+                # there was an error with the form redisplay
+                if form.is_valid():
+                    message = form.make_changes()
+                    messages.add_message(request, messages.INFO, message)
+                    return HttpResponseRedirect(url)
+            else:
+                # we need a confirmation, render the next form
+                form = actions[action](request.POST,user=request.user,items=items)
+            return render(request,actions[action].confirm_page,
+                    {"items":items,
+                     "form":form,
+                     "next":url
+                        }
+                    )
+    return HttpResponseRedirect(url)
 
 # Search views
 

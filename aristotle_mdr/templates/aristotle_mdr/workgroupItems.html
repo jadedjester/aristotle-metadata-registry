@@ -3,6 +3,10 @@
 {% block page %}
 <h1>{% block title %}{{ workgroup.name }} - Items{% endblock %}</h1>
 
+<form action="{% url 'aristotle:bulk_action' %}?next={{ request.path }}" method="POST">
+{% csrf_token %}
 {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
+{% include "aristotle_mdr/helpers/list_action_bar.html" with wrap=True %}
+</form>
 
 {% endblock %}

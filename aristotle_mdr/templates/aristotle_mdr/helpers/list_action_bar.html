@@ -1,0 +1,20 @@
+{% if wrap %}
+<div class="btn-group">
+{% endif %}
+
+    <!--span>Add selected</span -->
+    {% if request.user.is_active %}
+    <button class="btn btn-primary" type="submit" name="bulkaction" value="add_favourites">
+        <i class="fa fa-bookmark"></i> Add to
+        <small class="details">favourites</small>
+    </button>
+    {% endif %}
+    {% if request.user.profile.is_registrar %}
+    <button class="btn btn-primary" type="submit" name="bulkaction" value="change_state">
+        <i class="fa fa-university"></i> Change state
+    </button>
+    {% endif %}
+
+{% if wrap %}
+</div>
+{% endif %}

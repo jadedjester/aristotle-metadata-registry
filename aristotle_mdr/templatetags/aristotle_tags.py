@@ -36,6 +36,10 @@ def can_alter_post(user,post):
         return False
 
 @register.filter
+def is_in(item,iterable):
+    return item in iterable
+
+@register.filter
 def is_workgroup_manager(user,workgroup):
     """
     A filter that acts as a wrapper around ``aristotle_mdr.perms.user_is_workgroup_manager``.
