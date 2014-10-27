@@ -889,7 +889,7 @@ def bulk_action(request):
                 message = form.make_changes()
                 messages.add_message(request, messages.INFO, message)
             else:
-                messages.add_message(request, messages.ERROR, 'Error with action.')
+                messages.add_message(request, messages.ERROR, form.errors)
             return HttpResponseRedirect(url)
         else:
             form = MDRForms.bulk_actions.BulkActionForm(request.POST,user=request.user)
@@ -906,6 +906,7 @@ def bulk_action(request):
                     message = form.make_changes()
                     messages.add_message(request, messages.INFO, message)
                     return HttpResponseRedirect(url)
+                print form.errors
             else:
                 # we need a confirmation, render the next form
                 form = actions[action](request.POST,user=request.user,items=items)

@@ -93,6 +93,7 @@ class ChangeStatusForm(forms.Form):
         label="Do you want to update the registration of associated items?"
     )
     changeDetails = forms.CharField(max_length=512,
+        required=False,
         label="Why is the status being changed for these items?",
         widget=forms.Textarea
     )

@@ -201,6 +201,8 @@ class RegistrationAuthority(registryGroup):
         return (('unlocked',unlocked),('locked',locked),('public',public))
 
     def register(self,item,state,user,registrationDate=timezone.now(),cascade=False,changeDetails=""):
+        if not perms.user_can_change_status(user,item):
+            return None
         reg,created = Status.objects.get_or_create(
                 concept=item,
                 registrationAuthority=self,
@@ -491,6 +493,10 @@ class _concept(baseAristotleObject):
         if self.is_registered:
             for s in self.statuses.all():
                 ra = s.registrationAuthority
+                if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
+                    return True
+        if self.readyToReview:
+            for ra in self.workgroup.registrationAuthorities.all():
                 if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
                     return True
         return False
@@ -833,6 +839,7 @@ post_save.connect(create_user_profile, sender=User)
 #    viewer = models.ManyToManyField(User, related_name='subscribed_collections')
 
 def defaultData():
+    system = User.objects.get(username="aristotle")
     iso ,c = RegistrationAuthority.objects.get_or_create(
                 name="ISO/IEC",description="ISO/IEC")
     iso_wg,c = Workgroup.objects.get_or_create(name="ISO/IEC Workgroup")
@@ -840,7 +847,7 @@ def defaultData():
         name="ISO/IEC 11404 DataTypes",
         description="A collection of datatypes as described in the ISO/IEC 11404 Datatypes standard",
         workgroup=iso_wg)
-    iso.register(iso_package,STATES.standard,timezone.now())
+    iso.register(iso_package,STATES.standard,system,timezone.now())
     dataTypes = [
        ("Boolean","A binary value expressed using a string (e.g. true or false)."),
        ("Currency","A numeric value expressed using a particular medium of exchange."),
@@ -850,7 +857,7 @@ def defaultData():
        ]
     for name,desc in dataTypes:
         dt,created = DataType.objects.get_or_create(name=name,description=desc,workgroup=iso_wg)
-        iso.register(dt,STATES.standard,datetime.date(2000,1,1))
+        iso.register(dt,STATES.standard,system,datetime.date(2000,1,1))
         iso_package.items.add(dt)
         print "making datatype: {name}".format(name=name)
     reprClasses = [
