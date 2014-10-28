@@ -175,9 +175,6 @@ def unauthorised(request, path=''):
 def objectclass(*args,**kwargs):
     return render_if_user_can_view(MDR.ObjectClass,*args,**kwargs)
 
-def valuedomainPermissibleValue(*args,**kwargs):
-    return render_if_user_can_view(MDR.ValueDomain,*args,**kwargs)
-
 def valuedomain(*args,**kwargs):
     return render_if_user_can_view(MDR.ValueDomain,*args,**kwargs)
 
@@ -452,10 +449,6 @@ def userFavourites(request):
     context = { 'help':request.GET.get("help",False),
                 'favourite':request.GET.get("favourite",False),}
     return paginated_list(request,items,"aristotle_mdr/user/userFavourites.html",context)
-
-@login_required
-def userRegistrationAuthorities(request,iid):
-    pass
 
 @login_required
 def userRegistrarTools(request):
@@ -838,17 +831,6 @@ def browse(request,oc_id=None,dec_id=None):
                 }
             )
 
-def bulkFavourite(request,url="aristotle:userFavourites"):
-    print request.GET.getlist('favourites',[])
-    for item in request.GET.getlist('favourites',[]):
-        item = get_if_user_can_view(MDR._concept,request.user,id=int(item))
-        if item:
-            request.user.profile.favourites.add(item)
-    getVars = request.GET.copy()
-    if 'favourites' in getVars.keys(): getVars.pop('favourites')
-    if 'addFavourites' in getVars.keys(): getVars.pop('addFavourites')
-    return HttpResponseRedirect(reverse(url)+'?'+urllib.urlencode(getVars))
-
 @login_required
 def bulk_action(request):
     url = request.GET.get("next","/")
@@ -886,7 +868,6 @@ def bulk_action(request):
                     message = form.make_changes()
                     messages.add_message(request, messages.INFO, message)
                     return HttpResponseRedirect(url)
-                print form.errors
             else:
                 # we need a confirmation, render the next form
                 form = actions[action](request.POST,user=request.user,items=items)

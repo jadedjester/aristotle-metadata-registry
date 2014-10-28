@@ -18,7 +18,7 @@ class BulkWorkgroupActionsPage(utils.LoggedInViewPages,TestCase):
         self.item3 = models.ObjectClass.objects.create(name="OC3",workgroup=self.wg1)
         self.item4 = models.Property.objects.create(name="Prop4",workgroup=self.wg2)
 
-    def test_bulk_favourite(self):
+    def test_bulk_favourite_on_permitted_items(self):
         self.login_editor()
 
         self.assertEqual(self.editor.profile.favourites.count(),0)
@@ -30,7 +30,7 @@ class BulkWorkgroupActionsPage(utils.LoggedInViewPages,TestCase):
         self.assertEqual(response.status_code,302)
         self.assertEqual(self.editor.profile.favourites.count(),2)
 
-    def test_bulk_favourite2(self):
+    def test_bulk_favourite_on_forbidden_items(self):
         self.login_editor()
 
         self.assertEqual(self.editor.profile.favourites.count(),0)
@@ -42,7 +42,7 @@ class BulkWorkgroupActionsPage(utils.LoggedInViewPages,TestCase):
         self.assertEqual(response.status_code,302)
         self.assertEqual(self.editor.profile.favourites.count(),1)
 
-    def test_bulk_status_change(self):
+    def test_bulk_status_change_on_permitted_items(self):
         self.login_registrar()
         self.item1.readyToReview = True
         self.item2.readyToReview = True
@@ -64,7 +64,7 @@ class BulkWorkgroupActionsPage(utils.LoggedInViewPages,TestCase):
         self.assertTrue(self.item1.is_registered)
         self.assertTrue(self.item2.is_registered)
 
-    def test_bulk_status_change2(self):
+    def test_bulk_status_change_on_forbidden_items(self):
         self.login_registrar()
         self.item1.readyToReview = True
         self.item4.readyToReview = True

@@ -66,7 +66,6 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^action/supersede/(?P<iid>\d+)$', views.supersede, name='supersede'),
     url(r'^action/deprecate/(?P<iid>\d+)$', views.deprecate, name='deprecate'),
-    url(r'^action/bulkFavourite/?$', views.bulkFavourite, name='bulkFavourite'),
     url(r'^action/bulkaction/?$', views.bulk_action, name='bulk_action'),
 
     url(r'^changestatus/(?P<iid>\d+)$', views.changeStatus, name='changeStatus'),
