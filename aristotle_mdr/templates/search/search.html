@@ -132,26 +132,15 @@
               </div>
               </div>
             </nav>
-            <div class="col-md-10 col-md-offset-1">
-            {#  ----- If there are spelling suggestions, show them. ----- #}
-            {% if form.auto_correct_spell_search %}
-                {% if page.object_list %}
-                    <p><strong>No results for:</strong> {{ form.original_query }}
-                    </p>
-                    <strong>Searching instead for:</strong>
-                    <span>
-                    {% for word,suggestion in form.spelling_suggestions %}
-                        {% if suggestion %}
-                            <em>{{ suggestion }}</em>
-                        {% else %}
-                            {{ word }}
-                        {% endif %}
-                    {% endfor %}
-                    </span>
-                {% endif %}
-            {% elif form.has_spelling_suggestions  %}
-                Did you mean:
-                <a href="?q={{ form.suggested_query }}">
+    </form>
+    <div class="col-md-10 col-md-offset-1">
+        {#  ----- If there are spelling suggestions, show them. ----- #}
+        {% if form.auto_correct_spell_search %}
+            {% if page.object_list %}
+                <p><strong>No results for:</strong> {{ form.original_query }}
+                </p>
+                <strong>Searching instead for:</strong>
+                <span>
                 {% for word,suggestion in form.spelling_suggestions %}
                     {% if suggestion %}
                         <em>{{ suggestion }}</em>
@@ -159,161 +148,128 @@
                         {{ word }}
                     {% endif %}
                 {% endfor %}
-                </a>
+                </span>
             {% endif %}
-        {#  ----- MAIN RESULTS PAGE STARTS HERE ----- #}
-        {% if query or form.filter_search %}
-            {% if page.object_list %}
-                {% if form.auto_broaden_search %}
-                    <div class="alert alert-warning" role="alert">
-                        <p>There were no results for "{{ form.q.value }}" with your requested filters.
-                        </p>
-                        <p>
-                            We've automatically removed the filters and re-run your search.
-                        </p>
-                    </div>
+        {% elif form.has_spelling_suggestions  %}
+            Did you mean:
+            <a href="?q={{ form.suggested_query }}">
+            {% for word,suggestion in form.spelling_suggestions %}
+                {% if suggestion %}
+                    <em>{{ suggestion }}</em>
+                {% else %}
+                    {{ word }}
                 {% endif %}
-                <div class="btn-group pull-right">
-                    {% if user.is_active %}
-                    <button class="btn btn-primary" type="submit" name="addFavourites">
-                        <i class="fa fa-bookmark"></i> Add selected to
-                        <small class="details">favourites</small>
-                    </button>
-                    {% endif %}
-                    <div class="btn-group sort-order-box">
-                        <button  href="#" type="button" class="btn btn-default dropdown-toggle "
-                        data-toggle="dropdown">
-                            <i class="fa fa-sort"></i>
-                            Sort by... <span class="caret"></span>
-                            <small class="details"></small>
-                        </button>
-                        {{ form.sort }}
-                    </div>
+            {% endfor %}
+            </a>
+        {% endif %}
+    {#  ----- MAIN RESULTS PAGE STARTS HERE ----- #}
+    {% if query or form.filter_search %}
+        {% if page.object_list %}
+            {% if form.auto_broaden_search %}
+                <div class="alert alert-warning" role="alert">
+                    <p>There were no results for "{{ form.q.value }}" with your requested filters.
+                    </p>
+                    <p>
+                        We've automatically removed the filters and re-run your search.
+                    </p>
                 </div>
-                <h3>Results</h3>
-                <p>
-                    {% if page.has_other_pages %}
-                    Showing {{ page.start_index }} - {{ page.end_index }} of {{ page.paginator.count }} results.
-                    {% else %}
-                    Showing {{ page.paginator.count }} results.
-                    {% endif %}
-                </p>
-                <!-- form method="post" action="{% url 'aristotle:bulkFavourite'%}">
-                {% if user.is_active %}
-                    {% csrf_token %}
-                {% endif %} -->
-                <ol start="{{ page.start_index }}"
-                    class="searchResults {% ternary user.is_active 'active' '' %}">
-                {% for result in page.object_list %}
-                    {% if result.object.name %}
-                    <li>
-                        {% if user.is_active %}
-                            <input type='checkbox' value='{{ result.object.id }}' title='select to add to favourites' name='favourites'></input>
-                        {% endif %}
-                        <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a>
-                        <span class="item_type">({{ result.object.get_verbose_name }})</span>
-                        <div>
-                        <span class="attr"><span class="time">Created: {{ result.object.created }}</span> | <span class="time">Last modified: {{ result.object.modified|naturaltime }}</span></span>
-                        <span class="attr">Statuses:
-                            {% for s in result.object.statuses.all %}
-                                [{{ s.registrationAuthority }}: {{ s.state_name }}]
-                            {% empty %}
-                            <em>Unregistered</em>
-                            {% endfor %}</span>
-                        {{ result.object.description|truncatewords:20|striptags }}</div>
-                    </li>
-                    {% endif %}
-                {% empty %}
-                    <li>No results found.</li>
-                {% endfor %}
-                </ol>
-                <div class="btn-group pull-right">
-                    {% if user.is_active %}
-                    <button class="btn btn-primary" type="submit" name="addFavourites">
-                        <i class="fa fa-bookmark"></i> Add selected to
-                        <small class="details">favourites</small>
-                    </button>
-                    {% endif %}
-                </div>
-                {% if page.has_previous or page.has_next %}
-                    <div class="row text-center">
-                    {% if page.paginator.num_pages <= 10 %}
-                    <ul class="pagination pagination-sm searchResults">
-                        {% if page.has_previous %}
-                            <li><a accesskey="p" href="?{% search request page.previous_page_number %}">&laquo; Previous</a></li>
-                        {% endif %}
-                        {% for p in page.paginator.page_range %}
-                            <li><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.has_next %}
-                            <li><a accesskey="n" href="?{% search request page.next_page_number %}">Next &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                    {% else %}
-                    <ul class="pagination pagination-sm searchResults">
-                        {% if page.has_previous %}
-                            <li><a accesskey="p" href="?{% search request page.previous_page_number %}">&laquo; Previous</a></li>
-                        {% endif %}
-                        {% for p in page|search_paginator:"start" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}" >{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.number > 6 %}
-                            <li><a>...</a></li>
-                        {% endif %}
-                        {% for p in page|search_paginator:"middle" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                         <li><a>...</a></li>
-                        {% for p in page|search_paginator:"end" %}
-                            <li {% ifeq p page.number 'class="active"' %}><a href="?{% search request p %}">{{ p }}</a></li>
-                        {% endfor %}
-                        {% if page.has_next %}
-                            <li><a accesskey="n" href="?{% search request page.next_page_number %}">Next &raquo;</a></li>
-                        {% endif %}
-                    </ul>
-                    {% endif %}
-                    </div>
-                {% endif %}
-            {% else %}
-                <h3>No results found.</h3>
-                <p>
-                {% if form.auto_broaden_search %}
-                    <div class="alert alert-warning" role="alert">
-                        <p>There were no results for "{{ form.q.value }}" with your requested filters.
-                        </p>
-                        <p>
-                            We removed the filters and re-ran your search, but there were still zero results.
-                        </p>
-                    </div>
-                {% endif %}
-                {% if form.attempted_filter_search %}
-                    <div class="alert alert-warning" role="alert">
-                        <p>There were no results for your requested filters.
-                        </p>
-                        <p>
-                            Please change your search parameters and try again.
-                        </p>
-                    </div>
-                {% endif %}
-                </p>
             {% endif %}
-        {% else %}
-            {# Show some example queries to run, maybe query syntax, something else? #}
+            <div class="btn-group pull-right">
+                <div class="btn-group sort-order-box">
+                    <button  href="#" type="button" class="btn btn-default dropdown-toggle "
+                    data-toggle="dropdown">
+                        <i class="fa fa-sort"></i>
+                        Sort by... <span class="caret"></span>
+                        <small class="details"></small>
+                    </button>
+                    {{ form.sort }}
+                </div>
+            </div>
+            <h3>Results</h3>
             <p>
-                Enter a query above to search the registry.
+                {% if page.has_other_pages %}
+                Showing {{ page.start_index }} - {{ page.end_index }} of {{ page.paginator.count }} results.
+                {% else %}
+                Showing {{ page.paginator.count }} results.
+                {% endif %}
             </p>
-            <ul>
-            <li> Selecting a registration authority will limit search results to items registered by that authority.
-            </li>
-            <li> Selecting a registation state will limit search results to items that are in that state.
-            </li>
-            <li> Selecting both will limit search results to items that are at that state in a particular authority.
-            </li>
-            </ul>
+
+            {% if user.is_active %}
+                <form action="{% url 'aristotle:bulk_action' %}?next={{ request.get_full_path }}" method="POST">
+                {% csrf_token %}
+            {% endif %}
+            <ol start="{{ page.start_index }}"
+                class="searchResults {% ternary user.is_active 'active' '' %}">
+            {% for result in page.object_list %}
+                {% if result.object.name %}
+                <li>
+                    {% if user.is_active %}
+                        <input type='checkbox' id="id_items_{{item.id}}" name="items" value='{{ result.object.id }}' title='select to add to favourites'></input>
+                    {% endif %}
+                    <a href="{% url 'aristotle:item' result.object.id %}">{{ result.object.name }}</a>
+                    <span class="item_type">({{ result.object.get_verbose_name }})</span>
+                    <div>
+                    <span class="attr"><span class="time">Created: {{ result.object.created }}</span> | <span class="time">Last modified: {{ result.object.modified|naturaltime }}</span></span>
+                    <span class="attr">Statuses:
+                        {% for s in result.object.statuses.all %}
+                            [{{ s.registrationAuthority }}: {{ s.state_name }}]
+                        {% empty %}
+                        <em>Unregistered</em>
+                        {% endfor %}</span>
+                    {{ result.object.description|truncatewords:20|striptags }}</div>
+                </li>
+                {% endif %}
+            {% empty %}
+                <li>No results found.</li>
+            {% endfor %}
+            </ol>
+
+            {% if user.is_active %}
+                {% include "aristotle_mdr/helpers/list_action_bar.html" with wrap=True %}
+                </form>
+            {% endif %}
+
+            {% include "aristotle_mdr/helpers/paginator.html" with page=page %}
+
+        {% else %}
+            <h3>No results found.</h3>
             <p>
+            {% if form.auto_broaden_search %}
+                <div class="alert alert-warning" role="alert">
+                    <p>There were no results for "{{ form.q.value }}" with your requested filters.
+                    </p>
+                    <p>
+                        We removed the filters and re-ran your search, but there were still zero results.
+                    </p>
+                </div>
+            {% endif %}
+            {% if form.attempted_filter_search %}
+                <div class="alert alert-warning" role="alert">
+                    <p>There were no results for your requested filters.
+                    </p>
+                    <p>
+                        Please change your search parameters and try again.
+                    </p>
+                </div>
+            {% endif %}
             </p>
         {% endif %}
+    {% else %}
+        {# Show some example queries to run, maybe query syntax, something else? #}
+        <p>
+            Enter a query above to search the registry.
+        </p>
+        <ul>
+        <li> Selecting a registration authority will limit search results to items registered by that authority.
+        </li>
+        <li> Selecting a registation state will limit search results to items that are in that state.
+        </li>
+        <li> Selecting both will limit search results to items that are at that state in a particular authority.
+        </li>
+        </ul>
+        <p>
+        </p>
+    {% endif %}
 
-        </div>
-</form>
+    </div>
 {% endblock %}

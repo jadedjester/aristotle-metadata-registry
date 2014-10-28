@@ -1,21 +1,22 @@
-{% extends request.is_ajax|yesno:"aristotle_mdr/base_ajax.html,aristotle_mdr/base.html" %}
+{% extends "aristotle_mdr/base.html" %}
 
-{% block title %}Change state for {{ item.name }}{% endblock %}
+{% block title %}Change states for multiple items{% endblock %}
 {% block content %}
 {{ form.media }}
-<form method="post" action="{% url 'aristotle:changeStatus' item.id %}">{% csrf_token %}
+<form method="post" action="{% url 'aristotle:bulk_action' %}?next={{next}}">{% csrf_token %}
+    <input type="hidden" name="bulkaction" value="change_state"/>
     <div class="modal-body">
+        {% if item and not request.is_ajax %}
         <ol class="breadcrumb">
           <li><a href="{% url 'aristotle:item' item.id %}">{{ item.name }}</a></li>
           <li class="active">Change registation status</li>
         </ol>
-
-
-        <header>This form allows you to change the status of multiple items in your registration authorities.
+        {% endif %}
+        <header>This form allows you to change the status of items in your registration authorities.
         </header>
         <div>
-
-            {{ form.items }}:
+            {{ form.items.label }}
+            {{ form.items }}
         </div>
         <section>
         <div id="changeStatusDate">
@@ -60,13 +61,10 @@
         {% endblock %}
         </section>
     </div>
-    <div class="modal-footer">
-        {% if request.is_ajax %}
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        {% else %}
-            <a class="btn btn-default" href="{% url 'aristotle:item' item.id %}">Cancel</a>
-        {% endif %}
-        <input type="submit" class="btn btn-primary" value="Update Status" />
+    <div>
+        <a class="btn btn-default" href="{{ next }}">Cancel</a>
+        <button type="submit" name="confirmed" class="btn btn-primary" value="Update Status">Update Status</button>
     </div>
 </form>
+{% include 'autocomplete_light/static.html' %}
 {% endblock %}

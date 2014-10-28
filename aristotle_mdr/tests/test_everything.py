@@ -408,7 +408,9 @@ class CustomConceptQuerySetTest(TestCase):
     def test_is_public(self):
         ra = models.RegistrationAuthority.objects.create(name="Test RA",public_state=models.STATES.standard)
         wg = models.Workgroup.objects.create(name="Setup WG")
-        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg)
+        wg.registrationAuthorities.add(ra)
+        wg.save()
+        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg,readyToReview=True)
         oc2 = models.ObjectClass.objects.create(name="Test OC2",workgroup=wg)
         user = User.objects.create_superuser('super','','user')
 
@@ -433,7 +435,9 @@ class CustomConceptQuerySetTest(TestCase):
     def test_is_publicslow(self):
         ra = models.RegistrationAuthority.objects.create(name="Test RA",public_state=models.STATES.standard)
         wg = models.Workgroup.objects.create(name="Setup WG")
-        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg)
+        wg.registrationAuthorities.add(ra)
+        wg.save()
+        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg,readyToReview=True)
         oc2 = models.ObjectClass.objects.create(name="Test OC2",workgroup=wg)
         user = User.objects.create_superuser('super','','user')
 
@@ -462,9 +466,11 @@ class RegistryCascadeTest(TestCase):
         user = User.objects.create_superuser('super','','user')
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
         self.wg = models.Workgroup.objects.create(name="Setup WG")
-        self.oc = models.ObjectClass.objects.create(name="Test OC",workgroup=self.wg)
-        self.pr = models.Property.objects.create(name="Test P",workgroup=self.wg)
-        self.dec = models.DataElementConcept.objects.create(name="Test DEC",
+        self.wg.registrationAuthorities.add(self.ra)
+        self.wg.save()
+        self.oc = models.ObjectClass.objects.create(name="Test OC",workgroup=self.wg,readyToReview=True)
+        self.pr = models.Property.objects.create(name="Test P",workgroup=self.wg,readyToReview=True)
+        self.dec = models.DataElementConcept.objects.create(name="Test DEC",readyToReview=True,
             objectClass=self.oc,
             property=self.pr,
             workgroup=self.wg,
@@ -494,20 +500,22 @@ class RegistryCascadeTest(TestCase):
         user = User.objects.create_superuser('super','','user')
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
         self.wg = models.Workgroup.objects.create(name="Setup WG")
-        self.oc = models.ObjectClass.objects.create(name="Test OC",workgroup=self.wg)
-        self.pr = models.Property.objects.create(name="Test P",workgroup=self.wg)
-        self.vd = models.ValueDomain.objects.create(name="Test VD",
+        self.wg.registrationAuthorities.add(self.ra)
+        self.wg.save()
+        self.oc = models.ObjectClass.objects.create(name="Test OC",workgroup=self.wg,readyToReview=True)
+        self.pr = models.Property.objects.create(name="Test P",workgroup=self.wg,readyToReview=True)
+        self.vd = models.ValueDomain.objects.create(name="Test VD",readyToReview=True,
                 workgroup=self.wg,
                 format = "X" ,
                 maximumLength = 3,
                 dataType = models.DataType.objects.create(name="Test DT",workgroup=self.wg)
                 )
-        self.dec = models.DataElementConcept.objects.create(name="Test DEC",
+        self.dec = models.DataElementConcept.objects.create(name="Test DEC",readyToReview=True,
             objectClass=self.oc,
             property=self.pr,
             workgroup=self.wg,
             )
-        self.de = models.DataElement.objects.create(name="Test DE",
+        self.de = models.DataElement.objects.create(name="Test DE",readyToReview=True,
             dataElementConcept=self.dec,
             valueDomain=self.vd,
             workgroup=self.wg,

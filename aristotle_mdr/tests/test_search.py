@@ -14,13 +14,15 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
         super(TestSearch, self).setUp()
 
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
-        self.registrar = User.objects.create_user('stryker','william.styker@senate.gov','mutantsMustDie')
+        self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')
         self.ra.giveRoleToUser('Registrar',self.registrar)
         xmen = "wolverine cyclops professorX storm nightcrawler"
         self.xmen_wg = models.Workgroup.objects.create(name="X Men")
+        self.xmen_wg.registrationAuthorities.add(self.ra)
+        self.xmen_wg.save()
 
         self.item_xmen = [
-            models.ObjectClass.objects.create(name=t,description="known x-man",workgroup=self.xmen_wg)\
+            models.ObjectClass.objects.create(name=t,description="known x-man",workgroup=self.xmen_wg,readyToReview=True)\
             for t in xmen.split() ]
         for item in self.item_xmen:
             self.ra.register(item,models.STATES.standard,self.registrar)
@@ -47,12 +49,15 @@ class TestTokenSearch(TestCase):
     def setUp(self):
         self.client = Client()
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
-        self.registrar = User.objects.create_user('stryker','william.styker@senate.gov','mutantsMustDie')
+        self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')
         self.ra.giveRoleToUser('Registrar',self.registrar)
         xmen = "wolverine cyclops professorX storm nightcrawler"
         self.xmen_wg = models.Workgroup.objects.create(name="X Men")
+        self.xmen_wg.registrationAuthorities.add(self.ra)
+        self.xmen_wg.save()
+
         self.item_xmen = [
-            models.ObjectClass.objects.create(name=t,version="0.%d.0"%(v+1),description="known x-man",workgroup=self.xmen_wg)
+            models.ObjectClass.objects.create(name=t,version="0.%d.0"%(v+1),description="known x-man",workgroup=self.xmen_wg,readyToReview=True)
             for v,t in enumerate(xmen.split()) ]
         for item in self.item_xmen:
             self.ra.register(item,models.STATES.standard,self.registrar)

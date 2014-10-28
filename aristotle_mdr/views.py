@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
@@ -27,6 +28,13 @@ from django.template import Context
 import cgi
 
 PAGES_PER_RELATED_ITEM = 15
+
+paginate_sort_opts = {  "mod_asc":"modified",
+                        "mod_desc":"-modified",
+                        "name_asc":"name",
+                        "name_desc":"-name",
+                    }
+
 
 def render_to_pdf(template_src, context_dict):
     template = get_template(template_src)
@@ -98,30 +106,7 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
 
     # We add a user_can_edit flag in addition to others as we have odd rules around who can edit objects.
     isFavourite = request.user.is_authenticated () and request.user.profile.isFavourite(item.id)
-    """
-    if subpage=="related":
-        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-        related_items = item.relatedItems(request.user)
-        paginator = Paginator(related_items, PAGES_PER_RELATED_ITEM)
 
-        page = request.GET.get('page')
-        try:
-            related_items = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            related_items = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            related_items = paginator.page(paginator.num_pages)
-
-        return render(request,"aristotle_mdr/relatedItems.html",
-            {'item':item,
-             'relatedItems':related_items,}
-            )
-    else:
-    Lets disable the related page for the time being
-    Only a handful of Object classes will be impacted.
-    """
     from reversion.revisions import default_revision_manager
     last_edit = default_revision_manager.get_for_object_reference(
             item.__class__,
@@ -144,7 +129,6 @@ def itemPackages(request, item_id):
         else:
             raise PermissionDenied
 
-    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     packages = item.packages.all().visible(request.user)
     paginator = Paginator(packages, PAGES_PER_RELATED_ITEM)
     page = request.GET.get('page')
@@ -191,9 +175,6 @@ def unauthorised(request, path=''):
 def objectclass(*args,**kwargs):
     return render_if_user_can_view(MDR.ObjectClass,*args,**kwargs)
 
-def valuedomainPermissibleValue(*args,**kwargs):
-    return render_if_user_can_view(MDR.ValueDomain,*args,**kwargs)
-
 def valuedomain(*args,**kwargs):
     return render_if_user_can_view(MDR.ValueDomain,*args,**kwargs)
 
@@ -229,10 +210,9 @@ def workgroupItems(request, iid):
     wg = get_object_or_404(MDR.Workgroup,pk=iid)
     if not user_in_workgroup(request.user,wg):
         raise PermissionDenied
-    renderDict = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
-    renderDict['items'] = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
-    page = render(request,"aristotle_mdr/workgroupItems.html",renderDict)
-    return page
+    items = MDR._concept.objects.filter(workgroup=iid).select_subclasses()
+    context = {"item":wg,"workgroup":wg,"user_is_admin":user_is_workgroup_manager(request.user,wg)}
+    return paginated_list(request,items,"aristotle_mdr/workgroupItems.html",context)
 
 @login_required
 def workgroupMembers(request, iid):
@@ -436,17 +416,39 @@ def userEdit(request):
             )
 
 @login_required
-def userFavourites(request):
-    page = render(request,"aristotle_mdr/user/userFavourites.html",
-        {'help':request.GET.get("help",False),
-        'favourite':request.GET.get("favourite",False),
+def paginated_list(request,items,template,extra_context={}):
+    items = items.select_subclasses()
+    sort_by=request.GET.get('sort',"mod_desc")
+    if sort_by not in paginate_sort_opts.keys():
+        sort_by="mod_desc"
+
+    paginator = Paginator(
+        items.order_by(paginate_sort_opts.get(sort_by)),
+        request.GET.get('pp',20) # per page
+        )
+
+    page = request.GET.get('page')
+    try:
+        items = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        items = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        items = paginator.page(paginator.num_pages)
+    context = {
+        'sort':sort_by,
+        'page':items,
         }
-    )
-    return page
+    context.update(extra_context)
+    return render(request,template,context)
 
 @login_required
-def userRegistrationAuthorities(request,iid):
-    pass
+def userFavourites(request):
+    items = request.user.profile.favourites.select_subclasses()
+    context = { 'help':request.GET.get("help",False),
+                'favourite':request.GET.get("favourite",False),}
+    return paginated_list(request,items,"aristotle_mdr/user/userFavourites.html",context)
 
 @login_required
 def userRegistrarTools(request):
@@ -466,8 +468,8 @@ def userReadyForReview(request):
     else:
         items = MDR._concept.objects.all()
     items = items.filter(readyToReview=True,statuses=None)
-    page = render(request,"aristotle_mdr/user/userReadyForReview.html",{'items':items})
-    return page
+    context={}
+    return paginated_list(request,items,"aristotle_mdr/user/userReadyForReview.html",context)
 
 @login_required
 def userWorkgroups(request):
@@ -477,6 +479,8 @@ def userWorkgroups(request):
 @login_required
 def toggleFavourite(request, item_id):
     request.user.profile.toggleFavourite(item_id)
+    if request.GET.get('next',None):
+        return redirect(request.GET.get('next'))
     return redirect('/item/%s' % item_id)
 
 def registrationauthority(request, iid):
@@ -727,9 +731,8 @@ def changeStatus(request, iid):
             raise PermissionDenied
     # There would be an else here, but both branches above return,
     # so we've chopped it out to prevent an arrow anti-pattern.
-    ras=request.user.profile.registrarAuthorities
     if request.method == 'POST': # If the form has been submitted...
-        form = MDRForms.ChangeStatusForm(request.POST,ras=ras) # A form bound to the POST data
+        form = MDRForms.ChangeStatusForm(request.POST,user=request.user) # A form bound to the POST data
         if form.is_valid():
             # process the data in form.cleaned_data as required
             ras = form.cleaned_data['registrationAuthorities']
@@ -740,11 +743,10 @@ def changeStatus(request, iid):
             if regDate is None:
                 regDate = timezone.now().date()
             for ra in ras:
-                ra = MDR.RegistrationAuthority.objects.get(id=int(ra))
                 ra.register(item,state,request.user,regDate,cascade,changeDetails)
             return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
     else:
-        form = MDRForms.ChangeStatusForm(ras=ras)
+        form = MDRForms.ChangeStatusForm(user=request.user)
     return render(request,"aristotle_mdr/actions/changeStatus.html",
             {"item":item,
              "form":form,
@@ -829,16 +831,53 @@ def browse(request,oc_id=None,dec_id=None):
                 }
             )
 
-def bulkFavourite(request,url="aristotle:userFavourites"):
-    print request.GET.getlist('favourites',[])
-    for item in request.GET.getlist('favourites',[]):
-        item = get_if_user_can_view(MDR._concept,request.user,id=int(item))
-        if item:
-            request.user.profile.favourites.add(item)
-    getVars = request.GET.copy()
-    if 'favourites' in getVars.keys(): getVars.pop('favourites')
-    if 'addFavourites' in getVars.keys(): getVars.pop('addFavourites')
-    return HttpResponseRedirect(reverse(url)+'?'+urllib.urlencode(getVars))
+@login_required
+def bulk_action(request):
+    url = request.GET.get("next","/")
+    message = ""
+    if request.method == 'POST': # If the form has been submitted...
+        actions = {
+            "add_favourites":MDRForms.bulk_actions.FavouriteForm,
+            "change_state":MDRForms.bulk_actions.ChangeStateForm,
+            }
+        action = request.POST.get("bulkaction",None)
+        if action is None:
+            # no action, messed up, redirect
+            return HttpResponseRedirect(url)
+        if actions[action].confirm_page is None:
+            # if there is no confirm page or extra details required, do the action and redirect
+            form = actions[action](request.POST,user=request.user) # A form bound to the POST data
+            if form.is_valid():
+                message = form.make_changes()
+                messages.add_message(request, messages.INFO, message)
+            else:
+                messages.add_message(request, messages.ERROR, form.errors)
+            return HttpResponseRedirect(url)
+        else:
+            form = MDRForms.bulk_actions.BulkActionForm(request.POST,user=request.user)
+            items = []
+            if form.is_valid():
+                items = form.cleaned_data['items']
+            confirmed = request.POST.get("confirmed",None)
+
+            if confirmed:
+                # We've passed the confirmation page, try and save.
+                form = actions[action](request.POST,user=request.user,items=items) # A form bound to the POST data
+                # there was an error with the form redisplay
+                if form.is_valid():
+                    message = form.make_changes()
+                    messages.add_message(request, messages.INFO, message)
+                    return HttpResponseRedirect(url)
+            else:
+                # we need a confirmation, render the next form
+                form = actions[action](request.POST,user=request.user,items=items)
+            return render(request,actions[action].confirm_page,
+                    {"items":items,
+                     "form":form,
+                     "next":url
+                        }
+                    )
+    return HttpResponseRedirect(url)
 
 # Search views
 

@@ -55,7 +55,7 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
         self.assertRedirects(response,reverse("admin:aristotle_mdr_objectclass_changelist"))
         self.assertEqual(self.wg1.items.count(),0)
 
-        self.item1 = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg1)
+        self.item1 = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg1,readyToReview=True)
         self.assertEqual(self.wg1.items.count(),1)
         self.ra.register(self.item1,models.STATES.standard,self.registrar)
         self.assertTrue(self.item1.is_registered)

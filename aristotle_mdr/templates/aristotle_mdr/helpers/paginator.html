@@ -1,0 +1,41 @@
+{% load aristotle_tags %}
+
+{% if page.has_previous or page.has_next %}
+    <div class="row text-center">
+    {% if page.paginator.num_pages <= 10 %}
+    <ul class="pagination pagination-sm searchResults">
+        {% if page.has_previous %}
+            <li><a accesskey="p" href="?{% paginator_get request page.previous_page_number %}">&laquo; Previous</a></li>
+        {% endif %}
+        {% for p in page.paginator.page_range %}
+            <li><a href="?{% paginator_get request p %}">{{ p }}</a></li>
+        {% endfor %}
+        {% if page.has_next %}
+            <li><a accesskey="n" href="?{% paginator_get request page.next_page_number %}">Next &raquo;</a></li>
+        {% endif %}
+    </ul>
+    {% else %}
+    <ul class="pagination pagination-sm searchResults">
+        {% if page.has_previous %}
+            <li><a accesskey="p" href="?{% paginator_get request page.previous_page_number %}">&laquo; Previous</a></li>
+        {% endif %}
+        {% for p in page|paginator_range:"start" %}
+            <li {% ifeq p page.number 'class="active"' %}><a href="?{% paginator_get request p %}" >{{ p }}</a></li>
+        {% endfor %}
+        {% if page.number > 6 %}
+            <li><a>...</a></li>
+        {% endif %}
+        {% for p in page|paginator_range:"middle" %}
+            <li {% ifeq p page.number 'class="active"' %}><a href="?{% paginator_get request p %}">{{ p }}</a></li>
+        {% endfor %}
+         <li><a>...</a></li>
+        {% for p in page|paginator_range:"end" %}
+            <li {% ifeq p page.number 'class="active"' %}><a href="?{% paginator_get request p %}">{{ p }}</a></li>
+        {% endfor %}
+        {% if page.has_next %}
+            <li><a accesskey="n" href="?{% paginator_get request page.next_page_number %}">Next &raquo;</a></li>
+        {% endif %}
+    </ul>
+    {% endif %}
+    </div>
+{% endif %}

@@ -13,6 +13,8 @@ class LoggedInViewPages(object):
         self.wg1 = models.Workgroup.objects.create(name="Test WG 1") # Editor is member
         self.wg2 = models.Workgroup.objects.create(name="Test WG 2")
         self.ra = models.RegistrationAuthority.objects.create(name="Test RA")
+        self.wg1.registrationAuthorities.add(self.ra)
+        self.wg1.save()
 
         self.su = User.objects.create_superuser('super','','user')
         self.manager = User.objects.create_user('mandy','','manager')
