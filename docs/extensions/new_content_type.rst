@@ -2,7 +2,7 @@ Making new item types
 =====================
 
 Most of the overhead for creating new item types in Aristotle is taken care of by
-inheritance within Python language and the Django web framework.
+inheritance within the Python language and the Django web framework.
 
 For example, creating a new item within the registry requires as little code as::
 
@@ -12,16 +12,17 @@ For example, creating a new item within the registry requires as little code as:
 
 This code creates a new "Question" object in the registry that can be progressed
 like any standard item in Aristotle. Once the the appropriate admin pages are
-set up, this would be able to be indistinguishable from a Aristotle-MDR item.
+set up, from a usability and pulbication standpoint this would be indistinguishable
+from an Aristotle-MDR item.
 
-Once synced in with the database, this immediately creates a new item type that not only has
+Once synced with the database, this immediately creates a new item type that not only has
 a ``name`` and ``description``, but also can immediately be associated with a workgroup, can be
 registered and progressed within the registry and has all of the correct permissions
 associated with all of these actions.
 
 Likewise, creating relationships to pre-existing items only requires the correct
 application of `Django relationships <https://docs.djangoproject.com/en/dev/topics/db/examples/>`_
-such as like ``ForeignKey`` or ``ManyToManyField``, like so::
+such as a ``ForeignKey`` or ``ManyToManyField``, like so::
 
     import aristotle_mdr
 
@@ -36,9 +37,9 @@ such as like ``ForeignKey`` or ``ManyToManyField``, like so::
                 null=True,blank=True)
 
 This code, extends our Question model from the previous example and adds an optional
-link to the 11179 Data Element model managed by Aristotle and includes a new property
-on DataElements, so that ``myDataElement.question`` would return of all Questions
-that are collect information for that Data Element.
+link to the 11179 Data Element model managed by Aristotle and even includes a new property
+on Data Elements, so that ``myDataElement.question`` would return of all Questions
+that are used to collect information for that Data Element.
 
 Caveats: ``concept`` versus ``_concept``
 ----------------------------------------
@@ -126,12 +127,12 @@ Making new item types searchable
 
 The creation and registration of haystack search indexes is done in the ``search_indexes.py`` file of a Django app.
 
-On an Aristotle-MDRpowered site, it is possible to restrcit search results across a number of
+On an Aristotle-MDR powered site, it is possible to restrict search results across a number of
 criteria including the registration status of an item, its workgroup or Registration
 Authority or the item type.
 
 In ``aristotle.search_indexes`` there is the convenience class ``conceptIndex`` that
-make registering a new item quite easy, and allows new items to be searched across
+make indexing a new items within the search engine quite easy, and allows new item types to be searched using
 these criteria with a minimum of code. Inheriting from this class takes care of nearly
 all simple cases when searching for new items, like so::
 
@@ -192,7 +193,7 @@ DatElement that was only applicable in specific countries, this could be done li
         countries = models.ManyToManyField(Country)
 
 Aristotle does not prevent you from doing so, however there are a few issues that
-can arise from doing so.
+can arise when extending from non-abstract classes:
 
 * All objects subclassed from a concrete model, will also exist in the database as
   an item that belongs to the parent model.

@@ -29,6 +29,9 @@
             {% if item.synonyms %}
             <dt class="visible-xs">Synonyms</dt><dd class="visible-xs">{{ item.synonyms }}</dd>
             {% endif %}
+            {% if item.originURI %}
+            <dt title="{{ item.originURI.help_text }}">Origin URI</dt><dd><a title="This link will exit this site" href="{{ item.originURI }}">Jump to original <i class="fa fa-external-link"></i></a></dd>
+            {% endif %}
             <dt>Included in</dt>
             <dd>
                 {% with total=item.packages.count %}
