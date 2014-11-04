@@ -10,7 +10,12 @@ The following are required within a dictionary in the settings for the configure
 * ``SITE_BRAND`` - A URL to the logo to use for the site, this can be relative or absolute.
 * ``SITE_INTRO`` - The introductory text use on the home page as a prompt for users - required format ``string`` or ``unicode``
 * ``CONTENT_EXTENSIONS`` - A list of the *namespaces* used to add additional content types, these are used when discovering the available extensions for about pages - required format a ``list`` of ``strings``
-
+* ``SEPARATORS`` - A key:value set that describes the separators to be used for name suggestions in the
+                    admin interface. These are set by specifying the key as the django model name for
+                    a given model, and the value as the separator.
+                    When a value for a model isn't in this field it is a hyphen ``-``, however the the
+                    by default the settings specify the separator for "DataElements" as a comma ``,`` and
+                    the separator for "DataElementConcepts" as an em-dash ``–``.
 
 ``ARISTOTLE_DOWNLOADS``
 -----------------------
@@ -33,8 +38,11 @@ Aristotle example::
         'SITE_BRAND': '/static/aristotle_mdr/images/aristotle_small.png',
        # 'Intro text use on the home page as a prompt for users.'
         'SITE_INTRO': 'Use Aristotle Metadata to search for metadata...',
-       #Extensions that add additional object types for search/display.
-        'CONTENT_EXTENSIONS' : [ 'comet' ]
+       # Extensions that add additional object types for search/display.
+        'CONTENT_EXTENSIONS' : [ 'comet' ],
+       # Separators for auto-generating the names of constructed items.
+        'SEPARATORS': { 'DataElement':',',
+                    'DataElementConcept':'–'},
       }
 
     ARISTOTLE_DOWNLOADS = [
