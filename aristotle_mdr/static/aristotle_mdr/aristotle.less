@@ -37,6 +37,10 @@
     }
 }
 
+.main.navbar .navbar-nav li.dropdown a.dropdown-toggle {
+    color:@colors_footer_text;
+}
+
 tbody.newRa {
     border-top-width: 4px ;
 }
@@ -124,6 +128,27 @@ dl .description {
         white-space: pre;
     }
 }
+.no-notify, .notify {
+    &:before {
+        font-family: FontAwesome;
+        text-align:center;
+        width:1em;
+        padding-left:3px;
+    }
+}
+.no-notify {
+    &:before {
+        content: '\f003';
+    }
+}
+.notify {
+    &:before {
+        color:white;
+        content: '\f0e0';
+    }
+}
+
+
 #supersedes {
     border-top:1px solid @colors_border;
     border-bottom:1px solid @colors_border;

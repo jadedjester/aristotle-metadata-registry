@@ -1,7 +1,25 @@
-from django.forms.widgets import CheckboxSelectMultiple,ChoiceFieldRenderer,ChoiceInput,CheckboxChoiceInput, RadioSelect
+from django.forms.widgets import TextInput,CheckboxSelectMultiple,ChoiceFieldRenderer,ChoiceInput,CheckboxChoiceInput, RadioSelect
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+class NameSuggestInput(TextInput):
+    def __init__(self, *args, **kwargs):
+        self.suggests = kwargs.pop('name_suggest_fields')
+        self.separator = kwargs.pop('separator','-')
+        super(NameSuggestInput, self).__init__(*args, **kwargs)
+    def render(self, name, value, attrs=None):
+        out = super(NameSuggestInput, self).render(name, value, attrs)
+        if self.suggests:
+            print "here"
+            print self.separator
+            button = "<button type='button' data-separator='{}' data-suggest-fields='{}'>Suggest</button>".format(self.separator,",".join(self.suggests))
+            out = "<div class='suggest_name_wrapper'>{}{}</div>".format(out,button)
+            print out
+        else:
+            out = out
+        return mark_safe(out)
+
 
 class BootstrapChoiceInput(ChoiceInput):
     input_type = 'radio'
@@ -25,7 +43,7 @@ class BootstrapCheckInput(BootstrapChoiceInput,CheckboxChoiceInput):
 class BootstrapChoiceFieldRenderer(ChoiceFieldRenderer):
     wrap = True
     choice_input_class = BootstrapChoiceInput
-    
+
     def render(self):
         """
         Outputs a <ul> for this set of choice fields.
@@ -58,7 +76,7 @@ class BootstrapDropdownSelect(RadioSelect):
 
 class BootstrapDropdownIntelligentDate(BootstrapDropdownSelect):
     renderer = BootstrapIntelligentDateRenderer
-    
+
 class BootstrapDropdownSelectMultiple(CheckboxSelectMultiple):
     renderer = BootstrapCheckboxFieldRenderer
     allow_multiple_selected = True

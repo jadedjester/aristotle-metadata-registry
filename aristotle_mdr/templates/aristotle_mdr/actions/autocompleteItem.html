@@ -2,11 +2,14 @@
 {% load static %}
 
 <span class="autocomplete-item block" data-value="{{ choice.pk|unlocalize }}">
-    <strong class="title">
-    {{ choice }} <small>( id: {{ choice.id }} )</small>
+    <strong class="title" data-name="{{ choice.name }}" >
+    {{ choice }} <small>(id: {{ choice.id }}) </small>
     {% with choice.get_absolute_url as url %}
         {% if url %}
-        <a href="{{ url }}" target="_blank" class="choice-" title="{% trans 'Open in a new window' %}">
+        <a class="ac_preview_link" href="{{ url }}" target="preview" class="choice-"
+        title="{% trans 'Open in a new window' %}"
+        onclick="window.open('{{url}}', 'preview', 'height=600,width=595');return false;"
+        >
             <i class="fa fa-external-link-square"></i>
         </a>
         {% endif %}

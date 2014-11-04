@@ -1,5 +1,6 @@
 from django import forms
 from django.db.models import Q
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -8,9 +9,7 @@ import aristotle_mdr.models as MDR
 import aristotle_mdr.forms as MDRForms
 from aristotle_mdr import perms
 from django.core.urlresolvers import reverse
-import reversion
 from reversion_compare.admin import CompareVersionAdmin
-
 
 # Thanks http://stackoverflow.com/questions/6727372/
 class RegistrationAuthoritySelect(forms.Select):
@@ -115,7 +114,7 @@ class ConceptAdmin(CompareVersionAdmin):
                 'fields': ['superseded_by','deprecated'],
             })
     ]
-
+    name_suggest_fields = []
     raw_id_fields = ('workgroup',)
     autocomplete_lookup_fields = {'fk':['workgroup',]}
     light_autocomplete_lookup_fields = {
@@ -137,6 +136,10 @@ class ConceptAdmin(CompareVersionAdmin):
             def __new__(cls, *args, **kwargs):
                 kwargs['request'] = request
                 kwargs['auto_fields'] = self.light_autocomplete_lookup_fields
+                kwargs['name_suggest_fields'] = self.name_suggest_fields
+                SEPARATORS = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('SEPARATORS',{})
+                print SEPARATORS
+                kwargs['separator'] = SEPARATORS[self.model.__name__]
                 return conceptForm(*args, **kwargs)
         return ModelFormMetaClass
 
@@ -202,6 +205,7 @@ class ConceptAdmin(CompareVersionAdmin):
 
 
 class DataElementAdmin(ConceptAdmin):
+    name_suggest_fields = ['dataElementConcept','valueDomain']
     fieldsets = ConceptAdmin.fieldsets + [
             ('Components', {'fields': ['dataElementConcept','valueDomain']}),
     ]
@@ -214,10 +218,12 @@ class DataElementAdmin(ConceptAdmin):
     }
 
 class DataElementConceptAdmin(ConceptAdmin):
+    components = ['objectClass','property']
+    name_suggest_fields = components
     fieldsets = ConceptAdmin.fieldsets + [
-            ('Components', {'fields': ['objectClass','property']}),
+            ('Components', {'fields': components}),
     ]
-    #raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
+    raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
     light_autocomplete_lookup_fields = {
         'fk': [
             ('objectClass',MDR.ObjectClass ),

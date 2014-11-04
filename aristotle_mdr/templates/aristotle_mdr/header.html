@@ -3,8 +3,8 @@
 
 <a class="sr-only" accesskey="j" href="#content">Skip to content</a>
 <a class="sr-only" accesskey="l" href="{% url 'aristotle:accessibility' %}#accesskeys">Learn about the access keys available for {{ config.SITE_NAME }}</a>
-<nav class="navbar navbar-inverse">
-<div class="container-fluid">
+<nav class="main navbar navbar-inverse">
+<div class="container-fluid" role="navigation">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
         <span class="sr-only">Toggle navigation</span>
@@ -87,9 +87,9 @@
                     {% firstof user.get_short_name user.get_username %}
                     {% if user.is_active %}
                         {% if user.notifications.unread %}
-                        <i class="fa fa-envelope fa-fw" title="New notifications"></i>
+                        <span class="notify" title="New notifications"></span>
                         {% else %}
-                        <i class="fa fa-envelope-o fa-fw" title="No unread notifications"></i>
+                        <span class="no-notify" title="No unread notifications"></span>
                         {% endif %}
                     {% endif %}
                 </a>

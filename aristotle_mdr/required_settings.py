@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -94,6 +95,18 @@ BOOTSTRAP3 = {
 
 # We need this to make sure users can see all extensions.
 AUTHENTICATION_BACKENDS = ('aristotle_mdr.backends.AristotleBackend',)
+
+
+ARISTOTLE_SETTINGS = {
+    'SEPARATORS': { 'DataElement':',',
+                    'DataElementConcept':'–'},
+    'SITE_NAME': 'Default Site Name', # 'The main title for the site.'
+    'SITE_BRAND': '/static/aristotle_mdr/images/aristotle_small.png', # URL for the Site-wide logo
+    'SITE_INTRO': 'Use Default Site Name to search for metadata...', # 'Intro text use on the home page as a prompt for users.'
+    'SITE_DESCRIPTION': 'About this site', # 'The main title for the site.'
+    'CONTENT_EXTENSIONS' : []
+    }
+
 
 # Used for in place editing
 INPLACEEDIT_EDIT_EMPTY_VALUE = 'Double click to edit'

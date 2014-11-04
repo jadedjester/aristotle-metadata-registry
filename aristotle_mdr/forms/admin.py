@@ -3,6 +3,7 @@ autocomplete_light.autodiscover()
 
 from django import forms
 import aristotle_mdr.models as MDR
+import aristotle_mdr.widgets as widgets
 from django.forms import model_to_dict
 from aristotle_mdr.perms import user_can_edit
 
@@ -19,6 +20,8 @@ class AdminConceptForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         auto_fields = kwargs.pop('auto_fields', None)
         clone = self.request.GET.get("clone",None)
+        name_suggest_fields = kwargs.pop('name_suggest_fields',[])
+        separator = kwargs.pop('separator','-')
         if clone:
             clone = MDR._concept.objects.filter(id=clone).first()
             #clone.pop('id') # Get rid of the id.
@@ -36,6 +39,8 @@ class AdminConceptForm(forms.ModelForm):
             self.fields['deprecated'].initial = self.instance.supersedes.all()
             self.fields['superseded_by'].widget = autocomplete_light.ChoiceWidget(self.instance.get_autocomplete_name())
 
+        if name_suggest_fields:
+            self.fields['name'].widget = widgets.NameSuggestInput(name_suggest_fields=name_suggest_fields,separator=separator)
 
         if auto_fields:
             for f,l in auto_fields['fk']:
