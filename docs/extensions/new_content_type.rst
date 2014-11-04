@@ -274,15 +274,15 @@ can arise when extending from non-abstract classes:
   They would be returned a page that showed item ``543210`` as a ``DataElement``.
   Depending on the domain and objects, this may be desired behaviour.
 
-* Following from the above, restricted searchs for the parent item will return
-  results from the subclassed ite. In short all searches restricted to a ``DataElement``
+* Following from the above, restricted searches for only objects of the parent item type will return
+  results from the subclassed item. For example, all searches restricted to a ``DataElement``
   would also return results for ``CountrySpecificDataElement``, and they will
   be displayed in the list as ``DataElement`` *not* as ``CountrySpecificDataElement``.
 
 * Items that inherit from non-abstract classes do not inherit the Django object Mangers,
   this is one of the reasons for the decision to make ``concept`` an abstact class.
-  As such, its adviced that any items that inherit from concrete classes refine the
-  default object manager like so::
+  As such, it is **strongly adviced** that any items that inherit from concrete classes
+  specify the :doc:`Aristotle-MDR concept manager</extensions/using_concept_manager>`, like so::
 
     class CountrySpecificDataElement(aristotle.models.DataElement):
         countries = models.ManyToManyField(Country)
