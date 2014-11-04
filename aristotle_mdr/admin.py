@@ -137,9 +137,9 @@ class ConceptAdmin(CompareVersionAdmin):
                 kwargs['request'] = request
                 kwargs['auto_fields'] = self.light_autocomplete_lookup_fields
                 kwargs['name_suggest_fields'] = self.name_suggest_fields
-                SEPARATORS = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('SEPARATORS',{})
-                print SEPARATORS
-                kwargs['separator'] = SEPARATORS[self.model.__name__]
+                if self.name_suggest_fields:
+                    SEPARATORS = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('SEPARATORS',{})
+                    kwargs['separator'] = SEPARATORS[self.model.__name__]
                 return conceptForm(*args, **kwargs)
         return ModelFormMetaClass
 
