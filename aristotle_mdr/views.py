@@ -712,7 +712,7 @@ def addWorkgroupMembers(request,iid):
                     workgroup.giveRoleToUser(role,user)
             return HttpResponseRedirect('/workgroup/%s/members'%(workgroup.id))
     else:
-        form = MDRForms.AddWorkgroupMembers(initial={'roles':request.GET.get('role')})
+        form = MDRForms.AddWorkgroupMembers(initial={'roles':request.GET.getlist('role')})
 
 
     return render(request,"aristotle_mdr/actions/addWorkgroupMember.html",

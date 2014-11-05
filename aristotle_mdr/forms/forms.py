@@ -139,8 +139,9 @@ class AddWorkgroupMembers(forms.Form):
     users = forms.ModelMultipleChoiceField(
             label="Select users",
             queryset=User.objects.all(),
-            widget=forms.CheckboxSelectMultiple
+            widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_AristotleUser')
             )
+
 
     def clean_roles(self):
         roles = self.cleaned_data['roles']
