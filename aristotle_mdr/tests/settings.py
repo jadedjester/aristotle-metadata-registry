@@ -17,8 +17,6 @@ INSTALLED_APPS = (
     'aristotle_mdr',
 ) + INSTALLED_APPS
 
-HAYSTACK_SIGNAL_PROCESSOR = 'aristotle_mdr.signals.AristotleSignalProcessor'
-HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',

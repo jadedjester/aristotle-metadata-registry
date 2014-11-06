@@ -15,7 +15,7 @@ Available tags and filters
 """
 from django import template
 from aristotle_mdr import perms
-from aristotle_mdr import models as MDR
+import aristotle_mdr.models as MDR
 from django.core.urlresolvers import reverse, resolve
 
 register = template.Library()

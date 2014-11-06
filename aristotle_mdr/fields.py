@@ -4,7 +4,7 @@ from inplaceeditform.fields import AdaptorChoicesField
 from inplaceeditform.commons import apply_filters
 
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.forms.extras import widgets
 
 conf = dict(

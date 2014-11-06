@@ -1,18 +1,17 @@
 from django.db.models.signals import post_save, post_delete
-
-
 from haystack.signals import RealtimeSignalProcessor
 # Don't import aristotle_mdr.models directly, only pull in whats required,
 #  otherwise Haystack gets into a circular dependancy.
-from aristotle_mdr.models import Status
 
 class AristotleSignalProcessor(RealtimeSignalProcessor):
     def setup(self):
+        from aristotle_mdr.models import Status
         post_save.connect(self.handle_status_change, sender=Status)
         post_delete.connect(self.handle_status_change, sender=Status)
         super(AristotleSignalProcessor,self).setup()
 
     def teardown(self): # pragma: no cover
+        from aristotle_mdr.models import Status
         post_save.disconnect(self.handle_status_change, sender=Status)
         post_delete.disconnect(self.handle_status_change, sender=Status)
         super(AristotleSignalProcessor,self).teardown()

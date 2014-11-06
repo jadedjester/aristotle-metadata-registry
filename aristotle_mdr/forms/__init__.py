@@ -1,6 +1,6 @@
-from aristotle_mdr.forms.forms import *
-from aristotle_mdr.forms import creation_wizards as wizards
-from aristotle_mdr.forms import search
-from aristotle_mdr.forms import discussions
-from aristotle_mdr.forms import admin
-from aristotle_mdr.forms import bulk_actions
+from forms import *
+import creation_wizards as wizards
+import search
+import discussions
+import admin
+import bulk_actions
