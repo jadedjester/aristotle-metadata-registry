@@ -1,8 +1,8 @@
-from django.test import TestCase, Client
-from aristotle_mdr import models, perms
-from django.utils import timezone
+from django.test import TestCase
+
 from django.core.urlresolvers import reverse
-from aristotle_mdr.tests import utils
+import aristotle_mdr.models as models
+import aristotle_mdr.tests.utils as utils
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
@@ -20,7 +20,7 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
 
         response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_add")+"?clone=%s"%dec.id)
         self.assertEqual(response.status_code,200)
-        print response.context['form']
+        #print response.context['form']
 
     def test_name_suggests(self):
         self.login_editor()

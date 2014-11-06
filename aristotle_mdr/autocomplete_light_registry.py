@@ -1,5 +1,5 @@
 import autocomplete_light
-from aristotle_mdr import models as MDR
+import aristotle_mdr.models as MDR
 from django.contrib.auth.models import User
 
 autocompleteTemplate = {

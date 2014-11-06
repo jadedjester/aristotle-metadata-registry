@@ -1,13 +1,12 @@
-from django.test import TestCase, Client
-from aristotle_mdr import models, perms
-from django.utils import timezone
+from django.test import TestCase
+
+import aristotle_mdr.models as models
+import aristotle_mdr.tests.utils as utils
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
-
-from aristotle_mdr.tests import utils
 
 class TestSearch(utils.LoggedInViewPages,TestCase):
     def setUp(self):
@@ -47,6 +46,8 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
 
 class TestTokenSearch(TestCase):
     def setUp(self):
+        from django.test import Client
+
         self.client = Client()
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
         self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')

@@ -11,11 +11,8 @@ class NameSuggestInput(TextInput):
     def render(self, name, value, attrs=None):
         out = super(NameSuggestInput, self).render(name, value, attrs)
         if self.suggests:
-            print "here"
-            print self.separator
             button = "<button type='button' data-separator='{}' data-suggest-fields='{}'>Suggest</button>".format(self.separator,",".join(self.suggests))
             out = "<div class='suggest_name_wrapper'>{}{}</div>".format(out,button)
-            print out
         else:
             out = out
         return mark_safe(out)

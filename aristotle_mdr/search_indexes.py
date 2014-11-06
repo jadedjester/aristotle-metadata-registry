@@ -1,8 +1,7 @@
 import datetime
-from haystack import indexes
-from haystack.query import SearchQuerySet
+import haystack.indexes as indexes
 
-import models
+import aristotle_mdr.models as models
 
 class baseObjectIndex(indexes.SearchIndex):
     text = indexes.CharField(document=True, use_template=True)

@@ -1,5 +1,4 @@
-from aristotle_mdr import models, perms
-from django.test import TestCase, Client
+import aristotle_mdr.models as models
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
@@ -8,6 +7,7 @@ class LoggedInViewPages(object):
     This helps us manage testing across different user types.
     """
     def setUp(self):
+        from django.test import Client
 
         self.client = Client()
         self.wg1 = models.Workgroup.objects.create(name="Test WG 1") # Editor is member

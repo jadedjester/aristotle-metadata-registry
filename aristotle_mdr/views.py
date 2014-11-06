@@ -18,7 +18,6 @@ import aristotle_mdr.forms as MDRForms # Treble-one seven nine
 import aristotle_mdr.models as MDR # Treble-one seven nine
 
 from haystack.views import SearchView
-from haystack.query import SearchQuerySet
 
 import cStringIO as StringIO
 import xhtml2pdf.pisa as pisa
@@ -557,6 +556,7 @@ def createManagedObject(request,f):
                     )
 
                 similar = [o for o in similar if o.is_public]
+                import haystack.query.SearchQuerySet as SearchQuerySet
                 similarName = SearchQuerySet().models(f.Meta.model).filter(name=form.cleaned_data['name'])
                 similarDesc = SearchQuerySet().models(f.Meta.model).filter(content=form.cleaned_data['description'])
                 similarSyns = SearchQuerySet().models(f.Meta.model).filter(content=form.cleaned_data['synonyms'])
@@ -608,6 +608,7 @@ def createManagedObject(request,f):
     Looks for items ot a given item type with the given search terms
 """
 def findSimilar(itemType,name="",description="",synonyms=""):
+    import haystack.query.SearchQuerySet as SearchQuerySet
     similar = SearchQuerySet().models(itemType).filter_or(
             name=name,
             content=description+" "+synonyms) #.filter(states="Standard")

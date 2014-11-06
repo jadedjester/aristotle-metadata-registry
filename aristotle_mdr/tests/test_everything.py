@@ -1,9 +1,9 @@
-from django.test import TestCase, Client
-from aristotle_mdr import models, perms
+from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.contrib.auth.models import Group, Permission
 from django.core.urlresolvers import reverse
+import aristotle_mdr.models as models
+import aristotle_mdr.perms as perms
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
@@ -265,6 +265,7 @@ class UserEditTesting(TestCase):
 
 class AnonymousUserViewingThePages(TestCase):
     def setUp(self):
+        from django.test import Client
         self.client = Client()
     def test_homepage(self):
         home = self.client.get("/")
