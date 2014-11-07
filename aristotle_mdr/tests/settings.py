@@ -2,7 +2,6 @@ import os
 from aristotle_mdr.required_settings import *
 
 SECRET_KEY = 'inara+vtkprm7@0(fsc$+grbz9-s+tmo9d)e#k(9uf8m281&$7xhdkjr'
-project_dir = os.path.abspath('../') # or path to the dir. that the db should be in.
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True
 
@@ -18,8 +17,6 @@ INSTALLED_APPS = (
     'aristotle_mdr',
 ) + INSTALLED_APPS
 
-HAYSTACK_SIGNAL_PROCESSOR = 'aristotle_mdr.signals.AristotleSignalProcessor'
-HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',

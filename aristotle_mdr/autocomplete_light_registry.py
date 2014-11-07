@@ -1,5 +1,6 @@
 import autocomplete_light
-from aristotle_mdr import models as MDR
+import aristotle_mdr.models as MDR
+from django.contrib.auth.models import User
 
 autocompleteTemplate = {
     # Just like in ModelAdmin.search_fields
@@ -22,6 +23,14 @@ autocompleteTemplate = {
         #'class': 'modern-style',
     },
 }
+
+class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+    search_fields=['first_name', 'last_name','username','email']
+
+u = autocompleteTemplate.copy()
+u['name']='Autocomplete_AristotleUser'
+u['choice_template']='aristotle_mdr/actions/autocompleteUser.html'
+autocomplete_light.register(User,UserAutocomplete,**u)
 
 class PermissionsAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     search_fields=['name', 'description','id']

@@ -47,7 +47,7 @@ setup(
         'django-inplaceedit',
         'django-inplaceedit-extra-fields',
 
-        # Revision
+        # Revision control
         'django-reversion',
         'django-reversion-compare',
         'diff-match-patch',

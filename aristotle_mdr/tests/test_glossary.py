@@ -1,8 +1,9 @@
-from django.test import TestCase, Client
-from aristotle_mdr import models, perms
-from django.utils import timezone
-from django.core.urlresolvers import reverse
-from aristotle_mdr.tests import utils
+from django.test import TestCase
+
+#from django.core.urlresolvers import reverse
+#import aristotle_mdr.models as models
+#import aristotle_mdr.perms as perms
+import aristotle_mdr.tests.utils as utils
 
 from django.test.utils import setup_test_environment
 setup_test_environment()

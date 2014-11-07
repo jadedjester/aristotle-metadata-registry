@@ -1,0 +1,12 @@
+{% load i18n l10n %}
+{% load static %}
+
+<span class="autocomplete-item block" data-value="{{ choice.pk|unlocalize }}">
+    <strong class="title" >
+    {{ choice.first_name }} {{ choice.last_name }} <small>(id: {{ choice.username }}) </small>
+    </strong>
+    <div class="details">
+        Email: {{ choice.email }}<br>
+        <small>Organisation: </small>
+    </div>
+</span>

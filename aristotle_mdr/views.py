@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -6,11 +6,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from django.utils import timezone
 import datetime
-import urllib
 from django.contrib.auth.models import User
 
 from aristotle_mdr.perms import user_can_view, user_can_edit, user_in_workgroup, user_is_workgroup_manager, user_can_change_status
@@ -19,7 +18,6 @@ import aristotle_mdr.forms as MDRForms # Treble-one seven nine
 import aristotle_mdr.models as MDR # Treble-one seven nine
 
 from haystack.views import SearchView
-from haystack.query import SearchQuerySet
 
 import cStringIO as StringIO
 import xhtml2pdf.pisa as pisa
@@ -558,6 +556,7 @@ def createManagedObject(request,f):
                     )
 
                 similar = [o for o in similar if o.is_public]
+                import haystack.query.SearchQuerySet as SearchQuerySet
                 similarName = SearchQuerySet().models(f.Meta.model).filter(name=form.cleaned_data['name'])
                 similarDesc = SearchQuerySet().models(f.Meta.model).filter(content=form.cleaned_data['description'])
                 similarSyns = SearchQuerySet().models(f.Meta.model).filter(content=form.cleaned_data['synonyms'])
@@ -609,6 +608,7 @@ def createManagedObject(request,f):
     Looks for items ot a given item type with the given search terms
 """
 def findSimilar(itemType,name="",description="",synonyms=""):
+    import haystack.query.SearchQuerySet as SearchQuerySet
     similar = SearchQuerySet().models(itemType).filter_or(
             name=name,
             content=description+" "+synonyms) #.filter(states="Standard")
@@ -712,7 +712,7 @@ def addWorkgroupMembers(request,iid):
                     workgroup.giveRoleToUser(role,user)
             return HttpResponseRedirect('/workgroup/%s/members'%(workgroup.id))
     else:
-        form = MDRForms.AddWorkgroupMembers(initial={'roles':request.GET.get('role')})
+        form = MDRForms.AddWorkgroupMembers(initial={'roles':request.GET.getlist('role')})
 
 
     return render(request,"aristotle_mdr/actions/addWorkgroupMember.html",

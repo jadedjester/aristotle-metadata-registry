@@ -1,9 +1,10 @@
 import autocomplete_light
 autocomplete_light.autodiscover()
 
-from django.conf.urls import include, patterns, url
+from django.conf.urls import patterns, url
 
-from aristotle_mdr import views,forms
+import aristotle_mdr.views as views
+import aristotle_mdr.forms as forms
 from django.views.generic import TemplateView
 
 from haystack.query import SearchQuerySet

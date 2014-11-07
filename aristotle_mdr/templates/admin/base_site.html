@@ -1,21 +1,24 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
-{% load staticfiles %}
+{% load staticfiles compile_static %}
 
 {% block title %}{{ title }} - {{ config.SITE_NAME }}{% endblock %}
 
-{% block branding %}
-<h1 id="site-name">{{ site_header }}
-
+{% comment %}
+{%block branding %}
+<h1 id="site-name">
     <a href="{% url 'aristotle:home' %}" id="logo">
             <img height="48px" src="{{ config.SITE_BRAND }}" alt="{{ config.SITE_NAME }}" title="{{ config.SITE_NAME }}">
           </a>
 </h1>
 {% endblock %}
+{% endcomment %}
 
 
 {% block extrahead %}
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.js" type="text/javascript"></script>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ STATIC_URL }}{% compile 'aristotle_mdr/aristotle.admin.less' %}" />
+    <script src="{% static 'aristotle_mdr/aristotle.admin.js' %}" type="text/javascript"></script>
     {% include 'autocomplete_light/static.html' %}
 {% endblock %}

@@ -1,8 +1,9 @@
-from django.test import TestCase, Client
-from aristotle_mdr import models, perms
-from django.utils import timezone
+from django.test import TestCase
+
 from django.core.urlresolvers import reverse
-from aristotle_mdr.tests import utils
+
+import aristotle_mdr.models as models
+import aristotle_mdr.tests.utils as utils
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
@@ -10,6 +11,34 @@ setup_test_environment()
 class AdminPage(utils.LoggedInViewPages,TestCase):
     def setUp(self):
         super(AdminPage, self).setUp()
+
+    def test_clone(self):
+        from aristotle_mdr.utils import concept_to_clone_dict
+
+        # Does cloning an item prepopulate everythin?
+        self.login_editor()
+        oc = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg1)
+        prop = models.Property.objects.create(name="Prop1",workgroup=self.wg1)
+        dec = models.DataElementConcept.objects.create(name="DEC1",objectClass=oc,property=prop,workgroup=self.wg1)
+
+        response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_add")+"?clone=%s"%dec.id)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['adminform'].form.initial,concept_to_clone_dict(dec))
+
+    def test_name_suggests(self):
+        self.login_editor()
+        oc = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg1)
+        prop = models.Property.objects.create(name="Prop1",workgroup=self.wg1)
+        dec = models.DataElementConcept.objects.create(name="DEC1",objectClass=oc,property=prop,workgroup=self.wg1)
+
+        response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_change",args=(str(dec.id))))
+        self.assertEqual(response.status_code,200)
+
+    def test_supersede_saves(self):
+        pass
+
+    def test_editor_change_item(self):
+        pass
 
     def test_editor_make_item(self):
         self.login_editor()

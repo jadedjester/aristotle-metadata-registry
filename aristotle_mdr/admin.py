@@ -1,5 +1,6 @@
 from django import forms
 from django.db.models import Q
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -8,9 +9,7 @@ import aristotle_mdr.models as MDR
 import aristotle_mdr.forms as MDRForms
 from aristotle_mdr import perms
 from django.core.urlresolvers import reverse
-import reversion
 from reversion_compare.admin import CompareVersionAdmin
-
 
 # Thanks http://stackoverflow.com/questions/6727372/
 class RegistrationAuthoritySelect(forms.Select):
@@ -51,19 +50,13 @@ class StatusInline(admin.TabularInline):
         if obj is not None and perms.user_can_change_status(request.user,obj):
             return True
         return super(StatusInline, self).has_change_permission(request,obj=None)
+
     def has_add_permission(self, request):
         if True in (request.user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name))
                 for r in request.user.profile.registrationAuthorities.all()
                 ):
             return True
         return super(StatusInline, self).has_add_permission(request)
-    def get_readonly_fields(self, request, obj=None):
-        if obj is not None:
-        #    if request.user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=obj.registrationAuthority.name):
-            return () #('concept','registrationAuthority')
-        else:
-            #    return self.fields
-            return ()
 
 class WorkgroupFilter(RelatedFieldListFilter):
     def __init__(self, field, request, *args, **kwargs):
@@ -90,9 +83,6 @@ class ConceptAdmin(CompareVersionAdmin):
                 '/static/grappelli/tinymce/jscripts/tiny_mce/tiny_mce.js',
             ]
 
-    def compare_workgroup(self, obj_compare):
-        return ""
-
     form = MDRForms.admin.AdminConceptForm
     list_display = ['name', 'description','created','modified', 'workgroup','is_public','is_locked','readyToReview']#,'status']
     list_filter = ['created','modified',('workgroup',WorkgroupFilter)] #,'statuses']
@@ -112,10 +102,10 @@ class ConceptAdmin(CompareVersionAdmin):
         #('Registry',        {'fields': ['workgroup']}),
         ('Relationships',   {
                 'classes':('grp-collapse grp-closed',),
-                'fields': ['superseded_by','deprecated'],
+                'fields': ['originURI','superseded_by','deprecated'],
             })
     ]
-
+    name_suggest_fields = []
     raw_id_fields = ('workgroup',)
     autocomplete_lookup_fields = {'fk':['workgroup',]}
     light_autocomplete_lookup_fields = {
@@ -137,53 +127,39 @@ class ConceptAdmin(CompareVersionAdmin):
             def __new__(cls, *args, **kwargs):
                 kwargs['request'] = request
                 kwargs['auto_fields'] = self.light_autocomplete_lookup_fields
+                kwargs['name_suggest_fields'] = self.name_suggest_fields
+                if self.name_suggest_fields:
+                    SEPARATORS = getattr(settings, 'ARISTOTLE_SETTINGS', {}).get('SEPARATORS',{})
+                    kwargs['separator'] = SEPARATORS[self.model.__name__]
                 return conceptForm(*args, **kwargs)
         return ModelFormMetaClass
 
     def has_change_permission(self, request,obj=None):
-        if obj is not None:
+        if obj is None:
+            return True
+        else:
             if perms.user_can_edit(request.user,obj):
                 return True
             if perms.user_can_change_status(request.user,obj):
                 return True
             else:
                 return super(ConceptAdmin, self).has_change_permission(request,obj=None)
-        else:
-            return True
     def has_add_permission(self, request):
         return perms.user_is_editor(request.user)
 
     def has_delete_permission(self, request, obj=None):
-        if obj is not None:
-            return request.user.has_perm("aristotle_mdr.delete_concept_from_admin",obj)
-        else:
+        if obj is None:
             return perms.user_is_editor(request.user)
+        else:
+            return request.user.has_perm("aristotle_mdr.delete_concept_from_admin",obj)
 
     def get_queryset(self, request):
         queryset = super(ConceptAdmin, self).get_queryset(request)
         if not request.user.is_superuser:
-            """
-            workgroups=request.user.profile.workgroups.all()
-            # Get all objects in the users workgroups
-            in_wg = queryset.filter(workgroup__in=workgroups)
-            in_ra = []
-            #Check for objects registered in the users RAs
-            ra = (r for r in request.user.profile.registrationAuthorities.all()
-                    if request.user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=r.name)))
-            s = MDR.Status.objects.filter(registrationAuthority__in=ra)
-            in_ra = queryset.filter(statuses__in=s)
-            # TODO: Change to respect RA public guidelines
-            # This will require changing how we determine whats "public" and probably adding a cache flag to the model.
-            # (i for i in queryset if i.is_public)
-            public = MDR.Status.objects.filter(state__in=[MDR.STATES.standard,MDR.STATES.preferred])
-            is_public = queryset.filter(statuses__in=public)
-            queryset = in_wg | in_ra | is_public
-            """
-            #queryset.qs.filter(registrationAuthority__in=ra)
             if not self.has_change_permission(request):
                 queryset = queryset.none()
             else:
-                return queryset.editable_slow(request.user).all()
+                queryset = queryset.editable_slow(request.user).all()
         return queryset
 
     # On save or add, redirect to the live page.
@@ -194,6 +170,7 @@ class ConceptAdmin(CompareVersionAdmin):
         if request.POST.has_key('_save') and post_url_continue is None:
             response['location'] = reverse("aristotle:item",args=(obj.id,))
         return response
+
     def response_change(self, request, obj, post_url_continue=None):
         response = super(ConceptAdmin, self).response_change(request, obj)
         if request.POST.has_key('_save'):
@@ -202,6 +179,7 @@ class ConceptAdmin(CompareVersionAdmin):
 
 
 class DataElementAdmin(ConceptAdmin):
+    name_suggest_fields = ['dataElementConcept','valueDomain']
     fieldsets = ConceptAdmin.fieldsets + [
             ('Components', {'fields': ['dataElementConcept','valueDomain']}),
     ]
@@ -214,10 +192,12 @@ class DataElementAdmin(ConceptAdmin):
     }
 
 class DataElementConceptAdmin(ConceptAdmin):
+    components = ['objectClass','property']
+    name_suggest_fields = components
     fieldsets = ConceptAdmin.fieldsets + [
-            ('Components', {'fields': ['objectClass','property']}),
+            ('Components', {'fields': components}),
     ]
-    #raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
+    raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
     light_autocomplete_lookup_fields = {
         'fk': [
             ('objectClass',MDR.ObjectClass ),
@@ -252,9 +232,10 @@ class GlossaryAlternateDefinitionInline(admin.TabularInline):
     model = MDR.GlossaryAdditionalDefinition
     extra=0
 
-class GlossaryItemAdmin(admin.ModelAdmin):
+class GlossaryItemAdmin(ConceptAdmin):
     model = MDR.GlossaryItem
-    inlines = [GlossaryAlternateDefinitionInline]
+    fieldsets = ConceptAdmin.fieldsets
+    inlines = ConceptAdmin.inlines + [GlossaryAlternateDefinitionInline]
 
 class RegistrationAuthorityAdmin(admin.ModelAdmin):
     list_display = ['name', 'description','created','modified']
@@ -294,6 +275,7 @@ admin.site.register(MDR.DataType)
 # which acts a bit like a singleton
 class PossumProfileInline(admin.StackedInline):
     model = MDR.PossumProfile
+    exclude = ('SavedActiveWorkgroup',)
     can_delete = False
     verbose_name_plural = 'Membership details'
     filter_horizontal = ('workgroups','registrationAuthorities')

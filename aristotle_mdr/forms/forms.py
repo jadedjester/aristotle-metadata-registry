@@ -4,22 +4,21 @@ import autocomplete_light
 autocomplete_light.autodiscover()
 
 from django import forms
-import aristotle_mdr.models as MDR
-from tinymce.widgets import TinyMCE
+#from tinymce.widgets import TinyMCE
 from django.contrib.auth.models import User
-from django.contrib.admin import widgets
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
+import aristotle_mdr.models as MDR
 from aristotle_mdr.perms import user_can_edit
 from bootstrap3_datetime.widgets import DateTimePicker
-from django.utils import timezone
 
 class UserSelfEditForm(forms.Form):
     template = "aristotle_mdr/userEdit.html"
 
-    first_name      = forms.CharField(required=False,label=u'First Name')
-    last_name       = forms.CharField(required=False,label=u'Last Name')
-    email           = forms.EmailField(required=False,label=u'Email Address')
+    first_name      = forms.CharField(required=False,label=_('First Name'))
+    last_name       = forms.CharField(required=False,label=_('Last Name'))
+    email           = forms.EmailField(required=False,label=_('Email Address'))
 
 
 # For stating that an item deprecates other items.
@@ -38,7 +37,7 @@ class DeprecateForm(forms.Form):
         super(DeprecateForm, self).__init__(*args, **kwargs)
         self.fields['olderItems']=forms.ModelMultipleChoiceField(
                 queryset=self.qs,
-                label="Supersede older items",
+                label=_("Supersede older items"),
                 required=False,
                 initial=self.item.supersedes.all(),
                 widget=autocomplete_light.MultipleChoiceWidget(self.item.get_autocomplete_name()))
@@ -57,7 +56,7 @@ class SupersedeForm(forms.Form):
     newerItem = forms.ModelChoiceField(
                 queryset=MDR._concept.objects.all(),
                 empty_label="None",
-                label="Superseded by",
+                label=_("Superseded by"),
                 required=False,
                 widget=autocomplete_light.ChoiceWidget('Autocomplete_concept'))
     def __init__(self, *args, **kwargs):
@@ -68,7 +67,7 @@ class SupersedeForm(forms.Form):
         self.fields['newerItem']=forms.ModelChoiceField(
                 queryset=self.qs,
                 empty_label="None",
-                label="Superseded by",
+                label=_("Superseded by"),
                 initial=self.item.superseded_by,
                 required=False,
                 widget=autocomplete_light.ChoiceWidget(self.item.get_autocomplete_name()))
@@ -84,17 +83,17 @@ class SupersedeForm(forms.Form):
 class ChangeStatusForm(forms.Form):
     state = forms.ChoiceField(choices=MDR.STATES,widget=forms.RadioSelect)
     registrationDate = forms.DateField(
-        required=False,label="Registration date",
+        required=False,label=_("Registration date"),
         widget=DateTimePicker(options={"format": "YYYY-MM-DD"}),
         initial=timezone.now()
         )
     cascadeRegistration = forms.ChoiceField(initial=False,
         choices=[(0,'No'),(1,'Yes')],
-        label="Do you want to update the registration of associated items?"
+        label=_("Do you want to update the registration of associated items?")
     )
     changeDetails = forms.CharField(max_length=512,
         required=False,
-        label="Why is the status being changed for these items?",
+        label=_("Why is the status being changed for these items?"),
         widget=forms.Textarea
     )
 
@@ -139,8 +138,9 @@ class AddWorkgroupMembers(forms.Form):
     users = forms.ModelMultipleChoiceField(
             label="Select users",
             queryset=User.objects.all(),
-            widget=forms.CheckboxSelectMultiple
+            widget=autocomplete_light.MultipleChoiceWidget('Autocomplete_AristotleUser')
             )
+
 
     def clean_roles(self):
         roles = self.cleaned_data['roles']

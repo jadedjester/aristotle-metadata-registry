@@ -13,7 +13,6 @@ from haystack.query import SearchQuerySet
 
 from bootstrap3_datetime.widgets import DateTimePicker
 
-from aristotle_mdr.search_indexes import conceptIndex
 import aristotle_mdr.models as MDR
 from aristotle_mdr.widgets import BootstrapDropdownSelectMultiple, BootstrapDropdownIntelligentDate, BootstrapDropdownSelect
 
