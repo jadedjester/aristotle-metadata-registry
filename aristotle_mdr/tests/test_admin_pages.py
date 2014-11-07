@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from django.core.urlresolvers import reverse
+
 import aristotle_mdr.models as models
 import aristotle_mdr.tests.utils as utils
 
@@ -12,6 +13,8 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
         super(AdminPage, self).setUp()
 
     def test_clone(self):
+        from aristotle_mdr.utils import concept_to_clone_dict
+
         # Does cloning an item prepopulate everythin?
         self.login_editor()
         oc = models.ObjectClass.objects.create(name="OC1",workgroup=self.wg1)
@@ -20,7 +23,7 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
 
         response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_add")+"?clone=%s"%dec.id)
         self.assertEqual(response.status_code,200)
-        #print response.context['form']
+        self.assertEqual(response.context['adminform'].form.initial,concept_to_clone_dict(dec))
 
     def test_name_suggests(self):
         self.login_editor()
