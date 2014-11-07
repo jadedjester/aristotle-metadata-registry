@@ -8,6 +8,7 @@ python:
 # command to install dependencies
 before_install:
   - npm install -g less@1.7.4 # Required for static-precompiler
+  - sudo pip install codecov
 install:
   - "pip install coveralls"
   - "pip install ."
@@ -17,3 +18,4 @@ script:
   - coverage run --branch --source=aristotle_mdr manage.py test
 after_success:
   coveralls
+  codecov
