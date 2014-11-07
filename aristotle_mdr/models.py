@@ -316,7 +316,7 @@ class discussionAbstract(TimeStampedModel):
         return self.created != self.modifed
 
 class DiscussionPost(discussionAbstract):
-    workgroup = models.ForeignKey(Workgroup)
+    workgroup = models.ForeignKey(Workgroup,related_name='discussions')
     title = models.CharField(max_length=256)
     relatedItems = models.ManyToManyField('_concept',blank=True,
                     related_name='relatedDiscussions',
