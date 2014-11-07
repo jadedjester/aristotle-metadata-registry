@@ -17,5 +17,5 @@ install:
 script:
   - coverage run --branch --source=aristotle_mdr manage.py test
 after_success:
-  coveralls
-  codecov
+  - coveralls
+  - codecov
