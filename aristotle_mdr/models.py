@@ -33,8 +33,8 @@ STATES = Choices (
          )
 
 class baseAristotleObject(TimeStampedModel):
-    name = models.CharField(max_length=100)
-    description = HTMLField()
+    name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
+    description = HTMLField(help_text="A rich text field for describing the object.")
     objects = InheritanceManager()
 
     class Meta:
@@ -461,7 +461,7 @@ class ConceptManager(InheritanceManager):
 
 class _concept(baseAristotleObject):
     """
-    This is the base concrete class that `Status` items attach to, and to which
+    This is the base concrete class that ``Status`` items attach to, and to which
     collection objects refer to. It is not marked abstract in the Django Meta class, and
     **must not be inherited from**. It has relatively few fields and is a convenience
     class to link with in relationships.
@@ -555,8 +555,8 @@ class _concept(baseAristotleObject):
 
 class concept(_concept):
     """
-    This is an abstract class that all items that should behave like 11179 Concept
-    **must be inherited from**. This model includes the definitions for many long and optional text
+    This is an abstract class that all items that should behave like a 11179 Concept
+    **must inherit from**. This model includes the definitions for many long and optional text
     fields and the self-referential ``superseded_by`` field. It is not possible to include this
     model in a ``ForeignKey`` or ``ManyToManyField``.
     """
@@ -564,7 +564,7 @@ class concept(_concept):
     version = models.CharField(max_length=20,blank=True)
     synonyms = models.CharField(max_length=200, blank=True)
     references = HTMLField(blank=True)
-    originURI = models.URLField(blank=True) # If imported/migrated, where did this object come from?
+    originURI = models.URLField(blank=True,help_text="If imported, the original location of the item")
 
     # superseded_by = models.ForeignKey('managedObject', related_name='supersedes',blank=True,null=True)
     # TODO: switch above with below, try and get a generic reference.
