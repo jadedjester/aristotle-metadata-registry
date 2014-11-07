@@ -2,7 +2,7 @@
 Aristotle MetaData Registry (Aristotle-MDR)
 =====
 
-|build-status| |docs| |coverage|
+|build-status| |docs| |coveralls| |codecov|
 
 Aristotle-MDR is an open-source metadata registry as laid out by the requirements
 of the ISO/IEC 11179:2013 specification.
@@ -72,8 +72,12 @@ For a complete example of how to successfully include Aristotle, see the `exampl
     :scale: 100%
     :target: https://readthedocs.org/projects/aristotle-metadata-registry/
 
-.. |coverage| image:: https://coveralls.io/repos/LegoStormtroopr/aristotle-metadata-registry/badge.png?branch=master
-    :alt: Code coverage
+.. |coveralls| image:: https://coveralls.io/repos/LegoStormtroopr/aristotle-metadata-registry/badge.png?branch=master
+    :alt: Code coverage on coveralls
     :scale: 100%
     :target: https://coveralls.io/r/LegoStormtroopr/aristotle-metadata-registry?branch=master
 
+.. |codecov| image:: https://codecov.io/github/LegoStormtroopr/aristotle-metadata-registry/coverage.svg?branch=master
+    :alt: Code coverage on code cov (includes branch checks)
+    :scale: 100%
+    :target: https://codecov.io/github/LegoStormtroopr/aristotle-metadata-registry?branch=master
