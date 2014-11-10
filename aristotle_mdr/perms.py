@@ -21,31 +21,34 @@ def user_can_view(user,item):
     # A user can view their own details
     if hasattr(item, "profile"):
         return item == user
+
     return item.can_view(user)
 
-def user_is_registrar(user):
+def user_is_editor(user,workgroup=None):
     if user.is_superuser:
         return True
-    return True in (user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name))
-            for r in user.profile.registrationAuthorities.all()
-         )
+    elif workgroup is None:
+        return user.submitter_in.count() > 0 or user.steward_in.count() > 0
+    else:
+        return user.submitter_in.filter(workgroup=workgroup).exists() or \
+                user.steward_in.filter(workgroup=workgroup).exists()
 
-def user_is_editor(user):
+def user_is_registrar(user,ra=None):
     if user.is_superuser:
         return True
-    return True in (user.has_perm('aristotle_mdr.edit_unlocked_in_{name}'.format(name=w.name))
-            for w in user.profile.workgroups.all()
-         )
+    elif ra is None:
+        return user.registrar_in.count() > 0
+    else:
+        return user in ra.registrars.all()
 
-def user_is_registrar_in_ra(user,ra):
-    if user.is_superuser:
-        return True
-    return user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=ra.name))
 
-def user_is_workgroup_manager(user,workgroup):
+def user_is_workgroup_manager(user,workgroup=None):
     if user.is_superuser:
         return True
-    return user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=workgroup.name))
+    elif workgroup is None:
+        return user.workgroup_manager_in.count() > 0
+    else:
+        return user in workgroup.managers.all()
 
 def user_can_change_status(user,item):
     """Can the user change the status of the item?"""
@@ -58,9 +61,9 @@ def user_can_change_status(user,item):
         return True
     # TODO: restrict to only those registration authorities of that items based on the items workgroup, unless the item is visible to the user.
     if can_view or item.readyToReview:
-        return True in (user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name))
-                for r in user.profile.registrationAuthorities.all()
-             )
+        return user.registrar_in.count() > 0 and \
+                True in (user in ra.registrars.all()
+                        for ra in item.workgroup.registrationAuthorities.all())
     return False
 
 def user_can_edit(user,item):
@@ -82,6 +85,6 @@ def user_can_edit(user,item):
 def user_in_workgroup(user,wg):
     if user.is_superuser:
         return True
-    return wg in user.profile.workgroups.all()
+    return user in wg.members
 
 

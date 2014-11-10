@@ -93,42 +93,12 @@ class aristotleComponent(models.Model):
         return self.parentItem.can_view(user)
 
 
-#Pseudo-abstract: Can't actually abstract as 'tracker' isn't pulled across into the children
 class registryGroup(unmanagedObject):
-    tracker=FieldTracker()
-
-    def save(self, **kwargs):
-        for role,permissions in self.__class__.roles.items():
-            if self.pk is None:
-                # Is this a new item? If so create permissions
-                group,created = Group.objects.get_or_create(name="{name} {role}".format(name=self.name,role=role))
-                content_type = ContentType.objects.get_for_model(_concept)
-                for name,code in permissions:
-                    perm,created = Permission.objects.get_or_create(codename=code.format(name=self.name),
-                                                            name=name.format(name=self.name),
-                                                            content_type=content_type)
-                    group.permissions.add(perm)
-            elif self.tracker.has_changed('name'):
-                # If we have changed the name, update the permissions
-                prev = self.tracker.previous('name')
-                g = Group.objects.get(name="{name} {role}".format(name=prev, role=role))
-                g.name = "{name} {role}".format(name=self.name, role=role)
-                g.save()
-                for name,code in permissions:
-                    p = Permission.objects.get(codename=code.format(name=prev))
-                    p.codename = code.format(name=self.name)
-                    p.save()
-        super(registryGroup, self).save(**kwargs)
-
-    def giveRoleToUser(self,role,user):
-        if role in self.__class__.roles.keys():
-            g = Group.objects.get(name="{name} {role}".format(name=self.name, role=role))
-            g.user_set.add(user)
-
-    def removeRoleFromUser(self,role,user):
-        if role in self.__class__.roles.keys():
-            g = Group.objects.get(name="{name} {role}".format(name=self.name, role=role))
-            g.user_set.remove(user)
+    managers   = models.ManyToManyField(User,blank=True,related_name="%(class)s_manager_in")
+    class Meta:
+        abstract = True
+    def can_edit(self,user):
+        return user in self.managers.all()
 
 """
 A registration authority is a proxy group that describes a governance process for "standardising" metadata.
@@ -137,6 +107,8 @@ class RegistrationAuthority(registryGroup):
     template = "aristotle_mdr/registrationAuthority.html"
     locked_state = models.IntegerField(choices=STATES, default=STATES.candidate)
     public_state = models.IntegerField(choices=STATES, default=STATES.recorded)
+
+    registrars = models.ManyToManyField(User,blank=True,related_name='registrar_in',)
 
     # The below text fields allow for brief descriptions of the context of each
     # state for a particular Registration Authority
@@ -156,18 +128,9 @@ class RegistrationAuthority(registryGroup):
     superseded = models.TextField(blank=True)
     retired = models.TextField(blank=True)
 
-    roles = { 'Registrar':[
-                    ('Extract dictionary for {name}','extract_dict_in_{name}'),
-                    ('Manage dictionary for {name}','manage_dict_in_{name}'),
-                    ('Promote content for {name}','promote_in_{name}'),
-                    ('View registered content for {name}','view_registered_in_{name}'),
-                    ],
-            }
     class Meta:
         verbose_name_plural = _("Registration Authorities")
 
-    def can_edit(self,user):
-        return user.has_perm('promote_in_{name}'.format(name=self.name))
     def can_view(self,user):
         return True
 
@@ -202,6 +165,7 @@ class RegistrationAuthority(registryGroup):
 
     def register(self,item,state,user,registrationDate=timezone.now(),cascade=False,changeDetails=""):
         if not perms.user_can_change_status(user,item):
+            # Should raise something here instead of quietly failing
             return None
         reg,created = Status.objects.get_or_create(
                 concept=item,
@@ -222,12 +186,16 @@ class RegistrationAuthority(registryGroup):
                 if i is not None and perms.user_can_change_status(user,i):
                    self.register(i,state,user,registrationDate=registrationDate,cascade=cascade,changeDetails=changeDetails)
         return reg
-
     def giveRoleToUser(self,role,user):
-        super(RegistrationAuthority, self).giveRoleToUser(role,user)
-        user.profile.registrationAuthorities.add(self)
-
-
+        if role == 'registrar':
+            self.registrars.add(user)
+        if role == "manager":
+            self.managers.add(user)
+    def removeRoleFromUser(self,role,user):
+        if role == 'registrar':
+            self.registrars.remove(user)
+        if role == "manager":
+            self.managers.remove(user)
 
 class Workgroup(registryGroup):
     """
@@ -243,67 +211,54 @@ class Workgroup(registryGroup):
             related_name="workgroups",
             )
 
-    roles = { 'Viewer':[
-                    ('View content in workgroup {name}','view_in_{name}'),
-                    ],
-              'Editor':[
-                    ('View content in workgroup {name}','view_in_{name}'),
-                    ('Create content in workgroup {name}','create_in_{name}'),
-                    ('Edit Unlocked content in workgroup {name}','edit_unlocked_in_{name}'),
-                    ('Register content in workgroup {name}','register_in_{name}'),
-                    ],
-              'Super-Editor':[
-                    ('View content in workgroup {name}','view_in_{name}'),
-                    ('Create content in workgroup {name}','create_in_{name}'),
-                    ('Edit Unlocked content in workgroup {name}','edit_unlocked_in_{name}'),
-                    ('Edit LOCKED content in workgroup {name}','edit_locked_in_{name}'),
-                    ('Register content in workgroup {name}','register_in_{name}'),
-                    ],
-              'Manager':[
-                    ('View content in workgroup {name}','view_in_{name}'),
-                    ('Create content in workgroup {name}','create_in_{name}'),
-                    ('Administrate workgroup {name}','admin_in_{name}'),
-                    ]
-            }
+    viewers    = models.ManyToManyField(User,blank=True,related_name='viewer_in',)
+    submitters = models.ManyToManyField(User,blank=True,related_name='submitter_in',)
+    stewards   = models.ManyToManyField(User,blank=True,related_name='steward_in',)
 
-    def can_edit(self,user):
-        return user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=self.name))
+    roles = {'submitter':_("Submitter"),
+            'viewer'    :_("Viewer"),
+            'steward'   :_("Steward"),
+            'manager'   :_("Manager")}
+
+    @property
+    def members(self):
+        return self.viewers.all() | self.submitters.all() | self.stewards.all() | self.managers.all()
+
     def can_view(self,user):
-        return user.has_perm('aristotle_mdr.view_in_{name}'.format(name=self.name))
-
-    def giveRoleToUser(self,role,user):
-        super(Workgroup, self).giveRoleToUser(role,user)
-        if self not in user.profile.workgroups.all():
-            user.profile.workgroups.add(self)
-
-    def addUser(self,user):
-        if self not in user.profile.workgroups.all():
-            user.profile.workgroups.add(self)
-        self.giveRoleToUser("Viewer",user)
-
-    def removeUser(self,user):
-        if self in user.profile.workgroups.all():
-            user.profile.workgroups.remove(self)
-        for role in Workgroup.roles.keys():
-            self.removeRoleFromUser(role,user)
+        return user in self.members
 
     @property
     def classedItems(self):
         # Convenience class as we can't call functions in templates
         return self.items.select_subclasses()
 
-    @property
-    def managers(self):
-        return Group.objects.get(name="{name} {role}".format(name=self.name, role='Manager')).user_set.all()
-    @property
-    def super_editors(self):
-        return Group.objects.get(name="{name} {role}".format(name=self.name, role='Super-Editor')).user_set.all()
-    @property
-    def editors(self):
-        return Group.objects.get(name="{name} {role}".format(name=self.name, role='Editor')).user_set.all()
-    @property
-    def viewers(self):
-        return Group.objects.get(name="{name} {role}".format(name=self.name, role='Viewer')).user_set.all()
+    def giveRoleToUser(self,role,user):
+        if role == "manager":
+            self.managers.add(user)
+        if role == "viewer":
+            self.viewers.add(user)
+        if role == "submitter":
+            self.submitters.add(user)
+        if role == "steward":
+            self.stewards.add(user)
+        self.save()
+
+    def removeRoleFromUser(self,role,user):
+        if role == "manager":
+            self.managers.remove(user)
+        if role == "viewer":
+            self.viewers.remove(user)
+        if role == "submitter":
+            self.submitters.remove(user)
+        if role == "steward":
+            self.stewards.remove(user)
+        self.save()
+
+    def removeUser(self,user):
+        self.viewers.remove(user)
+        self.submitters.remove(user)
+        self.stewards.remove(user)
+        self.managers.remove(user)
 
 class discussionAbstract(TimeStampedModel):
     body = models.TextField()
@@ -476,28 +431,32 @@ class _concept(baseAristotleObject):
 
     def can_edit(self,user):
         if self.is_locked():
-            return user.has_perm('aristotle_mdr.edit_locked_in_{wg}'.format(wg=self.workgroup.name))
+            return user in self.workgroup.stewards.all()
+        elif self.is_registered:
+            return user in self.workgroup.submitters.all() \
+                or user in self.workgroup.stewards.all()
         else:
-            return user.has_perm('aristotle_mdr.edit_unlocked_in_{wg}'.format(wg=self.workgroup.name))
+            return user in self.workgroup.submitters.all()
 
     def can_view(self,user):
         if self.is_public():
             return True
-        else:
-            if user.is_anonymous():
-                return False
+        elif user.is_anonymous():
+            return False
         # If the user can view objects in this workgroup
-        if user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=self.workgroup.name)):
+        if user in self.workgroup.members.all():
             return True
         # if the item is registered and the user is a registrar view view permissions in that authority.
         if self.is_registered:
             for s in self.statuses.all():
                 ra = s.registrationAuthority
-                if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
+                if user in ra.registrars.all():
                     return True
         if self.readyToReview:
+            if user in self.workgroup.stewards.all():
+                return True
             for ra in self.workgroup.registrationAuthorities.all():
-                if user.has_perm('aristotle_mdr.view_registered_in_{name}'.format(name=ra.name)):
+                if user in ra.registrars.all():
                     return True
         return False
 
@@ -566,8 +525,6 @@ class concept(_concept):
     references = HTMLField(blank=True)
     originURI = models.URLField(blank=True,help_text="If imported, the original location of the item")
 
-    # superseded_by = models.ForeignKey('managedObject', related_name='supersedes',blank=True,null=True)
-    # TODO: switch above with below, try and get a generic reference.
     superseded_by = models.ForeignKey('self', related_name='supersedes',blank=True,null=True)
 
     objects = ConceptManager()
@@ -760,12 +717,7 @@ class GlossaryAdditionalDefinition(aristotleComponent):
 # Thanks to http://stackoverflow.com/a/965883/764357
 class PossumProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
-    registrationAuthorities = models.ManyToManyField(
-            RegistrationAuthority, blank=True,
-            verbose_name="Registration Authorities",
-            )
     savedActiveWorkgroup = models.ForeignKey(Workgroup,blank=True,null=True)
-    workgroups = models.ManyToManyField(Workgroup,related_name="members",blank=True)
     favourites = models.ManyToManyField(_concept,related_name='favourited_by',blank=True)
 
     # Override save for inline creation of objects.
@@ -781,6 +733,16 @@ class PossumProfile(models.Model):
     @property
     def activeWorkgroup(self):
         return self.savedActiveWorkgroup or self.workgroups.first() or self.myWorkgroups.first()
+
+    @property
+    def workgroups(self):
+        if self.user.is_superuser:
+            return Workgroup.objects.all()
+        else:
+            return  self.user.viewer_in.all()    |\
+                    self.user.submitter_in.all() |\
+                    self.user.steward_in.all()   |\
+                    self.user.workgroup_manager_in.all()
 
     @property
     def myWorkgroups(self):
@@ -803,8 +765,7 @@ class PossumProfile(models.Model):
         if self.user.is_superuser:
                 return RegistrationAuthority.objects.all()
         else:
-            return (r for r in self.registrationAuthorities.all()
-                if self.user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name)))
+            return self.user.registrar_in.all()
 
     def is_workgroup_manager(self,wg):
         return perms.user_is_workgroup_manager(self.user,wg)
@@ -917,7 +878,7 @@ def concept_saved(sender, instance, created, **kwargs):
         return
     for p in instance.favourited_by.all():
         favourite_updated(recipient=p.user,obj=instance)
-    for user in instance.workgroup.viewers:
+    for user in instance.workgroup.viewers.all():
         if created:
             workgroup_item_new(recipient=user,obj=instance)
         else:
@@ -961,9 +922,9 @@ def exampleData(): # pragma: no cover
     #Set up based workgroup and workers
     pw,c = Workgroup.objects.get_or_create(name="Possum Workgroup")
     users = [('vicky','Viewer'),
-             ('eddie','Editor'),
+             ('stewie','Steward'),
              ('mandy','Manager'),
-             ('sally','Super-Editor'),
+             ('suzie','Submitter'),
             ]
     for name,role in users:
         user = User.objects.filter(username__iexact=name).first()
@@ -973,8 +934,7 @@ def exampleData(): # pragma: no cover
         user.first_name=name.title()
         user.last_name=role
         print "updated user's name to {fn} {ln}".format(fn=user.first_name,ln=user.last_name)
-        user.profile.workgroups.add(pw)
-        pw.giveRoleToUser(role,user)
+        pw.giveRoleToUser(role.lower(),user)
         user.save()
 
     oldoc,c  = ObjectClass.objects.get_or_create(name="Person",

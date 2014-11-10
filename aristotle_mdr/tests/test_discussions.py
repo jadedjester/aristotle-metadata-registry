@@ -17,9 +17,9 @@ class PostingAndCommentingAtObjectLevel(TestCase):
         self.viewer1 = User.objects.create_user('vicky','','viewer') #viewer 1 always posts
         self.viewer2 = User.objects.create_user('viewer2','','viewer')
         self.manager = User.objects.create_user('mandy','','manger')
-        self.wg1.giveRoleToUser('Viewer',self.viewer1)
-        self.wg1.giveRoleToUser('Viewer',self.viewer2)
-        self.wg1.giveRoleToUser('Manager',self.manager)
+        self.wg1.giveRoleToUser('viewer',self.viewer1)
+        self.wg1.giveRoleToUser('viewer',self.viewer2)
+        self.wg1.giveRoleToUser('manager',self.manager)
 
     def test_ViewerCanAlterPost(self):
         post = models.DiscussionPost(author=self.viewer1,workgroup=self.wg1,title="test",body="test")
@@ -39,7 +39,7 @@ class WorkgroupMembersCanMakePostsAndComments(utils.LoggedInViewPages,TestCase):
         super(WorkgroupMembersCanMakePostsAndComments, self).setUp()
         self.viewer2 = User.objects.create_user('viewer2','','viewer') # not in any workgroup
         self.viewer3 = User.objects.create_user('viewer3','','viewer') # not in our "primary testing workgroup" (self.wg1)
-        self.wg1.giveRoleToUser('Viewer',self.viewer3)
+        self.wg1.giveRoleToUser('viewer',self.viewer3)
         self.wg2 = models.Workgroup.objects.create(name="Test WG 2")
 
     def can_the_current_logged_in_user_post(self):
@@ -124,12 +124,12 @@ class ViewDiscussionPostPage(utils.LoggedInViewPages,TestCase):
         super(ViewDiscussionPostPage, self).setUp()
         self.viewer2 = User.objects.create_user('viewer2','','viewer') # not in any workgroup
         self.viewer3 = User.objects.create_user('viewer3','','viewer') # not in our "primary testing workgroup" (self.wg1)
-        self.wg2.giveRoleToUser('Viewer',self.viewer3)
+        self.wg2.giveRoleToUser('viewer',self.viewer3)
 
     def test_member_can_see_posts(self):
         self.login_viewer()
         self.wg3 = models.Workgroup.objects.create(name="Test WG 3")
-        self.wg3.giveRoleToUser('Viewer',self.viewer)
+        self.wg3.giveRoleToUser('viewer',self.viewer)
 
         p1 = models.DiscussionPost.objects.create(author=self.su,workgroup=self.wg1,title="test",body="test")
         p2 = models.DiscussionPost.objects.create(author=self.su,workgroup=self.wg1,title="test",body="test")
@@ -156,6 +156,6 @@ class ViewDiscussionPostPage(utils.LoggedInViewPages,TestCase):
         self.login_viewer()
         response = self.client.get(reverse('aristotle:discussionsPost',args=[post.id]))
         self.assertEqual(response.status_code,200)
-        self.wg1.removeRoleFromUser('Viewer',self.viewer)
+        self.wg1.removeRoleFromUser('viewer',self.viewer)
         response = self.client.get(reverse('aristotle:discussionsPost',args=[post.id]))
         self.assertEqual(response.status_code,403)

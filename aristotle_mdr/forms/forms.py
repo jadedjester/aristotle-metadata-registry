@@ -132,7 +132,7 @@ class ChangeStatusForm(forms.Form):
 class AddWorkgroupMembers(forms.Form):
     roles = forms.MultipleChoiceField(
             label="Workgroup roles",
-            choices=zip(sorted(MDR.Workgroup.roles.keys()),sorted(MDR.Workgroup.roles.keys())),
+            choices=sorted(MDR.Workgroup.roles.items()),
             widget=forms.CheckboxSelectMultiple
             )
     users = forms.ModelMultipleChoiceField(

@@ -51,7 +51,7 @@ class TestTokenSearch(TestCase):
         self.client = Client()
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
         self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')
-        self.ra.giveRoleToUser('Registrar',self.registrar)
+        self.ra.giveRoleToUser('registrar',self.registrar)
         xmen = "wolverine cyclops professorX storm nightcrawler"
         self.xmen_wg = models.Workgroup.objects.create(name="X Men")
         self.xmen_wg.registrationAuthorities.add(self.ra)
@@ -63,6 +63,7 @@ class TestTokenSearch(TestCase):
         for item in self.item_xmen:
             self.ra.register(item,models.STATES.standard,self.registrar)
     def test_token_search(self):
+
         response = self.client.get(reverse('aristotle:search')+"?q=version:0.1.0")
         self.assertEqual(response.status_code,200)
         objs = response.context['page'].object_list
