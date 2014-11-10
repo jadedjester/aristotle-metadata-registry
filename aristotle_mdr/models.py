@@ -739,10 +739,10 @@ class PossumProfile(models.Model):
         if self.user.is_superuser:
             return Workgroup.objects.all()
         else:
-            return  self.user.viewer_in.all()    |\
+            return  (self.user.viewer_in.all()    |\
                     self.user.submitter_in.all() |\
                     self.user.steward_in.all()   |\
-                    self.user.workgroup_manager_in.all()
+                    self.user.workgroup_manager_in.all()).distinct()
 
     @property
     def myWorkgroups(self):
