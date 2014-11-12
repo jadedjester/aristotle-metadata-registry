@@ -34,7 +34,8 @@ STATES = Choices (
 
 class baseAristotleObject(TimeStampedModel):
     name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
-    description = HTMLField(help_text="A rich text field for describing the object.")
+    description = HTMLField(help_text="A rich text field for describing the metadata item.")
+    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
     objects = InheritanceManager()
 
     class Meta:
