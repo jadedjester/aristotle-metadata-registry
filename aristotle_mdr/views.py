@@ -236,7 +236,7 @@ def discussionsWorkgroup(request,wgid):
     #Show all discussions for a workgroups
     page = render(request,"aristotle_mdr/discussions/workgroup.html",{
         'workgroup':wg,
-        'discussions':MDR.DiscussionPost.objects.filter(workgroup=wg)
+        'discussions':wg.discussions.all() #MDR.DiscussionPost.objects.filter(workgroup=wg)
         })
     return page
 
