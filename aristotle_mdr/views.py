@@ -231,7 +231,7 @@ def discussions(request):
 @login_required
 def discussionsWorkgroup(request,wgid):
     wg = get_object_or_404(MDR.Workgroup,pk=wgid)
-    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=wg.name)):
+    if not perms.user_in_workgroup(request.user,wg):
         raise PermissionDenied
     #Show all discussions for a workgroups
     page = render(request,"aristotle_mdr/discussions/workgroup.html",{
@@ -243,7 +243,7 @@ def discussionsWorkgroup(request,wgid):
 @login_required
 def discussionsPost(request,pid):
     post = get_object_or_404(MDR.DiscussionPost,pk=pid)
-    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+    if not perms.user_in_workgroup(request.user,post.workgroup):
         raise PermissionDenied
     #Show all discussions for a workgroups
     comment_form = MDRForms.discussions.CommentForm(initial={'post':pid})
@@ -257,7 +257,7 @@ def discussionsPost(request,pid):
 @login_required
 def discussionsPostToggle(request,pid):
     post = get_object_or_404(MDR.DiscussionPost,pk=pid)
-    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+    if not perms.user_in_workgroup(request.user,post.workgroup):
         raise PermissionDenied
     post.closed = not post.closed
     post.save()
@@ -292,7 +292,7 @@ def discussionsNew(request):
 @login_required
 def discussionsPostNewComment(request,pid):
     post = get_object_or_404(MDR.DiscussionPost,pk=pid)
-    if not request.user.has_perm('aristotle_mdr.view_in_{wg}'.format(wg=post.workgroup.name)):
+    if not perms.user_in_workgroup(request.user,post.workgroup):
         raise PermissionDenied
     if request.method == 'POST':
         form = MDRForms.discussions.CommentForm(request.POST)

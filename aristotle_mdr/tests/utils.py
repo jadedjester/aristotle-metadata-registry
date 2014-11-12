@@ -26,13 +26,10 @@ class LoggedInViewPages(object):
         self.viewer = User.objects.create_user('vicky','','viewer')
         self.registrar = User.objects.create_user('reggie','','registrar')
 
-        self.wg1.addUser(self.editor)
-        self.wg1.giveRoleToUser('Editor',self.editor)
-        self.wg1.addUser(self.editor)
-        self.wg1.giveRoleToUser('Manager',self.manager)
-        self.wg1.addUser(self.viewer)
-        self.wg1.giveRoleToUser('Viewer',self.viewer)
-        self.ra.giveRoleToUser('Registrar',self.registrar)
+        self.wg1.submitters.add(self.editor)
+        self.wg1.managers.add(self.manager)
+        self.wg1.viewers.add(self.viewer)
+        self.ra.registrars.add(self.registrar)
 
         self.editor = User.objects.get(pk=self.editor.pk)
         self.manager = User.objects.get(pk=self.manager.pk)

@@ -21,12 +21,16 @@ class SuperuserPermissions(TestCase):
         self.assertTrue(perms.user_can_alter_post(self.su,None))
     def test_can_view(self):
         self.assertTrue(perms.user_can_view(self.su,None))
+    def test_is_editor(self):
+        self.assertTrue(perms.user_is_editor(self.su))
     def test_is_registrar(self):
         self.assertTrue(perms.user_is_registrar(self.su))
-    def test_is_registrar_in_ra(self):
-        self.assertTrue(perms.user_is_registrar_in_ra(self.su,None))
+        ra = models.RegistrationAuthority.objects.create(name="Test RA")
+        self.assertTrue(perms.user_is_registrar(self.su,ra))
     def test_is_workgroup_manager(self):
         self.assertTrue(perms.user_is_workgroup_manager(self.su,None))
+        wg = models.Workgroup.objects.create(name="Test WG")
+        self.assertTrue(perms.user_is_workgroup_manager(self.su,wg))
     def test_can_change_status(self):
         self.assertTrue(perms.user_can_change_status(self.su,None))
     def test_can_edit(self):
@@ -62,7 +66,7 @@ class ManagedObjectVisibility(object):
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
 
         # make editor for wg1
-        r1 = User.objects.create_user('reg','','reg')
+        r1 = User.objects.create_user('reggie','','reg')
 
         self.assertEqual(perms.user_can_view(r1,self.item),False)
         s = models.Status.objects.create(
@@ -73,28 +77,27 @@ class ManagedObjectVisibility(object):
                 )
         self.assertEqual(perms.user_can_view(r1,self.item),False)
         # Caching issue, refresh from DB with correct permissions
-        ra.giveRoleToUser('Registrar',r1)
+        ra.giveRoleToUser('registrar',r1)
         r1 = User.objects.get(pk=r1.pk)
 
         self.assertEqual(perms.user_can_view(r1,self.item),True)
 
 
-    def test_object_editor_can_view(self):
+    def test_object_submitter_can_view(self):
         # set up
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
 
         # make editor for wg1
         wg1 = models.Workgroup.objects.create(name="Test WG 1")
         e1 = User.objects.create_user('editor1','','editor1')
-        wg1.giveRoleToUser('Editor',e1)
+        wg1.giveRoleToUser('submitter',e1)
 
         # make editor for wg2
         wg2 = models.Workgroup.objects.create(name="Test WG 2")
         e2 = User.objects.create_user('editor2','','editor2')
-        wg2.giveRoleToUser('Editor',e2)
+        wg2.giveRoleToUser('submitter',e2)
 
-        # make an Object Class in wg1
-        oc = self.item
+        # ensure object is in wg1
         self.item.workgroup = wg1
         self.item.save()
 
@@ -102,7 +105,7 @@ class ManagedObjectVisibility(object):
         self.assertEqual(perms.user_can_view(e1,self.item),True)
         self.assertEqual(perms.user_can_view(e2,self.item),False)
 
-        # move Object Class to wg2
+        # move object to wg2
         self.item.workgroup = wg2
         self.item.save()
 
@@ -127,22 +130,21 @@ class ManagedObjectVisibility(object):
         self.assertEqual(perms.user_can_view(e1,self.item),True)
         self.assertEqual(perms.user_can_view(e2,self.item),True)
 
-    def test_object_editor_can_edit(self):
+    def test_object_submitter_can_edit(self):
         # set up
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
 
         # make editor for wg1
         wg1 = models.Workgroup.objects.create(name="Test WG 1")
         e1 = User.objects.create_user('editor1','','editor1')
-        wg1.giveRoleToUser('Editor',e1)
+        wg1.giveRoleToUser('submitter',e1)
 
         # make editor for wg2
         wg2 = models.Workgroup.objects.create(name="Test WG 2")
         e2 = User.objects.create_user('editor2','','editor2')
-        wg2.giveRoleToUser('Editor',e2)
+        wg2.giveRoleToUser('submitter',e2)
 
-        # make an Object Class in wg1
-        oc = self.item
+        # ensure object is in wg1
         self.item.workgroup = wg1
         self.item.save()
 
@@ -222,30 +224,30 @@ class RegistryGroupPermissions(TestCase):
         user = User.objects.create_user('registrar','','registrar')
 
         # User isn't in RA... yet
-        self.assertFalse(perms.user_is_registrar_in_ra(user,ra))
+        self.assertFalse(perms.user_is_registrar(user,ra))
 
         # Add user to RA, assert user is in RA
-        ra.giveRoleToUser('Registrar',user)
+        ra.giveRoleToUser('registrar',user)
         # Caching issue, refresh from DB with correct permissions
         user = User.objects.get(pk=user.pk)
-        self.assertTrue(perms.user_is_registrar_in_ra(user,ra))
+        self.assertTrue(perms.user_is_registrar(user,ra))
 
         # Change name of RA, assert user is still in RA
         ra.name = "Test RA2"
         ra.save()
         user = User.objects.get(pk=user.pk)
-        self.assertTrue(perms.user_is_registrar_in_ra(user,ra))
+        self.assertTrue(perms.user_is_registrar(user,ra))
 
         # Add new RA with old RA's name, assert user is not in the new RA
         newRA = models.RegistrationAuthority.objects.create(name="Test RA")
         user = User.objects.get(pk=user.pk)
-        self.assertFalse(perms.user_is_registrar_in_ra(user,newRA))
+        self.assertFalse(perms.user_is_registrar(user,newRA))
 
         # Remove user to RA, assert user is no longer in RA
-        ra.removeRoleFromUser('Registrar',user)
+        ra.removeRoleFromUser('registrar',user)
         # Caching issue, refresh from DB with correct permissions
         user = User.objects.get(pk=user.pk)
-        self.assertFalse(perms.user_is_registrar_in_ra(user,ra))
+        self.assertFalse(perms.user_is_registrar(user,ra))
 
 class UserEditTesting(TestCase):
     def test_canViewProfile(self):

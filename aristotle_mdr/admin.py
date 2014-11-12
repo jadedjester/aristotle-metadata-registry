@@ -40,10 +40,7 @@ class StatusInline(admin.TabularInline):
     def queryset(self, request):
         qs = super(StatusInline, self).queryset(request)
         if not request.user.is_superuser:
-            ra = [r for r in request.user.profile.registrationAuthorities.all()
-                    if request.user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name))
-                 ]
-            qs = qs.filter(registrationAuthority__in=ra)
+            qs = qs.filter(registrationAuthority__in=request.user.registrar_in.all())
         return qs
 
     def has_change_permission(self, request,obj=None):
@@ -52,9 +49,7 @@ class StatusInline(admin.TabularInline):
         return super(StatusInline, self).has_change_permission(request,obj=None)
 
     def has_add_permission(self, request):
-        if True in (request.user.has_perm('aristotle_mdr.promote_in_{name}'.format(name=r.name))
-                for r in request.user.profile.registrationAuthorities.all()
-                ):
+        if perms.user_is_registrar(request.user):
             return True
         return super(StatusInline, self).has_add_permission(request)
 
@@ -75,6 +70,18 @@ class WorkgroupAdmin(CompareVersionAdmin):
             return qs
         else:
             return request.user.profile.myWorkgroups.all()
+    def has_change_permission(self, request,obj=None):
+        if obj is None:
+            if request.GET.get('t',None) == "registrygroup_ptr":
+                return True
+            else:
+                return True in (request.user.has_perm('aristotle_mdr.admin_in_{name}'.format(name=w.name))
+                            for w in request.user.profile.workgroups.all()
+                         )
+        elif perms.user_can_edit(request.user,obj):
+            return True
+        else:
+            return super(WorkgroupAdmin, self).has_change_permission(request,obj=None)
 
 
 class ConceptAdmin(CompareVersionAdmin):
@@ -278,7 +285,7 @@ class PossumProfileInline(admin.StackedInline):
     exclude = ('SavedActiveWorkgroup',)
     can_delete = False
     verbose_name_plural = 'Membership details'
-    filter_horizontal = ('workgroups','registrationAuthorities')
+    #filter_horizontal = ('workgroups','registrationAuthorities')
 
 # Define a new User admin
 class UserAdmin(UserAdmin):
