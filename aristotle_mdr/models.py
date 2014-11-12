@@ -36,6 +36,8 @@ class baseAristotleObject(TimeStampedModel):
     name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
     description = HTMLField(help_text="A rich text field for describing the metadata item.")
     comments = HTMLField(help_text="Descriptive comments about the metadata item.")
+    submittingOrganisation = models.CharField(max_length=256)
+    responsibleOrganisation = models.CharField(max_length=256)
     objects = InheritanceManager()
 
     class Meta:
@@ -1020,7 +1022,6 @@ def exampleData(): # pragma: no cover
             print "making user: {name}".format(name=name)
         user.first_name=name.title()
         user.last_name=role
-        user.profile.registrationAuthorities.add(ra)
         ra.giveRoleToUser(role,user)
         user.save()
     gi,c  = GlossaryItem.objects.get_or_create(name="Person",
