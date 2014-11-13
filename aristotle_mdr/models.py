@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -365,6 +366,7 @@ class ConceptQuerySet(InheritanceQuerySet):
             ObjectClass.objects.filter(name__contains="Person").editable()
             ObjectClass.objects.editable().filter(name__contains="Person")
         """
+        return self.filter(workgroup__in = user.steward_in.all())
         return self.filter(id__in=[i.id for i in self.editable(user)])
     def visible_slow(self,user):
         """
@@ -428,18 +430,24 @@ class _concept(baseAristotleObject):
     template = "aristotle_mdr/concepts/managedContent.html"
     readyToReview = models.BooleanField(default=False)
     workgroup = models.ForeignKey(Workgroup,related_name="items")
+    # We will query on these, so want them cached with the items themselves
+    # To be usable these must be updated when statuses are changed
+    _is_public =  models.BooleanField(default=False)
+    _is_locked =  models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "item" # So the url_name works for items we can't determine
 
     def can_edit(self,user):
-        if self.is_locked():
+        if self.is_public():
+            return user in self.workgroup.stewards.all()
+        elif self.is_locked():
             return user in self.workgroup.stewards.all()
         elif self.is_registered:
             return user in self.workgroup.submitters.all() \
                 or user in self.workgroup.stewards.all()
         else:
-            return user in self.workgroup.submitters.all()
+            return user in self.workgroup.submitters.all() or user in self.workgroup.stewards.all()
 
     def can_view(self,user):
         if self.is_public():
@@ -501,17 +509,35 @@ class _concept(baseAristotleObject):
     def is_retired(self):
         return all(STATES.retired == status.state for status in self.statuses.all())and self.statuses.count() > 0
 
-    def is_public(self):
+    def check_is_public(self):
         """
             An object is public if any registration authority has advanced it to a public state for THAT RA.
             TODO: Limit this so onlt RAs who are part of the "owning" workgroup are checked
                   This would prevent someone from a different work group who can see it advance it in THEIR RA to public.
         """
         return True in [s.state >= s.registrationAuthority.public_state for s in self.statuses.all()]
+    def is_public(self):
+        cached_is_public = cache.get('item_is_public_%s'%str(self.id))
+        if cached_is_public is not None:
+            _is_public = cached_is_public
+        else:
+            _is_public = self.check_is_public()
+            cache.set('item_is_public_%s'%str(self.id),_is_public,60)
+        return _is_public
     is_public.boolean = True
     is_public.short_description = 'Public'
-    def is_locked(self):
+
+    def check_is_locked(self):
         return True in [s.state >= s.registrationAuthority.locked_state for s in self.statuses.all()]
+    def is_locked(self):
+        cached_is_locked = cache.get('is_public_%s'%str(self.id))
+        if cached_is_locked is not None:
+            _is_locked = cached_is_locked
+        else:
+            _is_locked = self.check_is_locked()
+            cache.set('item_is_locked_%s'%str(self.id),_is_locked,60)
+        return _is_locked
+
     is_locked.boolean = True
     is_locked.short_description = 'Locked'
 
@@ -571,6 +597,11 @@ class Status(TimeStampedModel):
             return super(Status, self).unique_error_message(model_class, unique_check)
 
     def save(self, *args, **kwargs):
+        #self.concept._is_public = self.concept.check_is_public()
+        #self.concept._is_public = self.state > self.registrationAuthority.public_state
+        #self.concept._is_locked = self.concept.check_is_locked()
+        #self.concept._is_locked = self.state > self.registrationAuthority.locked_state
+        #self.concept.save()
         prev_state=self.tracker.previous('state')
         if prev_state is None:
             prev_state_name = 'Unregistered'

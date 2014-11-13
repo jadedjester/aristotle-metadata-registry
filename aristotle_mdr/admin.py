@@ -64,6 +64,11 @@ class WorkgroupFilter(RelatedFieldListFilter):
         super(WorkgroupFilter, self).__init__(field, request, *args, **kwargs)
 
 class WorkgroupAdmin(CompareVersionAdmin):
+    fieldsets = [
+        (None,              {'fields': ['name','description']}),
+        ('Members',         {'fields': ['managers','stewards','submitters','viewers',]}),
+    ]
+    filter_horizontal = ['managers','stewards','submitters','viewers',]
     def queryset(self, request):
         qs = super(WorkgroupAdmin, self).queryset(request)
         if request.user.is_superuser:
@@ -199,10 +204,10 @@ class DataElementAdmin(ConceptAdmin):
     }
 
 class DataElementConceptAdmin(ConceptAdmin):
-    components = ['objectClass','property']
-    name_suggest_fields = components
+
+    name_suggest_fields = ['objectClass','property']
     fieldsets = ConceptAdmin.fieldsets + [
-            ('Components', {'fields': components}),
+            ('Components', {'fields': ['objectClass','property']}),
     ]
     raw_id_fields = ConceptAdmin.raw_id_fields + ('objectClass','property',)
     light_autocomplete_lookup_fields = {
@@ -247,8 +252,11 @@ class GlossaryItemAdmin(ConceptAdmin):
 class RegistrationAuthorityAdmin(admin.ModelAdmin):
     list_display = ['name', 'description','created','modified']
     list_filter = ['created','modified',]
+    filter_horizontal = ['managers','registrars',]
+
     fieldsets = [
         (None,              {'fields': ['name','description']}),
+        ('Members',         {'fields': ['managers','registrars',]}),
         ('Visibility and control',              {'fields': ['locked_state','public_state',]}),
         ('Status descriptions',
             {'fields': ['notprogressed','incomplete','candidate','recorded','qualified','standard','preferred','superseded','retired',]}),

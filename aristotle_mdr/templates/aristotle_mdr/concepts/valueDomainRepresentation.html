@@ -53,7 +53,7 @@ So we've split this out into its own template.
                 <tr>
                     {% if forloop.first %}
                     <th rowspan="{{ item.permissibleValues.count }}">Permissable Values
-                        {% if user_can_edit %}
+                        {% if item|can_edit:request.user %}
                             <a class="inline_action" href="{% adminEdit item %}#permissibleValues-group">edit</a>
                         {% endif %}
                     </th>
@@ -75,7 +75,7 @@ So we've split this out into its own template.
                 <tr>
                     {% if forloop.first %}
                     <th rowspan="{{ item.supplementaryValues.count }}">Supplementary Values
-                        {% if user_can_edit %}
+                        {% if item|can_edit:request.user %}
                             <a class="inline_action" href="{% adminEdit item %}#supplementaryValues-group">edit</a>
                         {% endif %}
                     </th>

@@ -42,7 +42,7 @@
         {% endif %}
     </h1>
     <div class="btn-group pull-right">
-        {% if user_can_edit %}
+        {% if item|can_edit:request.user %}
             <div class="btn-group">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                 Edit menu <span class="caret"></span>
@@ -126,16 +126,30 @@
         <dt>Synonyms</dt><dd>{% inplace_edit 'item.synonyms' %}</dd>
         {% endif %}
     </dl>
+    <h2>Definition</h2>
     <div id="description" class="description">
-        <h2>Definition</h2>
         {% inplace_edit 'item.description' adaptor='aristotle' %}
     </div>
-    {% block objSpecific %}
-    {% endblock %}
+
+    {% block objSpecific %}{% endblock %}
+
+    {% if item.comments %}
+        <h2>Comments</h2>
+        {% inplace_edit 'item.comments' adaptor='aristotle' %}
+    {% endif %}
+
     {% if item.references or view == "technical" %}
     <div>
     <h2>References</h2>
-        {% inplace_edit 'item.references' adaptor='aristotle' %}
+        <p>{% inplace_edit 'item.references' adaptor='aristotle' %}</p>
+        {% if item.submittingOrganisation %}
+        <h3>Submitting Organisation</h3>
+            <p>{% inplace_edit 'item.submittingOrganisation' %}</p>
+        {% endif %}
+        {% if item.responsibleOrganisation %}
+        <h3>Responsible Organisation</h3>
+            <p>{% inplace_edit 'item.responsibleOrganisation' %}</p>
+        {% endif %}
     </div>
     {% endif %}
     <h2>Relationships</h2>

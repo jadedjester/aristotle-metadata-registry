@@ -1,3 +1,5 @@
+from django.core.cache import cache
+
 class MyAdaptorEditInline(object):
 
     @classmethod
@@ -11,18 +13,49 @@ def user_can_alter_comment(user,comment):
 def user_can_alter_post(user,post):
     return user.is_superuser or user == post.author or user_is_workgroup_manager(user,post.workgroup)
 
-
 def user_can_view(user,item):
     """Can the user view the item?"""
+    if user.is_superuser: return True
 
-    #if user is None: return item.is_public()
-    if user.is_superuser:
-        return True
+    if user.is_anonymous():
+        user_key = "anonymous"
+    else:
+        user_key = str(user.id)
+
+    cached_can_view = cache.get('user_can_view_%s|%s'%(user_key,str(item.id)))
+    if cached_can_view is not None:
+        return cached_can_view
+
+    _can_view = False
     # A user can view their own details
     if hasattr(item, "profile"):
-        return item == user
+        _can_view = item == user
+    else:
+        _can_view = item.can_view(user)
+    cache.set('user_can_view_%s|%s'%(str(user.id),str(item.id)),_can_view,120)
+    return _can_view
 
-    return item.can_view(user)
+def user_can_edit(user,item):
+    """Can the user edit the item?"""
+    if user.is_superuser: return True
+    if user.is_anonymous(): return False
+
+    cached_can_edit = cache.get('user_can_edit_%s|%s'%(str(user.id),str(item.id)))
+    if cached_can_edit is not None:
+        return cached_can_edit
+
+    _can_edit = False
+
+    if not user_can_view(user,item):
+        _can_edit = False
+    # A user can edit their own details
+    if hasattr(item, "profile"):
+        _can_edit = item == user
+    else:
+        _can_edit = item.can_edit(user)
+    cache.set('user_can_edit_%s|%s'%(str(user.id),str(item.id)),_can_edit,60)
+
+    return _can_edit
 
 def user_is_editor(user,workgroup=None):
     if user.is_superuser:
@@ -65,22 +98,6 @@ def user_can_change_status(user,item):
                 True in (user in ra.registrars.all()
                         for ra in item.workgroup.registrationAuthorities.all())
     return False
-
-def user_can_edit(user,item):
-    """Can the user edit the item?"""
-
-    #non-logged in users can't edit anything
-    if user.is_anonymous():
-        return False
-    if not user_can_view(user,item):
-        return False
-    if user.is_superuser:
-        return True
-    # A user can edit their own details
-    if hasattr(item, "profile"):
-        return item == user
-    return item.can_edit(user)
-
 
 def user_in_workgroup(user,wg):
     if user.is_superuser:

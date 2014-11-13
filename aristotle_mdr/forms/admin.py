@@ -40,7 +40,7 @@ class AdminConceptForm(forms.ModelForm):
             self.fields['deprecated'].initial = self.instance.supersedes.all()
             self.fields['superseded_by'].widget = autocomplete_light.ChoiceWidget(self.instance.get_autocomplete_name())
 
-        if name_suggest_fields:
+        if name_suggest_fields and self.request.user.is_superuser:
             self.fields['name'].widget = widgets.NameSuggestInput(name_suggest_fields=name_suggest_fields,separator=separator)
 
         if auto_fields:

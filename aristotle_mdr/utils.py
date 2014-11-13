@@ -23,3 +23,44 @@ def concept_to_clone_dict(obj):
     clone_dict = concept_to_dict(obj)
     clone_dict['name'] = clone_dict['name'] + ugettext(u" (clone)")
     return clone_dict
+
+'''
+Modified from: https://djangosnippets.org/snippets/2524/
+'''
+from django.core.cache import cache
+
+def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
+    def decorator(function):
+        def apply_cache(request, *args, **kwargs):
+            # Gera a parte do usuario que ficara na chave do cache
+            if request.user.is_anonymous():
+                user = 'anonymous'
+            else:
+                user = request.user.id
+
+            iid = kwargs['iid']
+
+            # Gera a chave do cache
+            if prefix:
+                CACHE_KEY = '%s_%s_%s'%(prefix, user, iid)
+            else:
+                CACHE_KEY = 'view_cache_%s_%s_%s'%(function.__name__, user, iid)
+
+            # Verifica se pode fazer o cache do request
+            if not cache_post and request.method == 'POST':
+                can_cache = False
+            else:
+                can_cache = True
+
+            if can_cache and 'nocache' not in request.GET.keys():
+                response = cache.get(CACHE_KEY, None)
+            else:
+                response = None
+
+            if not response:
+                response = function(request, *args, **kwargs)
+                if can_cache:
+                    cache.set(CACHE_KEY, response, ttl)
+            return response
+        return apply_cache
+    return decorator

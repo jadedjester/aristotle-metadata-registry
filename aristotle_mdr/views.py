@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 
 from aristotle_mdr.perms import user_can_view, user_can_edit, user_in_workgroup, user_is_workgroup_manager, user_can_change_status
 from aristotle_mdr import perms
+from aristotle_mdr.utils import cache_per_item_user
 import aristotle_mdr.forms as MDRForms # Treble-one seven nine
 import aristotle_mdr.models as MDR # Treble-one seven nine
 
@@ -59,12 +60,14 @@ def get_if_user_can_view(objtype,user,iid):
     else:
         return False
 
-def render_if_user_can_view(*args,**kwargs):
-    return render_if_condition_met(user_can_view,*args,**kwargs)
+def render_if_user_can_view(item_type, request, *args, **kwargs):
+    #request = kwargs.pop('request')
+    return render_if_condition_met(request, user_can_view, item_type, *args,**kwargs)
 
 @login_required
-def render_if_user_can_edit(*args,**kwargs):
-    return render_if_condition_met(user_can_edit,*args,**kwargs)
+def render_if_user_can_edit(item_type, request, *args, **kwargs):
+    request = kwargs.pop('request')
+    return render_if_condition_met(request, user_can_edit, item_type, *args,**kwargs)
 
 def download(request,downloadType,iid=None):
     item = MDR._concept.objects.get_subclass(pk=iid)
@@ -90,8 +93,9 @@ def download(request,downloadType,iid=None):
 
     raise Http404
 
-# This has turned into a "god-function" and should be refactored.
-def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
+
+@cache_per_item_user(ttl=300, cache_post=False)
+def render_if_condition_met(request,condition,objtype,iid=None,subpage=None):
     if iid is None:
         app_name = objtype._meta.app_label
         return redirect(reverse("%s:about"%app_name,args=["".join(objtype._meta.verbose_name.lower().split())]))
@@ -112,7 +116,6 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
         ).first()
     return render(request,item.template,
         {'item':item,
-         'user_can_edit':user_can_edit(request.user,item),
          'view':request.GET.get('view','').lower(),
          'isFavourite': isFavourite,
          'last_edit': last_edit
@@ -120,7 +123,7 @@ def render_if_condition_met(condition,objtype,request,iid=None,subpage=None):
         )
 
 def itemPackages(request, item_id):
-    item = get_if_user_can_view(MDR._concept,request.user,item_id)
+    item = get_if_user_can_view(MDR._concept,request=request,iid=item_id)
     if not item:
         if request.user.is_anonymous():
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
@@ -156,13 +159,12 @@ def registrationHistory(request, item_id):
         history.append((s,past))
     return render(request,"aristotle_mdr/registrationHistory.html",
             {'item':item,
-             'user_can_edit':False,
              'history': history
                 }
             )
 
-def item(request, item_id):
-    return render_if_user_can_view(MDR._concept,request,item_id)
+def item(*args,**kwargs):
+    return render_if_user_can_view(MDR._concept,*args,**kwargs)
 
 def unauthorised(request, path=''):
     if request.user.is_anonymous():
@@ -481,8 +483,8 @@ def toggleFavourite(request, item_id):
         return redirect(request.GET.get('next'))
     return redirect('/item/%s' % item_id)
 
-def registrationauthority(request, iid):
-    return render_if_user_can_view(MDR.RegistrationAuthority,request,iid)
+def registrationauthority(*args,**kwargs):
+    return render_if_user_can_view(MDR.RegistrationAuthority,*args,**kwargs)
 def allRegistrationAuthorities(request):
     ras = MDR.RegistrationAuthority.objects.order_by('name')
     return render(request,"aristotle_mdr/allRegistrationAuthorities.html",
@@ -744,7 +746,7 @@ def changeStatus(request, iid):
                 regDate = timezone.now().date()
             for ra in ras:
                 ra.register(item,state,request.user,regDate,cascade,changeDetails)
-            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name(),args=[item.id]))
+            return HttpResponseRedirect(reverse("aristotle:%s"%item.url_name,args=[item.id]))
     else:
         form = MDRForms.ChangeStatusForm(user=request.user)
     return render(request,"aristotle_mdr/actions/changeStatus.html",

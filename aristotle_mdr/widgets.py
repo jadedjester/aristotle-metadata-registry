@@ -5,14 +5,21 @@ from django.utils.safestring import mark_safe
 
 class NameSuggestInput(TextInput):
     def __init__(self, *args, **kwargs):
-        self.suggests = kwargs.pop('name_suggest_fields')
-        self.separator = kwargs.pop('separator','-')
+        self.suggest_fields = kwargs.pop('name_suggest_fields')
+        self.separator = '-'
+        x = kwargs.pop('separator','-')
         super(NameSuggestInput, self).__init__(*args, **kwargs)
     def render(self, name, value, attrs=None):
         out = super(NameSuggestInput, self).render(name, value, attrs)
-        if self.suggests:
-            button = u"<button type='button' data-separator='{}' data-suggest-fields='{}'>Suggest</button>".format(self.separator,",".join(self.suggests))
-            out = u"<div class='suggest_name_wrapper'>{}{}</div>".format(out,button)
+        print out
+        if self.suggest_fields:
+            print "here"
+            button = u"<button type='button' data-separator='{}' data-suggest-fields='{}'>Suggest</button>".format(self.separator,",".join(self.suggest_fields))
+            print "herererere"
+            mark = u"<div class='suggest_name_wrapper'>{}{}</div>".format(out,button)
+            print "herererereeeeeeeeeeeeeeeeeeeeeeeeeee"
+            out = mark
+            print out,button, mark
         return mark_safe(out)
 
 
