@@ -36,9 +36,6 @@ STATES = Choices (
 class baseAristotleObject(TimeStampedModel):
     name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
     description = HTMLField(help_text="A rich text field for describing the metadata item.")
-    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
-    submittingOrganisation = models.CharField(max_length=256)
-    responsibleOrganisation = models.CharField(max_length=256)
     objects = InheritanceManager()
 
     class Meta:
@@ -553,6 +550,9 @@ class concept(_concept):
     synonyms = models.CharField(max_length=200, blank=True)
     references = HTMLField(blank=True)
     originURI = models.URLField(blank=True,help_text="If imported, the original location of the item")
+    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
+    submittingOrganisation = models.CharField(max_length=256)
+    responsibleOrganisation = models.CharField(max_length=256)
 
     superseded_by = models.ForeignKey('self', related_name='supersedes',blank=True,null=True)
 
