@@ -382,12 +382,6 @@ class ConceptQuerySet(InheritanceQuerySet):
             ObjectClass.objects.public().filter(name__contains="Person")
         """
         return self.filter(_is_public=True)
-    def editable_slow(self,user):
-        return self.editable(user)
-    def visible_slow(self,user):
-        return self.visible(user)
-    def public_slow(self):
-        return self.public()
 
 class ConceptManager(InheritanceManager):
     """The ``ConceptManager`` is the default object manager for ``concept`` and

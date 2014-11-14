@@ -172,7 +172,7 @@ class ConceptAdmin(CompareVersionAdmin):
             if not self.has_change_permission(request):
                 queryset = queryset.none()
             else:
-                queryset = queryset.editable_slow(request.user).all()
+                queryset = queryset.editable(request.user).all()
         return queryset
 
     # On save or add, redirect to the live page.

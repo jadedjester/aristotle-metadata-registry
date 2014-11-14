@@ -784,7 +784,7 @@ def deprecate(request, iid):
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
-    qs=item.__class__.objects.filter().editable_slow(request.user)
+    qs=item.__class__.objects.filter().editable(request.user)
     if request.method == 'POST': # If the form has been submitted...
         form = MDRForms.DeprecateForm(request.POST,user=request.user,item=item,qs=qs) # A form bound to the POST data
         if form.is_valid():
