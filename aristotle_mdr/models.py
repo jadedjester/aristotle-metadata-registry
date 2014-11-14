@@ -120,25 +120,6 @@ class RegistrationAuthority(registryGroup):
     public_state = models.IntegerField(choices=STATES, default=STATES.recorded)
 
     registrars = models.ManyToManyField(User,blank=True,related_name='registrar_in',)
-    tracker=FieldTracker()
-
-    def save(self, *args, **kwargs):
-        pk = self.pk
-        obj = super(RegistrationAuthority, self).save(*args, **kwargs)
-        if pk is not None:
-            prev_locked_state=self.tracker.previous('locked_state')
-            prev_public_state=self.tracker.previous('public_state')
-            # if we change the locked or public states we need to recache these for every item in this authority.
-            # This will take a long time, but needs to be done.
-            # TODO: Rewrite so this is done in a non-blocking way
-
-            if (prev_public_state is not None and prev_public_state != self.public_state) or \
-               (prev_locked_state is not None and prev_locked_state != self.locked_state):
-                q = Q()
-                q |= Q(statuses__registrationAuthority__in=self)
-                for i in _concept.objects.filter(q):
-                    i.recache_states()
-        return obj
 
     # The below text fields allow for brief descriptions of the context of each
     # state for a particular Registration Authority
@@ -157,6 +138,8 @@ class RegistrationAuthority(registryGroup):
     preferred = models.TextField(blank=True)
     superseded = models.TextField(blank=True)
     retired = models.TextField(blank=True)
+
+    tracker=FieldTracker()
 
     class Meta:
         verbose_name_plural = _("Registration Authorities")
@@ -227,6 +210,26 @@ class RegistrationAuthority(registryGroup):
         if role == "manager":
             self.managers.remove(user)
 
+    def save(self, *args, **kwargs):
+        # save happens before the transaction ends, so regular calls via the concept.recache
+        # access the original registration authority information
+        # plus we need to know what changed, so we can't use a post_save signal
+        # Hence we need to do wierd stuff here
+        obj = super(RegistrationAuthority, self).save(*args, **kwargs)
+        if self.tracker.has_changed('public_state') or self.tracker.has_changed('locked_state'):
+            instance = self
+            for s in Status.objects.filter(registrationAuthority=instance):
+                item = _concept.objects.get(id=s.concept.id)
+                item._is_public = True in [ s.state >= s.registrationAuthority.public_state
+                                            for s in item.statuses.all()
+                                            if  s.registrationAuthority != instance
+                                          ] or  s.state >= instance.public_state
+                item._is_locked = True in [ s.state >= s.registrationAuthority.locked_state
+                                            for s in item.statuses.all()
+                                            if  s.registrationAuthority != instance
+                                          ] or  s.state >= instance.locked_state
+                item.save()
+        return obj
 class Workgroup(registryGroup):
     """
     A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
@@ -502,26 +505,14 @@ class _concept(baseAristotleObject):
         """
         return True in [s.state >= s.registrationAuthority.public_state for s in self.statuses.all()]
     def is_public(self):
-        cached_is_public = cache.get('item_is_public_%s'%str(self.id))
-        if cached_is_public is not None:
-            _is_public = cached_is_public
-        else:
-            _is_public = self.check_is_public()
-            cache.set('item_is_public_%s'%str(self.id),_is_public,60)
-        return _is_public
+        return self._is_public
     is_public.boolean = True
     is_public.short_description = 'Public'
 
     def check_is_locked(self):
         return True in [s.state >= s.registrationAuthority.locked_state for s in self.statuses.all()]
     def is_locked(self):
-        cached_is_locked = cache.get('is_public_%s'%str(self.id))
-        if cached_is_locked is not None:
-            _is_locked = cached_is_locked
-        else:
-            _is_locked = self.check_is_locked()
-            cache.set('item_is_locked_%s'%str(self.id),_is_locked,60)
-        return _is_locked
+        return self._is_locked
 
     is_locked.boolean = True
     is_locked.short_description = 'Locked'
@@ -808,7 +799,6 @@ post_save.connect(create_user_profile, sender=User)
 
 def recache_concept_states(sender, instance, created, **kwargs):
     instance.concept.recache_states()
-    1/0
 post_save.connect(recache_concept_states, sender=Status)
 
 

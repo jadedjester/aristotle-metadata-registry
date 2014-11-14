@@ -56,6 +56,8 @@ class ManagedObjectVisibility(object):
         self.assertEqual(self.item.is_public(),True)
         ra.public_state = models.STATES.standard
         ra.save()
+
+        self.item = models._concept.objects.get(id=self.item.id) # Stupid cache
         self.assertEqual(self.item.is_public(),False)
         self.item.statuses.first().state = models.STATES.standard
         self.item.save()
