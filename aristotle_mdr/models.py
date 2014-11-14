@@ -44,12 +44,21 @@ class baseAristotleObject(TimeStampedModel):
         #Can't be abstract as we need unique app wide IDs.
         abstract = True
 
+    def was_modified_very_recently(self):
+        return self.modified >= timezone.now() - datetime.timedelta(seconds=15)
+
     def was_modified_recently(self):
         return self.modified >= timezone.now() - datetime.timedelta(days=1)
     was_modified_recently.admin_order_field = 'modified'
     was_modified_recently.boolean = True
     was_modified_recently.short_description = 'Modified recently?'
 
+    def description_stub(self):
+       from django.utils.html import strip_tags
+       d = strip_tags(self.description)
+       if len(d) > 150:
+           d = d[0:150] + "..."
+       return d
 
     def __unicode__(self):
         return "{name}".format(name = self.name)
@@ -111,6 +120,25 @@ class RegistrationAuthority(registryGroup):
     public_state = models.IntegerField(choices=STATES, default=STATES.recorded)
 
     registrars = models.ManyToManyField(User,blank=True,related_name='registrar_in',)
+    tracker=FieldTracker()
+
+    def save(self, *args, **kwargs):
+        pk = self.pk
+        obj = super(RegistrationAuthority, self).save(*args, **kwargs)
+        if pk is not None:
+            prev_locked_state=self.tracker.previous('locked_state')
+            prev_public_state=self.tracker.previous('public_state')
+            # if we change the locked or public states we need to recache these for every item in this authority.
+            # This will take a long time, but needs to be done.
+            # TODO: Rewrite so this is done in a non-blocking way
+
+            if (prev_public_state is not None and prev_public_state != self.public_state) or \
+               (prev_locked_state is not None and prev_locked_state != self.locked_state):
+                q = Q()
+                q |= Q(statuses__registrationAuthority__in=self)
+                for i in _concept.objects.filter(q):
+                    i.recache_states()
+        return obj
 
     # The below text fields allow for brief descriptions of the context of each
     # state for a particular Registration Authority
@@ -355,8 +383,8 @@ class ConceptQuerySet(InheritanceQuerySet):
         return self.editable(user)
     def visible_slow(self,user):
         return self.visible(user)
-    def public_slow(self,user):
-        return self.public(user)
+    def public_slow(self):
+        return self.public()
 
 class ConceptManager(InheritanceManager):
     """The ``ConceptManager`` is the default object manager for ``concept`` and
@@ -371,7 +399,7 @@ class ConceptManager(InheritanceManager):
         return ConceptQuerySet(self.model)
     def __getattr__(self, attr, *args):
         # Only let the slow ones through to the queryset
-        if attr in ['editable_slow','visible_slow','public_slow']:
+        if attr in ['editable','visible','public']:
             return getattr(self.get_queryset(), attr, *args)
         else:
             return getattr(self.__class__, attr, *args)
@@ -497,6 +525,11 @@ class _concept(baseAristotleObject):
 
     is_locked.boolean = True
     is_locked.short_description = 'Locked'
+
+    def recache_states(self):
+        self._is_public = self.check_is_public()
+        self._is_locked = self.check_is_locked()
+        self.save()
 
 class concept(_concept):
     """
@@ -759,8 +792,8 @@ class PossumProfile(models.Model):
     def is_workgroup_manager(self,wg):
         return perms.user_is_workgroup_manager(self.user,wg)
 
-    def isFavourite(self,item_id):
-        return self.favourites.filter(pk=item_id).exists()
+    def isFavourite(self,iid):
+        return self.favourites.filter(pk=iid).exists()
 
     def toggleFavourite(self, item):
         if self.isFavourite(item):
@@ -774,10 +807,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 post_save.connect(create_user_profile, sender=User)
 
 def recache_concept_states(sender, instance, created, **kwargs):
-    item = instance.concept
-    item._is_public = item.check_is_public()
-    item._is_locked = item.check_is_locked()
-    item.save()
+    instance.concept.recache_states()
+    1/0
 post_save.connect(recache_concept_states, sender=Status)
 
 
@@ -869,6 +900,7 @@ def workgroup_item_updated(recipient,obj):
     notify.send(recipient, recipient=recipient, verb="changed a item in the workgroup", target=obj)
 def workgroup_item_new(recipient,obj):
     notify.send(recipient, recipient=recipient, verb="a new item in the workgroup", target=obj)
+
 @receiver(post_save)
 def concept_saved(sender, instance, created, **kwargs):
     if not issubclass(sender, _concept):

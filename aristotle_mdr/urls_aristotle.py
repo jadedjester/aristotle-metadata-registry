@@ -86,7 +86,7 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^registrationauthority/(?P<iid>\d+)/?$', views.registrationauthority, name='registrationAuthority'),
     url(r'^registrationauthorities/?$', views.allRegistrationAuthorities, name='allRegistrationAuthorities'),
-    url(r'^account/toggleFavourite/(?P<item_id>\d+)/?$', views.toggleFavourite, name='toggleFavourite'),
+    url(r'^account/toggleFavourite/(?P<iid>\d+)/?$', views.toggleFavourite, name='toggleFavourite'),
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 

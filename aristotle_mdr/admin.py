@@ -99,7 +99,7 @@ class ConceptAdmin(CompareVersionAdmin):
             ]
 
     form = MDRForms.admin.AdminConceptForm
-    list_display = ['name', 'description','created','modified', 'workgroup','is_public','is_locked','readyToReview']#,'status']
+    list_display = ['name', 'description_stub','created','modified', 'workgroup','is_public','is_locked','readyToReview']#,'status']
     list_filter = ['created','modified',('workgroup',WorkgroupFilter)] #,'statuses']
     search_fields = ['name','synonyms']
     inlines = [StatusInline, ]

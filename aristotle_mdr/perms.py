@@ -22,8 +22,14 @@ def user_can_view(user,item):
     else:
         user_key = str(user.id)
 
+    # If the item was modified in the last 15 seconds, don't use cache
+    if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently :
+        can_use_cache = False
+    else:
+        can_use_cache = True
+
     cached_can_view = cache.get('user_can_view_%s|%s'%(user_key,str(item.id)))
-    if cached_can_view is not None:
+    if can_use_cache and cached_can_view is not None:
         return cached_can_view
 
     _can_view = False
@@ -40,8 +46,14 @@ def user_can_edit(user,item):
     if user.is_superuser: return True
     if user.is_anonymous(): return False
 
+    # If the item was modified in the last 15 seconds, don't use cache
+    if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently :
+        can_use_cache = False
+    else:
+        can_use_cache = True
+
     cached_can_edit = cache.get('user_can_edit_%s|%s'%(str(user.id),str(item.id)))
-    if cached_can_edit is not None:
+    if can_use_cache and cached_can_edit is not None:
         return cached_can_edit
 
     _can_edit = False

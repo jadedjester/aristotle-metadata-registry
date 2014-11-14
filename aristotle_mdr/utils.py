@@ -57,7 +57,7 @@ def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
             if 'nocache' not in request.GET.keys():
                 can_cache = False
 
-            # If the item was modifeded in the last 15 seconds, don't cache
+            # If the item was modified in the last 15 seconds, don't use cache
             recently = timezone.now() - datetime.timedelta(seconds=15)
             if _concept.objects.filter(id=iid,modified__gte=recently).first().modified:
                 can_cache = False

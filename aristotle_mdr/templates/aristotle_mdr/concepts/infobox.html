@@ -95,7 +95,7 @@
             <dd class="large">
             <ul><li>
                 {% if item.superseded_by %}
-                    <a href="{% url 'aristotle:item' item_id=item.superseded_by.id %}">{{ item.superseded_by }}</a>
+                    <a href="{% url 'aristotle:item' iid=item.superseded_by.id %}">{{ item.superseded_by }}</a>
                 {% else %}
                     <em>None</em>
                 {% endif %}

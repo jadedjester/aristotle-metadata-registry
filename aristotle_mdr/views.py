@@ -122,8 +122,8 @@ def render_if_condition_met(request,condition,objtype,iid=None,subpage=None):
             }
         )
 
-def itemPackages(request, item_id):
-    item = get_if_user_can_view(MDR._concept,request=request,iid=item_id)
+def itemPackages(request, iid):
+    item = get_if_user_can_view(MDR._concept,request=request,iid=iid)
     if not item:
         if request.user.is_anonymous():
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
@@ -145,8 +145,8 @@ def itemPackages(request, item_id):
          'packages':packages,}
         )
 
-def registrationHistory(request, item_id):
-    item = get_if_user_can_view(MDR._concept,request.user,item_id)
+def registrationHistory(request, iid):
+    item = get_if_user_can_view(MDR._concept,request.user,iid)
     if not item:
         if request.user.is_anonymous():
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
@@ -477,11 +477,11 @@ def userWorkgroups(request):
     return page
 
 @login_required
-def toggleFavourite(request, item_id):
-    request.user.profile.toggleFavourite(item_id)
+def toggleFavourite(request, iid):
+    request.user.profile.toggleFavourite(iid)
     if request.GET.get('next',None):
         return redirect(request.GET.get('next'))
-    return redirect('/item/%s' % item_id)
+    return redirect('/item/%s' % iid)
 
 def registrationauthority(*args,**kwargs):
     return render_if_user_can_view(MDR.RegistrationAuthority,*args,**kwargs)
