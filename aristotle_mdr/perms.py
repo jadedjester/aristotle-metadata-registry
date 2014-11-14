@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.cache import cache
 
 class MyAdaptorEditInline(object):
@@ -16,7 +17,8 @@ def user_can_alter_post(user,post):
 def user_can_view(user,item):
     """Can the user view the item?"""
     if user.is_superuser: return True
-    if user == item: return True            # A user can see their own details
+    if item.__class__ == User:              # -- Sometimes duck-typing fails --
+        return user == item                 # A user can edit their own details
 
     if user.is_anonymous():
         user_key = "anonymous"
@@ -43,7 +45,8 @@ def user_can_edit(user,item):
     """Can the user edit the item?"""
     if user.is_superuser: return True       # Superusers can edit everything
     if user.is_anonymous(): return False    # Anonymous users can edit nothing
-    if user == item: return True            # A user can edit their own details
+    if item.__class__ == User:              # -- Sometimes duck-typing fails --
+        return user == item                 # A user can edit their own details
 
     # If the item was modified in the last 15 seconds, don't use cache
     if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently :
