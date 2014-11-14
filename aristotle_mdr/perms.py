@@ -16,6 +16,7 @@ def user_can_alter_post(user,post):
 def user_can_view(user,item):
     """Can the user view the item?"""
     if user.is_superuser: return True
+    if user == item: return True            # A user can see their own details
 
     if user.is_anonymous():
         user_key = "anonymous"
@@ -34,17 +35,15 @@ def user_can_view(user,item):
 
     _can_view = False
     # A user can view their own details
-    if hasattr(item, "profile"):
-        _can_view = item == user
-    else:
-        _can_view = item.can_view(user)
+    _can_view = item.can_view(user)
     cache.set('user_can_view_%s|%s'%(str(user.id),str(item.id)),_can_view,120)
     return _can_view
 
 def user_can_edit(user,item):
     """Can the user edit the item?"""
-    if user.is_superuser: return True
-    if user.is_anonymous(): return False
+    if user.is_superuser: return True       # Superusers can edit everything
+    if user.is_anonymous(): return False    # Anonymous users can edit nothing
+    if user == item: return True            # A user can edit their own details
 
     # If the item was modified in the last 15 seconds, don't use cache
     if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently :
@@ -60,11 +59,8 @@ def user_can_edit(user,item):
 
     if not user_can_view(user,item):
         _can_edit = False
-    # A user can edit their own details
-    if hasattr(item, "profile"):
-        _can_edit = item == user
-    else:
-        _can_edit = item.can_edit(user)
+
+    _can_edit = item.can_edit(user)
     cache.set('user_can_edit_%s|%s'%(str(user.id),str(item.id)),_can_edit,60)
 
     return _can_edit
