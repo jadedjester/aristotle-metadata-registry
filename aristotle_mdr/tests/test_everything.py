@@ -133,6 +133,8 @@ class ManagedObjectVisibility(object):
     def test_object_submitter_can_edit(self):
         # set up
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
+        registrar = User.objects.create_user('registrar','','registrar')
+        ra.registrars.add(registrar)
 
         # make editor for wg1
         wg1 = models.Workgroup.objects.create(name="Test WG 1")
@@ -160,6 +162,7 @@ class ManagedObjectVisibility(object):
         self.assertEqual(perms.user_can_edit(e2,self.item),True)
         self.assertEqual(perms.user_can_edit(e1,self.item),False)
 
+        #ra.register(self.item,ra.locked_state,registrar,timezone.now(),)
         s = models.Status.objects.create(
                 concept=self.item,
                 registrationAuthority=ra,

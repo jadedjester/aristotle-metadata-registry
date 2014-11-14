@@ -6,6 +6,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save,m2m_changed
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -291,112 +292,71 @@ class DiscussionComment(discussionAbstract):
 #    object = models.ForeignKey(managedObject)
 
 class ConceptQuerySet(InheritanceQuerySet):
-    def editable(self,user):
-        """
-        Returns a list of items from the queryset the user can edit.
-
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
-
-            ObjectClass.objects.filter(name__contains="Person").editable()
-
-        But this will break::
-
-            ObjectClass.objects.editable().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `editable` items, use ``editable_slow``.
-        """
-        return [i for i in self.all() if perms.user_can_edit(user,i)]
     def visible(self,user):
         """
-        Returns a list of items from the queryset the user can view.
+        Returns a queryset that returns all items that the given user has permission to view.
+        For speed reasons and django queryset limitations , *doesn't* use `perms.user_can_view`
+        however, is guaranteed to follow the same logic.
 
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
+        It is **chainable** with other querysets. For example, both of these will work and return the same list::
 
             ObjectClass.objects.filter(name__contains="Person").visible()
-
-        But this will break::
-
             ObjectClass.objects.visible().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `visible` items, use ``visible_slow``.
         """
-        return [i for i in self.all() if perms.user_can_view(user,i)]
+        if user.is_superuser:
+            return self.all()
+        if user.is_anonymous():
+            return self.filter(_is_public=True)
+        q = Q(_is_public=True)
+        if user.profile.workgroups:
+            # User can see everything in their workgroups.
+            q |= Q(workgroup__in=user.profile.workgroups)
+        if user.profile.is_registrar:
+            # User can see everything that is "readyToReview" or registered in their workgroup
+            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),readyToReview=True)
+            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),
+                    statuses__registrationAuthority__in=user.profile.registrarAuthorities.all())
+        return self.filter(q)
+    def editable(self,user):
+        """
+        Returns a queryset that returns all items that the given user has permission to edit.
+        For speed reasons and django queryset limitations , *doesn't* use `perms.user_can_edit`
+        however, is guaranteed to follow the same logic.
+
+        It is **chainable** with other querysets. For example, both of these will work and return the same list::
+
+            ObjectClass.objects.filter(name__contains="Person").editable()
+            ObjectClass.objects.editable().filter(name__contains="Person")
+        """
+        if user.is_superuser:
+            return self.all()
+        if user.is_anonymous():
+            return None
+        q = Q()
+        if user.submitter_in.exists():
+            q |= Q(_is_locked=False,workgroup__in=user.submitter_in.all())
+        if user.steward_in.exists():
+            q |= Q(workgroup__in=user.steward_in.all())
+        return self.filter(q)
     def public(self):
         """
         Returns a list of public items from the queryset.
 
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
+        This is a chainable query set, that filters on items which have the internal
+        `_is_public` flag set to true.
+
+        Both of these examples will work and return the same list::
 
             ObjectClass.objects.filter(name__contains="Person").public()
-
-        But this will break::
-
             ObjectClass.objects.public().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `public` items, use ``public_slow``.
         """
-        return [i for i in self.all() if i.is_public()]
-
-    # The below return actual querysets, but are much slower
-    # They hit the database twice, once to get the item ids and again to get the matching objects
+        return self.filter(_is_public=True)
     def editable_slow(self,user):
-        """
-        This is a slow wrapper around `editable` that queries for items a user can edit
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
-
-            ObjectClass.objects.filter(name__contains="Person").editable()
-            ObjectClass.objects.editable().filter(name__contains="Person")
-        """
-        return self.filter(workgroup__in = user.steward_in.all())
-        return self.filter(id__in=[i.id for i in self.editable(user)])
+        return self.editable(user)
     def visible_slow(self,user):
-        """
-        This is a slow wrapper around `visible` that queries for items a user can view
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
-
-            ObjectClass.objects.filter(name__contains="Person").visible()
-            ObjectClass.objects.visible().filter(name__contains="Person")
-        """
-        return self.filter(id__in=[i.id for i in self.visible(user)])
-    def public_slow(self):
-        """
-        This is a slow wrapper around `public` that queries for items that are public
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **very very slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
-
-            ObjectClass.objects.filter(name__contains="Person").public()
-            ObjectClass.objects.public().filter(name__contains="Person")
-        """
-        return self.filter(id__in=[i.id for i in self.public()])
+        return self.visible(user)
+    def public_slow(self,user):
+        return self.public(user)
 
 class ConceptManager(InheritanceManager):
     """The ``ConceptManager`` is the default object manager for ``concept`` and
@@ -597,11 +557,6 @@ class Status(TimeStampedModel):
             return super(Status, self).unique_error_message(model_class, unique_check)
 
     def save(self, *args, **kwargs):
-        #self.concept._is_public = self.concept.check_is_public()
-        #self.concept._is_public = self.state > self.registrationAuthority.public_state
-        #self.concept._is_locked = self.concept.check_is_locked()
-        #self.concept._is_locked = self.state > self.registrationAuthority.locked_state
-        #self.concept.save()
         prev_state=self.tracker.previous('state')
         if prev_state is None:
             prev_state_name = 'Unregistered'
@@ -817,6 +772,14 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
        profile, created = PossumProfile.objects.get_or_create(user=instance)
 post_save.connect(create_user_profile, sender=User)
+
+def recache_concept_states(sender, instance, created, **kwargs):
+    item = instance.concept
+    item._is_public = item.check_is_public()
+    item._is_locked = item.check_is_locked()
+    item.save()
+post_save.connect(recache_concept_states, sender=Status)
+
 
 #"""
 #A collection is a user specified ad-hoc, sharable collections of content.

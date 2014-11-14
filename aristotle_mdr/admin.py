@@ -65,16 +65,19 @@ class WorkgroupFilter(RelatedFieldListFilter):
 
 class WorkgroupAdmin(CompareVersionAdmin):
     fieldsets = [
-        (None,              {'fields': ['name','description']}),
+        (None,              {'fields': ['name','description','registrationAuthorities']}),
         ('Members',         {'fields': ['managers','stewards','submitters','viewers',]}),
     ]
-    filter_horizontal = ['managers','stewards','submitters','viewers',]
+    filter_horizontal = ['managers','stewards','submitters','viewers','registrationAuthorities']
     def queryset(self, request):
         qs = super(WorkgroupAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
         else:
             return request.user.profile.myWorkgroups.all()
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
     def has_change_permission(self, request,obj=None):
         if obj is None:
             if request.GET.get('t',None) == "registrygroup_ptr":
@@ -118,8 +121,6 @@ class ConceptAdmin(CompareVersionAdmin):
             })
     ]
     name_suggest_fields = []
-    raw_id_fields = ('workgroup',)
-    autocomplete_lookup_fields = {'fk':['workgroup',]}
     light_autocomplete_lookup_fields = {
         'fk': [],
     }
@@ -185,7 +186,7 @@ class ConceptAdmin(CompareVersionAdmin):
 
     def response_change(self, request, obj, post_url_continue=None):
         response = super(ConceptAdmin, self).response_change(request, obj)
-        if request.POST.has_key('_save'):
+        if request.POST.has_key('_save') and post_url_continue is None:
             response['location'] = reverse("aristotle:item",args=(obj.id,))
         return response
 
@@ -288,18 +289,27 @@ admin.site.register(MDR.DataType)
 
 # Define an inline admin descriptor for Employee model
 # which acts a bit like a singleton
-class PossumProfileInline(admin.StackedInline):
+class AristotleProfileInline(admin.StackedInline):
     model = MDR.PossumProfile
-    exclude = ('SavedActiveWorkgroup',)
+    form = MDRForms.admin.AristotleProfileForm
+    exclude = ('savedActiveWorkgroup','favourites')
     can_delete = False
     verbose_name_plural = 'Membership details'
-    #filter_horizontal = ('workgroups','registrationAuthorities')
 
 # Define a new User admin
-class UserAdmin(UserAdmin):
-    inlines = [PossumProfileInline, ]
+class AristotleUserAdmin(UserAdmin):
+
+    inlines = [AristotleProfileInline, ]
+
+    def save_formset(self,request, form, formset, change):
+        super(AristotleUserAdmin, self).save_formset(request, form, formset, change)
+        for f in formset.forms:
+           f.save_memberships()
+
+
 
 # Re-register UserAdmin
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+if User in admin.site._registry:
+    admin.site.unregister(User)
+admin.site.register(User, AristotleUserAdmin)
 

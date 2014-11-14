@@ -9,6 +9,45 @@ import aristotle_mdr.widgets as widgets
 from aristotle_mdr.perms import user_can_edit
 from aristotle_mdr.utils import concept_to_clone_dict
 
+def MembershipField(model,name):
+    from django.contrib.admin.widgets import FilteredSelectMultiple
+    return forms.ModelMultipleChoiceField(
+        queryset=model.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(name, False)
+        )
+
+class AristotleProfileForm(forms.ModelForm):
+    steward_in = MembershipField(MDR.Workgroup,_('workgroups'))
+    submitter_in = MembershipField(MDR.Workgroup,_('workgroups'))
+    viewer_in = MembershipField(MDR.Workgroup,_('workgroups'))
+    workgroup_manager_in = MembershipField(MDR.Workgroup,_('workgroups'))
+
+    registrationauthority_manager_in = MembershipField(MDR.RegistrationAuthority,'registration authorities')
+    registrar_in = MembershipField(MDR.RegistrationAuthority,_('registration authorities'))
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(AristotleProfileForm, self).__init__(*args, **kwargs)
+        from django.contrib.auth.models import User # paranoid about circular imports now
+
+        #if self.instance and self.instance.user.count() == 1: # and self.instance.user.exists():
+        try:
+            self.fields['registrar_in'].initial = self.instance.user.registrar_in.all()
+            self.fields['registrationauthority_manager_in'].initial = self.instance.user.registrationauthority_manager_in.all()
+
+            self.fields['workgroup_manager_in'].initial = self.instance.user.workgroup_manager_in.all()
+            self.fields['steward_in'].initial = self.instance.user.steward_in.all()
+            self.fields['submitter_in'].initial = self.instance.user.submitter_in.all()
+            self.fields['viewer_in'].initial = self.instance.user.viewer_in.all()
+        except User.DoesNotExist:
+            pass
+
+
+    def save_memberships(self, *args, **kwargs):
+        self.instance.user.steward_in = self.cleaned_data['steward_in']
+        self.instance.user.registrar_in = self.cleaned_data['registrar_in']
+
 class AdminConceptForm(forms.ModelForm):
     # Thanks: http://stackoverflow.com/questions/6034047/one-to-many-inline-select-with-django-admin
     # Although concept is an abstract class, we still need this to have a reverse one-to-many edit field.
@@ -40,7 +79,7 @@ class AdminConceptForm(forms.ModelForm):
             self.fields['deprecated'].initial = self.instance.supersedes.all()
             self.fields['superseded_by'].widget = autocomplete_light.ChoiceWidget(self.instance.get_autocomplete_name())
 
-        if name_suggest_fields and self.request.user.is_superuser:
+        if name_suggest_fields:
             self.fields['name'].widget = widgets.NameSuggestInput(name_suggest_fields=name_suggest_fields,separator=separator)
 
         if auto_fields:

@@ -8,6 +8,8 @@
         {% if original.id %}
         <li class="grp-float-left">
             <a accesskey="c" class="grp-button grp-delete-link" href="{% url 'aristotle:item' original.id %}">{% trans "Cancel editing and return to main site" %}</a></li>
+        {% else %}
+            <a accesskey="c" class="grp-button grp-delete-link" href="..">{% trans "Exit without saving" %}</a></li>
         {% endif %}
         {% if show_save %}
         	<li><input type="submit" accesskey="s" value="{% trans 'Save and return to item' %}" class="grp-button grp-default" name="_save" /></li>

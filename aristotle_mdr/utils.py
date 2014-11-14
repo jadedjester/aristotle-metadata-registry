@@ -28,7 +28,7 @@ def concept_to_clone_dict(obj):
 Modified from: https://djangosnippets.org/snippets/2524/
 '''
 from django.core.cache import cache
-
+# "There are only two hard problems in Computer Science: cache invalidation, naming things and off-by-one errors"
 def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
     def decorator(function):
         def apply_cache(request, *args, **kwargs):
@@ -40,19 +40,29 @@ def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
 
             iid = kwargs['iid']
 
-            # Gera a chave do cache
             if prefix:
                 CACHE_KEY = '%s_%s_%s'%(prefix, user, iid)
             else:
                 CACHE_KEY = 'view_cache_%s_%s_%s'%(function.__name__, user, iid)
 
-            # Verifica se pode fazer o cache do request
             if not cache_post and request.method == 'POST':
                 can_cache = False
             else:
                 can_cache = True
 
-            if can_cache and 'nocache' not in request.GET.keys():
+            from aristotle_mdr.models import _concept
+            import datetime
+            from django.utils import timezone
+
+            if 'nocache' not in request.GET.keys():
+                can_cache = False
+
+            # If the item was modifeded in the last 15 seconds, don't cache
+            recently = timezone.now() - datetime.timedelta(seconds=15)
+            if _concept.objects.filter(id=iid,modified__gte=recently).first().modified:
+                can_cache = False
+
+            if can_cache:
                 response = cache.get(CACHE_KEY, None)
             else:
                 response = None

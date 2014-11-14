@@ -36,7 +36,7 @@ class PermissionsAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     search_fields=['name', 'description','id']
 
     def choices_for_request(self):
-        self.choices = self.choices.editable_slow(self.request.user)
+        self.choices = self.choices.visible(self.request.user)
         return super(PermissionsAutocomplete, self).choices_for_request()
 
 autocompletesToRegister = [
