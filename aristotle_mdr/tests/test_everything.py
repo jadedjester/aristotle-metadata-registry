@@ -56,6 +56,8 @@ class ManagedObjectVisibility(object):
         self.assertEqual(self.item.is_public(),True)
         ra.public_state = models.STATES.standard
         ra.save()
+
+        self.item = models._concept.objects.get(id=self.item.id) # Stupid cache
         self.assertEqual(self.item.is_public(),False)
         self.item.statuses.first().state = models.STATES.standard
         self.item.save()
@@ -133,6 +135,8 @@ class ManagedObjectVisibility(object):
     def test_object_submitter_can_edit(self):
         # set up
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
+        registrar = User.objects.create_user('registrar','','registrar')
+        ra.registrars.add(registrar)
 
         # make editor for wg1
         wg1 = models.Workgroup.objects.create(name="Test WG 1")
@@ -160,6 +164,7 @@ class ManagedObjectVisibility(object):
         self.assertEqual(perms.user_can_edit(e2,self.item),True)
         self.assertEqual(perms.user_can_edit(e1,self.item),False)
 
+        #ra.register(self.item,ra.locked_state,registrar,timezone.now(),)
         s = models.Status.objects.create(
                 concept=self.item,
                 registrationAuthority=ra,
@@ -435,33 +440,10 @@ class CustomConceptQuerySetTest(TestCase):
         # Assert no public items
         self.assertEqual(len(models.ObjectClass.objects.all().public()),0)
 
-    def test_is_publicslow(self):
-        ra = models.RegistrationAuthority.objects.create(name="Test RA",public_state=models.STATES.standard)
-        wg = models.Workgroup.objects.create(name="Setup WG")
-        wg.registrationAuthorities.add(ra)
-        wg.save()
-        oc1 = models.ObjectClass.objects.create(name="Test OC1",workgroup=wg,readyToReview=True)
-        oc2 = models.ObjectClass.objects.create(name="Test OC2",workgroup=wg)
-        user = User.objects.create_superuser('super','','user')
-
-        # Assert no public items
-        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),0)
-
-        # Register OC1 only
-        ra.register(oc1,models.STATES.standard,user)
-
-        # Assert only OC1 is public
-        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),1)
-        self.assertEqual(models.ObjectClass.objects.public_slow().all().first(),oc1)
-        self.assertTrue(oc1 in models.ObjectClass.objects.public_slow().all())
-        self.assertTrue(oc2 not in models.ObjectClass.objects.public_slow().all())
-
-        # Deregister OC1
-        state=models.STATES.incomplete
-        ra.register(oc1,state,user)
-
-        # Assert no public items
-        self.assertEqual(len(models.ObjectClass.objects.public_slow().all()),0)
+    def test_is_editable(self):
+        pass
+    def test_is_visible(self):
+        pass
 
 
 class RegistryCascadeTest(TestCase):

@@ -22,7 +22,7 @@
         {% if request.is_ajax %}
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         {% else %}
-            <a class="btn btn-default" href="{% url 'aristotle:item' item_id=item.id%}">Cancel</a>
+            <a class="btn btn-default" href="{% url 'aristotle:item' iid=item.id%}">Cancel</a>
         {% endif %}
             <input type="submit" class="btn btn-primary" value="Supersede" />
     </div>

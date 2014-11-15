@@ -18,7 +18,12 @@
     <div id="infobox" class="collapse navbar-collapse" >
         <header class="hidden-xs">{{ item.name }}</header>
         <dl>
-            <dt>Type</dt><dd><a href="{% aboutLink item %}">{{ item.get_verbose_name }}</a></dd>
+            <dt>Type</dt>
+            <dd>
+                <a href="{% aboutLink item %}"
+                    data-toggle="modal" data-target="#infobox_modal"
+                >{{ item.get_verbose_name }}</a>
+            </dd>
             <dt>Aristotle ID</dt><dd>{{ item.id }}</dd>
             {% if item.shortName %}
             <dt class="visible-xs">Short name</dt><dd class="visible-xs">{{ item.shortName }}</dd>
@@ -66,13 +71,13 @@
             <dt class="large">Supersedes
             {% if item|can_edit:request.user %}
                 <a class="inline_action" href="{% url 'aristotle:deprecate' iid=item.id %}"
-                    data-toggle="modal" data-target="#supersede">{% ternary total 'Change' 'Add'%}</a>
+                    data-toggle="modal" data-target="#infobox_modal">{% ternary total 'Change' 'Add'%}</a>
             {% endif %}</dt>
             <dd class="large">
             <ul>
                 {% for sup in item.supersedes.all|can_view_iter:user %}
                     <li>
-                      <a href="{% url 'aristotle:item' item_id=sup.id %}/">
+                      <a href="{% url 'aristotle:item' iid=sup.id %}/">
                         {{ sup }}
                       </a>
                     </li>
@@ -85,19 +90,19 @@
             <dt class="large">Superseded by
                 {% if item|can_edit:request.user %}
                     <a class="inline_action" href="{% url 'aristotle:supersede' iid=item.id %}"
-                       data-toggle="modal" data-target="#supersede">{% ternary item.superseded_by 'Change' 'Add'%}</a>
+                       data-toggle="modal" data-target="#infobox_modal">{% ternary item.superseded_by 'Change' 'Add'%}</a>
                 {% endif %}</dt>
             <dd class="large">
             <ul><li>
                 {% if item.superseded_by %}
-                    <a href="{% url 'aristotle:item' item_id=item.superseded_by.id %}">{{ item.superseded_by }}</a>
+                    <a href="{% url 'aristotle:item' iid=item.superseded_by.id %}">{{ item.superseded_by }}</a>
                 {% else %}
                     <em>None</em>
                 {% endif %}
             </li></ul>
             </dd>
         </dl>
-        <div id="supersede" class="modal fade">
+        <div id="infobox_modal" class="modal fade">
           <div class="modal-dialog">
               <div class="modal-content">
               </div><!-- /.modal-content -->

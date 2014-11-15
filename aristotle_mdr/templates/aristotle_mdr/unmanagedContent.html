@@ -5,14 +5,14 @@
 
 {% block title %}{{ item.name }}{% endblock %}
 {% block content %}
+
 <header class="unmanaged row">
     <h1 id="objectTitle"  class="pull-left">
         <a href="#">{% inplace_edit 'item.name' %}</a>
         <span>({{ item.get_verbose_name }})</span>
     </h1>
-        <div class="btn-group pull-right" >
-        {% if user_can_edit %}
-        <a id="ActivateInplaceEdit" class="btn btn-default"></a>
+    <div class="btn-group pull-right" >
+        {% if item|can_edit:request.user %}
         <a class="btn btn-default hidden-xs" href="{% adminEdit item %}">
             <i class="fa fa-sliders"></i> Advanced editor
         </a>

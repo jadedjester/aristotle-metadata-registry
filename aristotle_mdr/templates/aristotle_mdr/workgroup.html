@@ -43,8 +43,8 @@
 {% endif %}
 </dt>
 <dd>
-{% for member in workgroup.managers %}
-    {{ member.first_name }} {{ member.last_name }}{% if member.profile.is_registrar %}*{% endif %}{% if not forloop.last %},{% endif %}
+{% for member in workgroup.managers.all %}
+    {{ member.first_name }} {{ member.last_name }}({{ member.username }}){% if member.profile.is_registrar %}*{% endif %}{% if not forloop.last %},{% endif %}
 {% empty %}
     <em>No active managers</em>
 {% endfor %}

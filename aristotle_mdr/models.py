@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save,m2m_changed
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -31,13 +33,11 @@ STATES = Choices (
            (7,'superseded',_('Superseded')),
            (8,'retired',_('Retired')),
          )
+VERY_RECENTLY_SECONDS = 15
 
 class baseAristotleObject(TimeStampedModel):
     name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
     description = HTMLField(help_text="A rich text field for describing the metadata item.")
-    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
-    submittingOrganisation = models.CharField(max_length=256)
-    responsibleOrganisation = models.CharField(max_length=256)
     objects = InheritanceManager()
 
     class Meta:
@@ -45,12 +45,21 @@ class baseAristotleObject(TimeStampedModel):
         #Can't be abstract as we need unique app wide IDs.
         abstract = True
 
+    def was_modified_very_recently(self):
+        return self.modified >= timezone.now() - datetime.timedelta(seconds=VERY_RECENTLY_SECONDS)
+
     def was_modified_recently(self):
         return self.modified >= timezone.now() - datetime.timedelta(days=1)
     was_modified_recently.admin_order_field = 'modified'
     was_modified_recently.boolean = True
     was_modified_recently.short_description = 'Modified recently?'
 
+    def description_stub(self):
+       from django.utils.html import strip_tags
+       d = strip_tags(self.description)
+       if len(d) > 150:
+           d = d[0:150] + "..."
+       return d
 
     def __unicode__(self):
         return "{name}".format(name = self.name)
@@ -101,7 +110,7 @@ class registryGroup(unmanagedObject):
     class Meta:
         abstract = True
     def can_edit(self,user):
-        return user in self.managers.all()
+        return self.managers.filter(pk=user.pk).exists()
 
 """
 A registration authority is a proxy group that describes a governance process for "standardising" metadata.
@@ -130,6 +139,8 @@ class RegistrationAuthority(registryGroup):
     preferred = models.TextField(blank=True)
     superseded = models.TextField(blank=True)
     retired = models.TextField(blank=True)
+
+    tracker=FieldTracker()
 
     class Meta:
         verbose_name_plural = _("Registration Authorities")
@@ -200,6 +211,26 @@ class RegistrationAuthority(registryGroup):
         if role == "manager":
             self.managers.remove(user)
 
+    def save(self, *args, **kwargs):
+        # save happens before the transaction ends, so regular calls via the concept.recache
+        # access the original registration authority information
+        # plus we need to know what changed, so we can't use a post_save signal
+        # Hence we need to do wierd stuff here
+        obj = super(RegistrationAuthority, self).save(*args, **kwargs)
+        if self.tracker.has_changed('public_state') or self.tracker.has_changed('locked_state'):
+            instance = self
+            for s in Status.objects.filter(registrationAuthority=instance):
+                item = _concept.objects.get(id=s.concept.id)
+                item._is_public = True in [ s.state >= s.registrationAuthority.public_state
+                                            for s in item.statuses.all()
+                                            if  s.registrationAuthority != instance
+                                          ] or  s.state >= instance.public_state
+                item._is_locked = True in [ s.state >= s.registrationAuthority.locked_state
+                                            for s in item.statuses.all()
+                                            if  s.registrationAuthority != instance
+                                          ] or  s.state >= instance.locked_state
+                item.save()
+        return obj
 class Workgroup(registryGroup):
     """
     A workgroup is a collection of associated users given control to work on a specific piece of work. usually this work will be a specific collection or subset of objects, such as data elements or indicators, for a specific topic.
@@ -228,7 +259,7 @@ class Workgroup(registryGroup):
         return self.viewers.all() | self.submitters.all() | self.stewards.all() | self.managers.all()
 
     def can_view(self,user):
-        return user in self.members
+        return self.members.filter(pk=user.pk).exists()
 
     @property
     def classedItems(self):
@@ -293,111 +324,65 @@ class DiscussionComment(discussionAbstract):
 #    object = models.ForeignKey(managedObject)
 
 class ConceptQuerySet(InheritanceQuerySet):
-    def editable(self,user):
-        """
-        Returns a list of items from the queryset the user can edit.
-
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
-
-            ObjectClass.objects.filter(name__contains="Person").editable()
-
-        But this will break::
-
-            ObjectClass.objects.editable().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `editable` items, use ``editable_slow``.
-        """
-        return [i for i in self.all() if perms.user_can_edit(user,i)]
     def visible(self,user):
         """
-        Returns a list of items from the queryset the user can view.
+        Returns a queryset that returns all items that the given user has permission to view.
+        For speed reasons and django queryset limitations , *doesn't* use `perms.user_can_view`
+        however, is guaranteed to follow the same logic.
 
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
+        It is **chainable** with other querysets. For example, both of these will work and return the same list::
 
             ObjectClass.objects.filter(name__contains="Person").visible()
-
-        But this will break::
-
             ObjectClass.objects.visible().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `visible` items, use ``visible_slow``.
         """
-        return [i for i in self.all() if perms.user_can_view(user,i)]
+        if user.is_superuser:
+            return self.all()
+        if user.is_anonymous():
+            return self.filter(_is_public=True)
+        q = Q(_is_public=True)
+        if user.profile.workgroups:
+            # User can see everything in their workgroups.
+            q |= Q(workgroup__in=user.profile.workgroups)
+        if user.profile.is_registrar:
+            # User can see everything that is "readyToReview" or registered in their workgroup
+            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),readyToReview=True)
+            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),
+                    statuses__registrationAuthority__in=user.profile.registrarAuthorities.all())
+        return self.filter(q)
+    def editable(self,user):
+        """
+        Returns a queryset that returns all items that the given user has permission to edit.
+        For speed reasons and django queryset limitations , *doesn't* use `perms.user_can_edit`
+        however, is guaranteed to follow the same logic.
+
+        It is **chainable** with other querysets. For example, both of these will work and return the same list::
+
+            ObjectClass.objects.filter(name__contains="Person").editable()
+            ObjectClass.objects.editable().filter(name__contains="Person")
+        """
+        if user.is_superuser:
+            return self.all()
+        if user.is_anonymous():
+            return None
+        q = Q()
+        if user.submitter_in.exists():
+            q |= Q(_is_locked=False,workgroup__in=user.submitter_in.all())
+        if user.steward_in.exists():
+            q |= Q(workgroup__in=user.steward_in.all())
+        return self.filter(q)
     def public(self):
         """
         Returns a list of public items from the queryset.
 
-        This isn't actually a query set, as it returns a list of items instead of an actual
-        ``Queryset`` object. As such this is unchainable after this is called, and **must**
-        be the last call in a queryset chain. For example, this will work::
+        This is a chainable query set, that filters on items which have the internal
+        `_is_public` flag set to true.
 
-            ObjectClass.objects.filter(name__contains="Person").public()
-
-        But this will break::
-
-            ObjectClass.objects.public().filter(name__contains="Person")
-
-        However, because querysets and lists are both iterable, in most cases this is safe to use.
-        If you need a queryset of `public` items, use ``public_slow``.
-        """
-        return [i for i in self.all() if i.is_public()]
-
-    # The below return actual querysets, but are much slower
-    # They hit the database twice, once to get the item ids and again to get the matching objects
-    def editable_slow(self,user):
-        """
-        This is a slow wrapper around `editable` that queries for items a user can edit
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
-
-            ObjectClass.objects.filter(name__contains="Person").editable()
-            ObjectClass.objects.editable().filter(name__contains="Person")
-        """
-        return self.filter(id__in=[i.id for i in self.editable(user)])
-    def visible_slow(self,user):
-        """
-        This is a slow wrapper around `visible` that queries for items a user can view
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
-
-            ObjectClass.objects.filter(name__contains="Person").visible()
-            ObjectClass.objects.visible().filter(name__contains="Person")
-        """
-        return self.filter(id__in=[i.id for i in self.visible(user)])
-    def public_slow(self):
-        """
-        This is a slow wrapper around `public` that queries for items that are public
-        and then requeries the database for items that match the ids of the initial
-        query.
-
-        It is **very very slow, but chainable**. It is recommended that this the very last query
-        after the querset in a chain so it is as small as possible, and is only used
-        where a `QuerySet`` is absolutely required.
-
-         For example, both of these will work::
+        Both of these examples will work and return the same list::
 
             ObjectClass.objects.filter(name__contains="Person").public()
             ObjectClass.objects.public().filter(name__contains="Person")
         """
-        return self.filter(id__in=[i.id for i in self.public()])
+        return self.filter(_is_public=True)
 
 class ConceptManager(InheritanceManager):
     """The ``ConceptManager`` is the default object manager for ``concept`` and
@@ -412,7 +397,7 @@ class ConceptManager(InheritanceManager):
         return ConceptQuerySet(self.model)
     def __getattr__(self, attr, *args):
         # Only let the slow ones through to the queryset
-        if attr in ['editable_slow','visible_slow','public_slow']:
+        if attr in ['editable','visible','public']:
             return getattr(self.get_queryset(), attr, *args)
         else:
             return getattr(self.__class__, attr, *args)
@@ -428,18 +413,24 @@ class _concept(baseAristotleObject):
     template = "aristotle_mdr/concepts/managedContent.html"
     readyToReview = models.BooleanField(default=False)
     workgroup = models.ForeignKey(Workgroup,related_name="items")
+    # We will query on these, so want them cached with the items themselves
+    # To be usable these must be updated when statuses are changed
+    _is_public =  models.BooleanField(default=False)
+    _is_locked =  models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "item" # So the url_name works for items we can't determine
 
     def can_edit(self,user):
-        if self.is_locked():
-            return user in self.workgroup.stewards.all()
+        if self.is_public():
+            return self.workgroup.stewards.filter(pk=user.pk).exists()
+        elif self.is_locked():
+            return self.workgroup.stewards.filter(pk=user.pk).exists()
         elif self.is_registered:
-            return user in self.workgroup.submitters.all() \
-                or user in self.workgroup.stewards.all()
+            return self.workgroup.submitters.filter(pk=user.pk).exists() \
+                or self.workgroup.stewards.filter(pk=user.pk).exists()
         else:
-            return user in self.workgroup.submitters.all()
+            return self.workgroup.submitters.filter(pk=user.pk).exists() or self.workgroup.stewards.filter(pk=user.pk).exists()
 
     def can_view(self,user):
         if self.is_public():
@@ -447,19 +438,19 @@ class _concept(baseAristotleObject):
         elif user.is_anonymous():
             return False
         # If the user can view objects in this workgroup
-        if user in self.workgroup.members.all():
+        if self.workgroup.members.filter(pk=user.pk).exists():
             return True
         # if the item is registered and the user is a registrar view view permissions in that authority.
         if self.is_registered:
             for s in self.statuses.all():
                 ra = s.registrationAuthority
-                if user in ra.registrars.all():
+                if ra.registrars.filter(pk=user.pk).exists():
                     return True
         if self.readyToReview:
-            if user in self.workgroup.stewards.all():
+            if self.workgroup.stewards.filter(pk=user.pk).exists():
                 return True
             for ra in self.workgroup.registrationAuthorities.all():
-                if user in ra.registrars.all():
+                if ra.registrars.filter(pk=user.pk).exists():
                     return True
         return False
 
@@ -501,19 +492,30 @@ class _concept(baseAristotleObject):
     def is_retired(self):
         return all(STATES.retired == status.state for status in self.statuses.all())and self.statuses.count() > 0
 
-    def is_public(self):
+    def check_is_public(self):
         """
             An object is public if any registration authority has advanced it to a public state for THAT RA.
             TODO: Limit this so onlt RAs who are part of the "owning" workgroup are checked
                   This would prevent someone from a different work group who can see it advance it in THEIR RA to public.
         """
         return True in [s.state >= s.registrationAuthority.public_state for s in self.statuses.all()]
+    def is_public(self):
+        return self._is_public
     is_public.boolean = True
     is_public.short_description = 'Public'
-    def is_locked(self):
+
+    def check_is_locked(self):
         return True in [s.state >= s.registrationAuthority.locked_state for s in self.statuses.all()]
+    def is_locked(self):
+        return self._is_locked
+
     is_locked.boolean = True
     is_locked.short_description = 'Locked'
+
+    def recache_states(self):
+        self._is_public = self.check_is_public()
+        self._is_locked = self.check_is_locked()
+        self.save()
 
 class concept(_concept):
     """
@@ -527,6 +529,9 @@ class concept(_concept):
     synonyms = models.CharField(max_length=200, blank=True)
     references = HTMLField(blank=True)
     originURI = models.URLField(blank=True,help_text="If imported, the original location of the item")
+    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
+    submittingOrganisation = models.CharField(max_length=256)
+    responsibleOrganisation = models.CharField(max_length=256)
 
     superseded_by = models.ForeignKey('self', related_name='supersedes',blank=True,null=True)
 
@@ -578,8 +583,9 @@ class Status(TimeStampedModel):
             prev_state_name=STATES[prev_state]
         obj = super(Status, self).save(*args, **kwargs)
         if prev_state != self.state:
-            for p in self.concept.favourited_by.all():
-                pass
+            pass
+            #for p in self.concept.favourited_by.all():
+                #pass
                 #notify.send(p.user, recipient=p.user, verb="changed the status of a favourite item", target=self.concept,
                 #description='The state has gone from %s to %s in Registration Authority "%s"'%(prev_state_name,self.state_name,self.registrationAuthority.name)
                 #)
@@ -603,6 +609,7 @@ class ObjectClass(concept):
         verbose_name_plural = "Object Classes"
 
     def relatedItems(self,user=None):
+        # TODO Switch to visible queryset
         return [s for s in self.dataelementconcept_set.all() if perms.user_can_view(user,s)]
 
 class Property(concept):
@@ -773,8 +780,8 @@ class PossumProfile(models.Model):
     def is_workgroup_manager(self,wg):
         return perms.user_is_workgroup_manager(self.user,wg)
 
-    def isFavourite(self,item_id):
-        return self.favourites.filter(pk=item_id).exists()
+    def isFavourite(self,iid):
+        return self.favourites.filter(pk=iid).exists()
 
     def toggleFavourite(self, item):
         if self.isFavourite(item):
@@ -786,6 +793,11 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
        profile, created = PossumProfile.objects.get_or_create(user=instance)
 post_save.connect(create_user_profile, sender=User)
+
+def recache_concept_states(sender, instance, created, **kwargs):
+    instance.concept.recache_states()
+post_save.connect(recache_concept_states, sender=Status)
+
 
 #"""
 #A collection is a user specified ad-hoc, sharable collections of content.
@@ -875,6 +887,7 @@ def workgroup_item_updated(recipient,obj):
     notify.send(recipient, recipient=recipient, verb="changed a item in the workgroup", target=obj)
 def workgroup_item_new(recipient,obj):
     notify.send(recipient, recipient=recipient, verb="a new item in the workgroup", target=obj)
+
 @receiver(post_save)
 def concept_saved(sender, instance, created, **kwargs):
     if not issubclass(sender, _concept):

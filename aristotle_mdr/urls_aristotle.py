@@ -49,9 +49,9 @@ urlpatterns = patterns('aristotle_mdr.views',
     url(r'^discussions/edit/post/(?P<pid>\d+)?$', views.discussionsEditPost, name='discussionsEditPost'),
     url(r'^discussions/post/(?P<pid>\d+)/toggle?$', views.discussionsPostToggle, name='discussionsPostToggle'),
 
-    url(r'^item/(?P<item_id>\d+)/?$', views.item, name='item'),
-    url(r'^item/(?P<item_id>\d+)/packages/?$', views.itemPackages, name='itemPackages'),
-    url(r'^item/(?P<item_id>\d+)/registrationHistory/?$', views.registrationHistory, name='registrationHistory'),
+    url(r'^item/(?P<iid>\d+)/?$', views.item, name='item'),
+    url(r'^item/(?P<iid>\d+)/packages/?$', views.itemPackages, name='itemPackages'),
+    url(r'^item/(?P<iid>\d+)/registrationHistory/?$', views.registrationHistory, name='registrationHistory'),
 
     #url(r'^create/?$', views.item, name='item'),
     url(r'^create/?$', views.allRegistrationAuthorities, name='createList'),
@@ -86,7 +86,7 @@ urlpatterns = patterns('aristotle_mdr.views',
 
     url(r'^registrationauthority/(?P<iid>\d+)/?$', views.registrationauthority, name='registrationAuthority'),
     url(r'^registrationauthorities/?$', views.allRegistrationAuthorities, name='allRegistrationAuthorities'),
-    url(r'^account/toggleFavourite/(?P<item_id>\d+)/?$', views.toggleFavourite, name='toggleFavourite'),
+    url(r'^account/toggleFavourite/(?P<iid>\d+)/?$', views.toggleFavourite, name='toggleFavourite'),
 
     url(r'^browse(?:/(?P<oc_id>\d+)(?:-[a-z\-]*)?(?:/(?P<dec_id>\d+)(?:-[a-z\-]*)?)?)?/?$', views.browse, name='browse'),
 

@@ -16,6 +16,13 @@ DATABASES = {
 }
 SECRET_KEY = "OVERRIDE_THIS_IN_PRODUCTION"
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'aristotle-mdr-cache'
+    }
+}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -63,8 +70,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+
     'reversion.middleware.RevisionMiddleware',
 )
+
 
 TEMPLATE_CONTEXT_PROCESSORS = (
   'django.contrib.auth.context_processors.auth',
@@ -99,7 +109,7 @@ AUTHENTICATION_BACKENDS = ('aristotle_mdr.backends.AristotleBackend',)
 
 ARISTOTLE_SETTINGS = {
     'SEPARATORS': { 'DataElement':',',
-                    'DataElementConcept':'–'},
+                    'DataElementConcept':u'–'},
     'SITE_NAME': 'Default Site Name', # 'The main title for the site.'
     'SITE_BRAND': '/static/aristotle_mdr/images/aristotle_small.png', # URL for the Site-wide logo
     'SITE_INTRO': 'Use Default Site Name to search for metadata...', # 'Intro text use on the home page as a prompt for users.'

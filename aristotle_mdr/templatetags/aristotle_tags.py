@@ -88,10 +88,11 @@ def can_edit(item,user):
         {{ item }}
       {% endif %}
     """
+    #return perms.user_can_edit(user,item)
     try:
         return perms.user_can_edit(user,item)
     except:
-        return False
+        return None
 
 @register.filter
 def can_view_iter(qs,user):
@@ -309,5 +310,5 @@ def extra_content(extension,item,user):
             Context({'item':item,'user':user})
         )
     except template.TemplateDoesNotExist:
-        return ""
         # there is no extra content for this item, and thats ok.
+        return ""

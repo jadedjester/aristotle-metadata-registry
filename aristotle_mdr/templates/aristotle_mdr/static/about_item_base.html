@@ -1,16 +1,17 @@
-{% extends "aristotle_mdr/base.html" %}
+{% extends request.is_ajax|yesno:"aristotle_mdr/base_ajax.html,aristotle_mdr/base.html" %}
 
 {% block title %}{% endblock %}
 
 {% block content %}
+{% if not request.is_ajax %}
 <h1><a href="#">About: {% block item_name %}{% endblock %}</a></h1>
-
 <ol class="breadcrumb">
     <li><a href="{% url 'aristotle:aboutMain' %}">About</a></li>
     <li><a href="{% url 'aristotle:about' '11179' %}">ISO/IEC 11179</a></li>
     {% block breadcrumbs %}
     {% endblock %}
 </ol>
+{% endif %}
 
 <blockquote>
 <p>
@@ -21,5 +22,11 @@
 
 {% block description %}
 {% endblock %}
+
+{% if request.is_ajax %}
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
+{% endif %}
 
 {% endblock %}
