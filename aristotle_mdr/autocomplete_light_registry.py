@@ -43,6 +43,7 @@ autocompletesToRegister = [
         MDR._concept,
         MDR.DataElement,
         MDR.DataElementConcept,
+        MDR.ConceptualDomain,
         MDR.ObjectClass,
         MDR.Property,
         MDR.ValueDomain,
