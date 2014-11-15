@@ -33,6 +33,7 @@ STATES = Choices (
            (7,'superseded',_('Superseded')),
            (8,'retired',_('Retired')),
          )
+VERY_RECENTLY_SECONDS = 15
 
 class baseAristotleObject(TimeStampedModel):
     name = models.CharField(max_length=100,help_text="The primary name used for human identification purposes.")
@@ -45,7 +46,7 @@ class baseAristotleObject(TimeStampedModel):
         abstract = True
 
     def was_modified_very_recently(self):
-        return self.modified >= timezone.now() - datetime.timedelta(seconds=15)
+        return self.modified >= timezone.now() - datetime.timedelta(seconds=VERY_RECENTLY_SECONDS)
 
     def was_modified_recently(self):
         return self.modified >= timezone.now() - datetime.timedelta(days=1)

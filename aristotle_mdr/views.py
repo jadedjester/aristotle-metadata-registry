@@ -94,7 +94,7 @@ def download(request,downloadType,iid=None):
     raise Http404
 
 
-#@cache_per_item_user(ttl=300, cache_post=False)
+@cache_per_item_user(ttl=300, cache_post=False)
 def render_if_condition_met(request,condition,objtype,iid=None,subpage=None):
     if iid is None:
         app_name = objtype._meta.app_label
