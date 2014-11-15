@@ -40,7 +40,7 @@ def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
 
             iid = kwargs['iid']
 
-            if prefix:
+            if prefix: # pragma no cover - we don't use this
                 CACHE_KEY = '%s_%s_%s'%(prefix, user, iid)
             else:
                 CACHE_KEY = 'view_cache_%s_%s_%s'%(function.__name__, user, iid)

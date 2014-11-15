@@ -110,7 +110,7 @@ class registryGroup(unmanagedObject):
     class Meta:
         abstract = True
     def can_edit(self,user):
-        return user in self.managers.all()
+        return self.managers.filter(pk=user.pk).exists()
 
 """
 A registration authority is a proxy group that describes a governance process for "standardising" metadata.
@@ -259,7 +259,7 @@ class Workgroup(registryGroup):
         return self.viewers.all() | self.submitters.all() | self.stewards.all() | self.managers.all()
 
     def can_view(self,user):
-        return user in self.members
+        return self.members.filter(pk=user.pk).exists()
 
     @property
     def classedItems(self):
@@ -423,14 +423,14 @@ class _concept(baseAristotleObject):
 
     def can_edit(self,user):
         if self.is_public():
-            return user in self.workgroup.stewards.all()
+            return self.workgroup.stewards.filter(pk=user.pk).exists()
         elif self.is_locked():
-            return user in self.workgroup.stewards.all()
+            return self.workgroup.stewards.filter(pk=user.pk).exists()
         elif self.is_registered:
-            return user in self.workgroup.submitters.all() \
-                or user in self.workgroup.stewards.all()
+            return self.workgroup.submitters.filter(pk=user.pk).exists() \
+                or self.workgroup.stewards.filter(pk=user.pk).exists()
         else:
-            return user in self.workgroup.submitters.all() or user in self.workgroup.stewards.all()
+            return self.workgroup.submitters.filter(pk=user.pk).exists() or self.workgroup.stewards.filter(pk=user.pk).exists()
 
     def can_view(self,user):
         if self.is_public():
@@ -438,19 +438,19 @@ class _concept(baseAristotleObject):
         elif user.is_anonymous():
             return False
         # If the user can view objects in this workgroup
-        if user in self.workgroup.members.all():
+        if self.workgroup.members.filter(pk=user.pk).exists():
             return True
         # if the item is registered and the user is a registrar view view permissions in that authority.
         if self.is_registered:
             for s in self.statuses.all():
                 ra = s.registrationAuthority
-                if user in ra.registrars.all():
+                if ra.registrars.filter(pk=user.pk).exists():
                     return True
         if self.readyToReview:
-            if user in self.workgroup.stewards.all():
+            if self.workgroup.stewards.filter(pk=user.pk).exists():
                 return True
             for ra in self.workgroup.registrationAuthorities.all():
-                if user in ra.registrars.all():
+                if ra.registrars.filter(pk=user.pk).exists():
                     return True
         return False
 
@@ -583,8 +583,9 @@ class Status(TimeStampedModel):
             prev_state_name=STATES[prev_state]
         obj = super(Status, self).save(*args, **kwargs)
         if prev_state != self.state:
-            for p in self.concept.favourited_by.all():
-                pass
+            pass
+            #for p in self.concept.favourited_by.all():
+                #pass
                 #notify.send(p.user, recipient=p.user, verb="changed the status of a favourite item", target=self.concept,
                 #description='The state has gone from %s to %s in Registration Authority "%s"'%(prev_state_name,self.state_name,self.registrationAuthority.name)
                 #)
@@ -608,6 +609,7 @@ class ObjectClass(concept):
         verbose_name_plural = "Object Classes"
 
     def relatedItems(self,user=None):
+        # TODO Switch to visible queryset
         return [s for s in self.dataelementconcept_set.all() if perms.user_can_view(user,s)]
 
 class Property(concept):

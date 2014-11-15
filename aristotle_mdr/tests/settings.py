@@ -14,6 +14,7 @@ DATABASES = {
 INSTALLED_APPS = (
     #The good stuff
     'haystack',
+    'extension_test',
     'aristotle_mdr',
 ) + INSTALLED_APPS
 
