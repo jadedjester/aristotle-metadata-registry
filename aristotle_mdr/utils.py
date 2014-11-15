@@ -59,7 +59,7 @@ def cache_per_item_user(ttl=None, prefix=None, cache_post=False):
 
             # If the item was modified in the last 15 seconds, don't use cache
             recently = timezone.now() - datetime.timedelta(seconds=15)
-            if _concept.objects.filter(id=iid,modified__gte=recently).first().modified:
+            if _concept.objects.filter(id=iid,modified__gte=recently).exists():
                 can_cache = False
 
             if can_cache:
