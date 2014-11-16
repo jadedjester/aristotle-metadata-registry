@@ -304,7 +304,7 @@ class AristotleUserAdmin(UserAdmin):
     def save_formset(self,request, form, formset, change):
         super(AristotleUserAdmin, self).save_formset(request, form, formset, change)
         for f in formset.forms:
-           f.save_memberships()
+           f.save_memberships(user = form.instance)
 
 
 

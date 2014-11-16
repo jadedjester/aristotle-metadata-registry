@@ -44,9 +44,20 @@ class AristotleProfileForm(forms.ModelForm):
             pass
 
 
-    def save_memberships(self, *args, **kwargs):
-        self.instance.user.steward_in = self.cleaned_data['steward_in']
-        self.instance.user.registrar_in = self.cleaned_data['registrar_in']
+    def save_memberships(self, user, *args, **kwargs):
+        if "workgroup_manager_in" in self.cleaned_data.keys():
+            user.workgroup_manager_in = self.cleaned_data['workgroup_manager_in']
+        if "submitter_in" in self.cleaned_data.keys():
+            user.submitter_in = self.cleaned_data['submitter_in']
+        if "steward_in" in self.cleaned_data.keys():
+            user.steward_in = self.cleaned_data['steward_in']
+        if "viewer_in" in self.cleaned_data.keys():
+            user.viewer_in = self.cleaned_data['viewer_in']
+
+        if "registrationauthority_manager_in" in self.cleaned_data.keys():
+            user.registrationauthority_manager_in = self.cleaned_data['registrationauthority_manager_in']
+        if "registrar_in" in self.cleaned_data.keys():
+            user.registrar_in = self.cleaned_data['registrar_in']
 
 class AdminConceptForm(forms.ModelForm):
     # Thanks: http://stackoverflow.com/questions/6034047/one-to-many-inline-select-with-django-admin
