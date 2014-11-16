@@ -1,11 +1,11 @@
-from django.test import TestCase
-
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.test import TestCase
+from django.test.utils import setup_test_environment
 
 import aristotle_mdr.models as models
 import aristotle_mdr.tests.utils as utils
 
-from django.test.utils import setup_test_environment
 setup_test_environment()
 
 class AdminPage(utils.LoggedInViewPages,TestCase):
@@ -33,6 +33,56 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
 
         response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_change",args=(str(dec.id))))
         self.assertEqual(response.status_code,200)
+
+    def test_su_can_add_new_user(self):
+        self.login_superuser()
+        response = self.client.post(reverse("admin:auth_user_add"),
+            {'username':"newuser",'password1':"test",'password2':"test",
+                'profile-TOTAL_FORMS': 1, 'profile-INITIAL_FORMS': 0, 'profile-MAX_NUM_FORMS': 1,
+                'profile-0-workgroup_manager_in': [self.wg1.id],
+                'profile-0-steward_in': [self.wg1.id],
+                'profile-0-submitter_in': [self.wg1.id],
+                'profile-0-viewer_in': [self.wg1.id],
+                'profile-0-registrationauthority_manager_in': [self.ra.id],
+                'profile-0-registrar_in': [self.ra.id],
+
+            }
+        )
+        self.assertEqual(response.status_code,302)
+        new_user = User.objects.get(username='newuser')
+        self.assertEqual(new_user.profile.workgroups.count(),1)
+        self.assertEqual(new_user.profile.workgroups.first(),self.wg1)
+        self.assertEqual(new_user.profile.registrarAuthorities.count(),1)
+        self.assertEqual(new_user.profile.registrarAuthorities.first(),self.ra)
+        for rel in [new_user.workgroup_manager_in,
+                    new_user.steward_in,
+                    new_user.submitter_in,
+                    new_user.viewer_in]:
+            self.assertEqual(rel.count(),1)
+            self.assertEqual(rel.first(),self.wg1)
+        for rel in [new_user.registrationauthority_manager_in,
+                    new_user.registrar_in,]:
+            self.assertEqual(rel.count(),1)
+            self.assertEqual(rel.first(),self.ra)
+
+        response = self.client.post(reverse("admin:auth_user_add"),
+            {'username':"newuser_with_none",'password1':"test",'password2':"test",
+                'profile-TOTAL_FORMS': 1, 'profile-INITIAL_FORMS': 0, 'profile-MAX_NUM_FORMS': 1,
+            }
+        )
+        self.assertEqual(response.status_code,302)
+        new_user = User.objects.get(username='newuser_with_none')
+        self.assertEqual(new_user.profile.workgroups.count(),0)
+        self.assertEqual(new_user.profile.registrarAuthorities.count(),0)
+        for rel in [new_user.workgroup_manager_in,
+                    new_user.steward_in,
+                    new_user.submitter_in,
+                    new_user.viewer_in]:
+            self.assertEqual(rel.count(),0)
+        for rel in [new_user.registrationauthority_manager_in,
+                    new_user.registrar_in,]:
+            self.assertEqual(rel.count(),0)
+
 
     def test_supersede_saves(self):
         pass
