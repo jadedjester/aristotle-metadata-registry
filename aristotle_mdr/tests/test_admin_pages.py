@@ -34,6 +34,16 @@ class AdminPage(utils.LoggedInViewPages,TestCase):
         response = self.client.get(reverse("admin:aristotle_mdr_dataelementconcept_change",args=(str(dec.id))))
         self.assertEqual(response.status_code,200)
 
+    def test_add_new_user(self):
+        return
+        response = self.client.post(reverse("admin:auth_user"),
+            {'username':"put_in_all",'password':"test",
+                "workgroup":self.wg1.id,
+                'statuses-TOTAL_FORMS': 0, 'statuses-INITIAL_FORMS': 0 #no substatuses
+            }
+        )
+
+
     def test_supersede_saves(self):
         pass
 
