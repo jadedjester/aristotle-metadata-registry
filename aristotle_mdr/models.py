@@ -297,19 +297,14 @@ class Workgroup(registryGroup):
         self.managers.remove(user)
 
 
-def update_registarion_authorities(sender, instance, action, **kwargs):
-    # save happens before the transaction ends, so regular calls via the concept.recache
-    # access the original registration authority information
-    # plus we need to know what changed, so we can't use a post_save signal
-    # Hence we need to do wierd stuff here
-    print "I'm updating things"
+def update_registation_authorities(sender, instance, action, **kwargs):
+    # this will be slow, but necessary... perhaps this will encourage people to not
+    # change or add registration authorities to workgroups willy-nilly.
     if action in ['post_add','post_remove','post_clear']:
         for item in instance.items.all():
-            item.name = item.name + " help?"
             item.recache_states()
             item.save()
-            print item
-m2m_changed.connect(update_registarion_authorities, sender=Workgroup.registrationAuthorities.through)
+m2m_changed.connect(update_registation_authorities, sender=Workgroup.registrationAuthorities.through)
 
 class discussionAbstract(TimeStampedModel):
     body = models.TextField()

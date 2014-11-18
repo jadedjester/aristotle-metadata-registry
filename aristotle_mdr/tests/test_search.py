@@ -43,7 +43,7 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
         self.logout()
         response = self.client.get(reverse('aristotle:search')+"?q=xman")
         self.assertEqual(response.status_code,200)
-        self.assertEqual(response.context['page'].object_list,len(self.item_xmen))
+        self.assertEqual(len(response.context['page'].object_list),len(self.item_xmen))
         for i in response.context['page'].object_list:
             self.assertTrue(i.object.is_public())
 
