@@ -44,7 +44,7 @@ def is_workgroup_manager(user,workgroup):
     """
     A filter that acts as a wrapper around ``aristotle_mdr.perms.user_is_workgroup_manager``.
     Returns true if the user has permission to administer the workgroup, otherwise it returns False.
-    If calling ``user_can_view`` throws an exception it safely returns False.
+    If calling ``user_is_workgroup_manager`` throws an exception it safely returns False.
 
     For example::
 
@@ -54,6 +54,24 @@ def is_workgroup_manager(user,workgroup):
     """
     try:
         return perms.user_is_workgroup_manager(user,workgroup)
+    except:
+        return False
+
+@register.filter
+def in_workgroup(user,workgroup):
+    """
+    A filter that acts as a wrapper around ``aristotle_mdr.perms.user_in_workgroup``.
+    Returns true if the user has permission to administer the workgroup, otherwise it returns False.
+    If calling ``user_in_workgroup`` throws an exception it safely returns False.
+
+    For example::
+
+      {% if request.user|in_workgroup:workgroup %}
+        {{ something }}
+      {% endif %}
+    """
+    try:
+        return perms.user_in_workgroup(user,workgroup)
     except:
         return False
 

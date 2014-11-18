@@ -35,46 +35,57 @@
 </aside>
 
 <div class="col-sm-8">
-<header>Details</header>
-<dl>
-<dt>Managers
-{% if user_is_admin %}
-    <a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}" class="inline_action">Add</a>
-{% endif %}
-</dt>
-<dd>
-{% for member in workgroup.managers.all %}
-    {{ member.first_name }} {{ member.last_name }}({{ member.username }}){% if member.profile.is_registrar %}*{% endif %}{% if not forloop.last %},{% endif %}
-{% empty %}
-    <em>No active managers</em>
-{% endfor %}
-</dd>
-<dt>Members</dt>
-<dd>
-<a href="{% url 'aristotle:workgroupMembers' item.id %}">
-    {% with total=workgroup.members.count %}
-        {% comment %} Cache the count then reuse for performance.{% endcomment %}
-        {{ total }} current member{{ total|pluralize }}
-    {% endwith %}
-</a>
-</dd>
-<dt>Items</dt>
-<dd>
-<a href="{% url 'aristotle:workgroupItems' iid=item.id %}">
-    {% with total=workgroup.items.count %}
-        {% comment %} Cache the count then reuse for performance.{% endcomment %}
-        {{ total }} current item{{ total|pluralize }}
-    {% endwith %}
-</a>
-</dd>
-</dl>
+    <h2>Details</h2>
+    <dl>
+        <dt>Responsible Registration Authorities</dt>
+        <dd>
+            <ul>{% for ra in workgroup.registrationAuthorities.all %}
+                <a href="{% url 'aristotle:registrationAuthority' iid=ra.id %}">{{ ra.name }}</a>
+            {% empty %}
+                <li><em>No Registration Authorities - items in this workgroup cannot be progressed!</em></li>
+            {% endfor %}
+            </ul>
+        </dd>
 
-<h2>Recent conversations</h2>
-<a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
-{% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=item.discussionpost_set.all|slice:":5" %}
+        <dt>Managers
+            {% if user_is_admin %}
+                <a data-toggle="modal" data-target="#addMember" href="{% url 'aristotle:addWorkgroupMembers' workgroup.id %}" class="inline_action">Add</a>
+            {% endif %}
+        </dt>
+        <dd>
+            {% for member in workgroup.managers.all %}
+                {{ member.first_name }} {{ member.last_name }}({{ member.username }}){% if member.profile.is_registrar %}*{% endif %}{% if not forloop.last %},{% endif %}
+            {% empty %}
+                <em>No active managers</em>
+            {% endfor %}
+        </dd>
+        <dt>Members</dt>
+        <dd>
+            <a href="{% url 'aristotle:workgroupMembers' item.id %}">
+                {% with total=workgroup.members.count %}
+                    {% comment %} Cache the count then reuse for performance.{% endcomment %}
+                    {{ total }} current member{{ total|pluralize }}
+                {% endwith %}
+            </a>
+        </dd>
+        <dt>Items</dt>
+        <dd>
+            <a href="{% url 'aristotle:workgroupItems' iid=item.id %}">
+                {% with total=workgroup.items.count %}
+                    {% comment %} Cache the count then reuse for performance.{% endcomment %}
+                    {{ total }} current item{{ total|pluralize }}
+                {% endwith %}
+            </a>
+        </dd>
+    </dl>
 
+    <h2>Recent conversations</h2>
+    <a href="{% url 'aristotle:discussionsWorkgroup' item.id %}">View all posts.</a>
+    {% include 'aristotle_mdr/discussions/discussion_list.html' with discussions=item.discussionpost_set.all|slice:":5" %}
+
+    </div>
 </div>
-</div>
+
 <div id="addMember" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content"></div>

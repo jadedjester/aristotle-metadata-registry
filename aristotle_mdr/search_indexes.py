@@ -49,6 +49,11 @@ class conceptIndex(baseObjectIndex):
 
     def prepare_registrationAuthorities (self, obj):
         ras = [s.registrationAuthority.id for s in obj.statuses.all()]
+        if not ras and obj.readyToReview:
+            # We fake a registration authority only if an item is "ready to review".
+            # This allows registrars to search for flag items in their authority.
+            # But this item won't get a state.
+            ras = [r.id for r in obj.workgroup.registrationAuthorities.all()]
         return ras
 
     def prepare_is_public(self,obj):

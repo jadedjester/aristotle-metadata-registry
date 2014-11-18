@@ -21,6 +21,7 @@
             {% if page %}
                 <strong><a href="?help=help">Get help on using your favourites list</a></strong>
                 <form action="{% url 'aristotle:bulk_action' %}?next={{ request.path }}" method="POST">
+                {% csrf_token %}
                 {% include "aristotle_mdr/helpers/paginated_list.html" with page=page %}
                 {% include "aristotle_mdr/helpers/list_action_bar.html" with wrap=True %}
                 </form>

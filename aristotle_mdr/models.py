@@ -254,6 +254,8 @@ class Workgroup(registryGroup):
             'steward'   :_("Steward"),
             'manager'   :_("Manager")}
 
+    tracker=FieldTracker()
+
     @property
     def members(self):
         return self.viewers.all() | self.submitters.all() | self.stewards.all() | self.managers.all()
@@ -293,6 +295,21 @@ class Workgroup(registryGroup):
         self.submitters.remove(user)
         self.stewards.remove(user)
         self.managers.remove(user)
+
+
+def update_registarion_authorities(sender, instance, action, **kwargs):
+    # save happens before the transaction ends, so regular calls via the concept.recache
+    # access the original registration authority information
+    # plus we need to know what changed, so we can't use a post_save signal
+    # Hence we need to do wierd stuff here
+    print "I'm updating things"
+    if action in ['post_add','post_remove','post_clear']:
+        for item in instance.items.all():
+            item.name = item.name + " help?"
+            item.recache_states()
+            item.save()
+            print item
+m2m_changed.connect(update_registarion_authorities, sender=Workgroup.registrationAuthorities.through)
 
 class discussionAbstract(TimeStampedModel):
     body = models.TextField()
@@ -345,8 +362,8 @@ class ConceptQuerySet(InheritanceQuerySet):
             q |= Q(workgroup__in=user.profile.workgroups)
         if user.profile.is_registrar:
             # User can see everything that is "readyToReview" or registered in their workgroup
-            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),readyToReview=True)
-            q |= Q(workgroup__registrationAuthority__in=user.profile.registrarAuthorities.all(),
+            q |= Q(workgroup__registrationAuthorities__in=user.profile.registrarAuthorities.all(),readyToReview=True)
+            q |= Q(workgroup__registrationAuthorities__in=user.profile.registrarAuthorities.all(),
                     statuses__registrationAuthority__in=user.profile.registrarAuthorities.all())
         return self.filter(q)
     def editable(self,user):
@@ -529,9 +546,9 @@ class concept(_concept):
     synonyms = models.CharField(max_length=200, blank=True)
     references = HTMLField(blank=True)
     originURI = models.URLField(blank=True,help_text="If imported, the original location of the item")
-    comments = HTMLField(help_text="Descriptive comments about the metadata item.")
-    submittingOrganisation = models.CharField(max_length=256)
-    responsibleOrganisation = models.CharField(max_length=256)
+    comments = HTMLField(help_text="Descriptive comments about the metadata item.", blank=True)
+    submittingOrganisation = models.CharField(max_length=256, blank=True)
+    responsibleOrganisation = models.CharField(max_length=256, blank=True)
 
     superseded_by = models.ForeignKey('self', related_name='supersedes',blank=True,null=True)
 

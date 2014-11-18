@@ -42,11 +42,12 @@ class booleanYesNo(AdaptorChoicesField):
         return field
 
     def render_value(self, field_name=None):
+        from django.utils.translation import ugettext
         field_name = field_name or self.field_name_render
         value = getattr(self.obj, field_name)
         if value:
-            value = _("Yes")
+            value = ugettext("Yes")
         else:
-            value = _("No")
+            value = ugettext("No")
         return apply_filters(value, self.filters_to_show, self.loads)
 

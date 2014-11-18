@@ -342,24 +342,20 @@ class PermissionSearchForm(TokenSearchForm):
             # Regular users can only see public items, so boot them off now.
             q = Q(is_public=True)
             sqs = sqs.filter(q)
-        else:
-            if user.is_superuser:
-                pass
-            elif not user.profile.is_registrar:
-                # Non-registrars can only see public things or things in their workgroup
-                q |= Q(workgroup__in=user.profile.workgroups.all())
-            elif user.profile.is_registrar:
-                q |= Q(workgroup__in=user.profile.workgroups.all())
-                q |= Q(registrationAuthorities__in=user.profile.registrarAuthorities)
-            else:
-                #I'm paranoid...
-                q = Q(is_public=True)
-                sqs = sqs.filter(q)
+            return sqs
+        if not user.is_superuser:
+            # Non-registrars can only see public things or things in their workgroup
+            # if they have no workgroups they won't see anything extra
+            if user.profile.workgroups.count() > 0:
+                q |= Q(workgroup__in=[w.id for w in user.profile.workgroups.all()])
+            if user.profile.is_registrar:
+                # if registrar, also filter through items in the registered in their authorities
+                q |= Q(registrationAuthorities__in=[r.id for r in user.profile.registrarAuthorities])
 
-            if self.cleaned_data['public_only'] == True:
-                q &= Q(is_public=True)
-            if self.cleaned_data['myWorkgroups_only'] == True:
-                q &= Q(workgroup__in=user.profile.workgroups.all())
+        if self.cleaned_data['public_only'] == True:
+            q &= Q(is_public=True)
+        if self.cleaned_data['myWorkgroups_only'] == True:
+            q &= Q(workgroup__in=user.profile.workgroups.all())
 
         sqs = sqs.filter(q)
 

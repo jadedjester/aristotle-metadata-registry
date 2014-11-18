@@ -5,9 +5,12 @@ import haystack.signals as signals #.RealtimeSignalProcessor as RealtimeSignalPr
 
 class AristotleSignalProcessor(signals.RealtimeSignalProcessor):
     def setup(self):
-        from aristotle_mdr.models import Status
+        from aristotle_mdr.models import Status, _concept
         post_save.connect(self.handle_status_change, sender=Status)
         post_delete.connect(self.handle_status_change, sender=Status)
+        post_save.connect(self.handle_concept_save, sender=_concept)
+        post_delete.connect(self.handle_concept_delete, sender=Status)
+
         super(AristotleSignalProcessor,self).setup()
 
     def teardown(self): # pragma: no cover
@@ -21,4 +24,10 @@ class AristotleSignalProcessor(signals.RealtimeSignalProcessor):
         obj = instance.concept.item
         super(AristotleSignalProcessor,self).handle_save(obj.__class__,obj)
 
+    def handle_concept_save(self, sender, instance, **kwargs):
+        obj = instance.item
+        self.handle_save(obj.__class__,obj)
 
+    def handle_concept_delete(self, sender, instance, **kwargs):
+        obj = instance.item
+        self.handle_save(obj.__class__,obj)
