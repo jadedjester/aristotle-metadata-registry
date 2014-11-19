@@ -1,7 +1,6 @@
 import datetime
 from django import forms
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils import Choices
@@ -9,7 +8,7 @@ from model_utils import Choices
 from haystack import connections
 from haystack.constants import DEFAULT_ALIAS
 from haystack.forms import SearchForm, model_choices
-from haystack.query import SearchQuerySet
+from haystack.query import SearchQuerySet, SQ
 
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -92,6 +91,32 @@ DELTA ={QUICK_DATES.hour : datetime.timedelta(hours=1),
         }
 
 
+class PermissionSearchQuerySet(SearchQuerySet):
+    def apply_permission_checks(self,user=None,public_only=False,user_workgroups_only=False):
+        sqs = self
+        q = SQ(is_public=True)
+        if user is None or user.is_anonymous():
+            # Regular users can only see public items, so boot them off now.
+            sqs = sqs.filter(q)
+            return sqs
+
+        if not user.is_superuser:
+            # Non-registrars can only see public things or things in their workgroup
+            # if they have no workgroups they won't see anything extra
+            if user.profile.workgroups.count() > 0:
+                #for w in user.profile.workgroups.all():
+                #    q |= SQ(workgroup=str(w.id))
+                q |= SQ(workgroup__in=[int(w.id) for w in user.profile.workgroups.all()])
+            if user.profile.is_registrar:
+                # if registrar, also filter through items in the registered in their authorities
+                q |= SQ(registrationAuthorities__in=[str(r.id) for r in user.profile.registrarAuthorities])
+        if public_only:
+            q &= SQ(is_public=True)
+        if user_workgroups_only:
+            q &= SQ(workgroup__in=[str(w.id) for w in user.profile.workgroups.all()])
+        sqs = sqs.filter(q)
+        return sqs
+
 class TokenSearchForm(SearchForm):
     def prepare_tokens(self):
         try:
@@ -138,6 +163,7 @@ datePickerOptions={
     "defaultDate":"",
     "useCurrent": False,
 }
+
 
 class PermissionSearchForm(TokenSearchForm):
     """
@@ -187,6 +213,10 @@ class PermissionSearchForm(TokenSearchForm):
                 widget=BootstrapDropdownSelectMultiple
                 )
 
+    def __init__(self,*args, **kwargs):
+        kwargs['searchqueryset'] = PermissionSearchQuerySet()
+        super(PermissionSearchForm, self).__init__(*args, **kwargs)
+
     def get_models(self):
         """Return an alphabetical list of model classes in the index."""
         search_models = []
@@ -217,7 +247,10 @@ class PermissionSearchForm(TokenSearchForm):
 
         sqs = self.apply_registration_status_filters(sqs)
         sqs = self.apply_date_filtering(sqs)
-        sqs = self.apply_permission_checks(sqs)
+        sqs = sqs.apply_permission_checks(  user=self.request.user,
+                                            public_only=self.cleaned_data['public_only'],
+                                            user_workgroups_only=self.cleaned_data['myWorkgroups_only']
+                                        )
 
         self.has_spelling_suggestions = False
         if not self.repeat_search:
@@ -330,34 +363,6 @@ class PermissionSearchForm(TokenSearchForm):
             sqs = sqs.order_by('name')
         elif sort_order == SORT_OPTIONS.state:
             sqs = sqs.order_by('-highest_state')
-
-        return sqs
-
-    def apply_permission_checks(self,sqs):
-
-        user = self.request.user
-
-        q = Q()
-        if user.is_anonymous():
-            # Regular users can only see public items, so boot them off now.
-            q = Q(is_public=True)
-            sqs = sqs.filter(q)
-            return sqs
-        if not user.is_superuser:
-            # Non-registrars can only see public things or things in their workgroup
-            # if they have no workgroups they won't see anything extra
-            if user.profile.workgroups.count() > 0:
-                q |= Q(workgroup__in=[w.id for w in user.profile.workgroups.all()])
-            if user.profile.is_registrar:
-                # if registrar, also filter through items in the registered in their authorities
-                q |= Q(registrationAuthorities__in=[r.id for r in user.profile.registrarAuthorities])
-
-        if self.cleaned_data['public_only'] == True:
-            q &= Q(is_public=True)
-        if self.cleaned_data['myWorkgroups_only'] == True:
-            q &= Q(workgroup__in=user.profile.workgroups.all())
-
-        sqs = sqs.filter(q)
 
         return sqs
 

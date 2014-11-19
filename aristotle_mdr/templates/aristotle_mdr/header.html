@@ -24,7 +24,7 @@
             (SPECIFICALLY the home page) to override or hide the search bar
             DO NOT OVERRIDE THIS UNLESS YOU ARE CERTAIN OF WHAT YOU ARE DOING!
             {% endcomment %}
-            <form id="quickSearch" action="/search" method="get"
+            <form id="quickSearch" action="{% url 'aristotle:search' %}" method="get"
             class="navbar-form navbar-left" role="search">
                 <label style="display:none;" for="searchText">Search:</label>
                 <div class="input-group">

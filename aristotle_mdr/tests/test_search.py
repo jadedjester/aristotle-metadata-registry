@@ -11,6 +11,9 @@ setup_test_environment()
 
 class TestSearch(utils.LoggedInViewPages,TestCase):
     def setUp(self):
+        from haystack.management.commands import clear_index
+        clear_index.Command().handle(interactive=False)
+
         super(TestSearch, self).setUp()
 
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
@@ -108,6 +111,68 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
         self.assertEqual(len(response.context['page'].object_list),1)
         self.assertEqual(response.context['page'].object_list[0].object.item,steve_rogers)
         self.assertTrue(perms.user_can_view(self.registrar,response.context['page'].object_list[0].object))
+
+    def test_workgroup_member_search(self):
+        self.logout()
+        self.viewer = User.objects.create_user('charles.xavier','charles@schoolforgiftedyoungsters.edu','equalRightsForAll')
+        self.weaponx_wg = models.Workgroup.objects.create(name="WeaponX")
+
+        response = self.client.post(reverse('django.contrib.auth.views.login'),
+                    {'username': 'charles.xavier', 'password': 'equalRightsForAll'})
+
+        self.assertEqual(response.status_code,302) # logged in
+
+        #Charles is not in any workgroups
+        self.assertFalse(perms.user_in_workgroup(self.viewer,self.xmen_wg))
+        self.assertFalse(perms.user_in_workgroup(self.viewer,self.weaponx_wg))
+
+        #Create Deadpool in Weapon X workgroup
+        dp = models.ObjectClass.objects.create(name="deadpool",
+                    description="not really an xman, no matter how much he tries",
+                    workgroup=self.weaponx_wg,readyToReview=False)
+        dp = models.ObjectClass.objects.get(pk=dp.pk) # Un-cache
+        self.assertFalse(perms.user_can_view(self.viewer,dp))
+        self.assertFalse(dp.is_public())
+
+        # Charles isn't a viewer of X-men yet, so no results.
+        from aristotle_mdr.forms.search import PermissionSearchQuerySet
+        psqs = PermissionSearchQuerySet()
+        psqs = psqs.auto_query('deadpool').apply_permission_checks(self.viewer)
+        self.assertEqual(len(psqs),0)
+        #response = self.client.get(reverse('aristotle:search')+"?q=deadpool")
+        #self.assertEqual(len(response.context['page'].object_list),0)
+
+        # Make viewer of XMen
+        self.xmen_wg.giveRoleToUser('viewer',self.viewer)
+        self.assertFalse(perms.user_can_view(self.viewer,dp))
+
+        # Deadpool isn't an Xman yet, still no results.
+        psqs = PermissionSearchQuerySet()
+        psqs = psqs.auto_query('deadpool').apply_permission_checks(self.viewer)
+        self.assertEqual(len(psqs),0)
+
+        dp.workgroup = self.xmen_wg
+        dp.save()
+        dp = models.ObjectClass.objects.get(pk=dp.pk) # Un-cache
+
+        # Charles is a viewer, Deadpool is in X-men, should have results now.
+        psqs = PermissionSearchQuerySet()
+        psqs = psqs.auto_query('deadpool').apply_permission_checks(self.viewer)
+        self.assertEqual(len(psqs),1)
+
+        response = self.client.get(reverse('aristotle:search')+"?q=deadpool")
+        self.assertTrue(perms.user_can_view(self.viewer,dp))
+        self.assertEqual(len(response.context['page'].object_list),1)
+        self.assertEqual(response.context['page'].object_list[0].object.item,dp)
+
+        # Take away Charles viewing rights and no results again.
+        self.xmen_wg.removeRoleFromUser('viewer',self.viewer)
+        psqs = PermissionSearchQuerySet()
+        psqs = psqs.auto_query('deadpool').apply_permission_checks(self.viewer)
+        self.assertEqual(len(psqs),0)
+
+        response = self.client.get(reverse('aristotle:search')+"?q=deadpool")
+        self.assertEqual(len(response.context['page'].object_list),0)
 
 
 class TestTokenSearch(TestCase):

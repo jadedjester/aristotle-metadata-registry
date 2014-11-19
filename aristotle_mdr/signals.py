@@ -22,12 +22,12 @@ class AristotleSignalProcessor(signals.RealtimeSignalProcessor):
     def handle_status_change(self, sender, instance, **kwargs):
         # When a status changes, force an update of the object
         obj = instance.concept.item
-        super(AristotleSignalProcessor,self).handle_save(obj.__class__,obj)
+        super(AristotleSignalProcessor,self).handle_save(obj.__class__,obj, **kwargs)
 
     def handle_concept_save(self, sender, instance, **kwargs):
         obj = instance.item
-        self.handle_save(obj.__class__,obj)
+        self.handle_save(obj.__class__,obj, **kwargs)
 
     def handle_concept_delete(self, sender, instance, **kwargs):
         obj = instance.item
-        self.handle_save(obj.__class__,obj)
+        self.handle_delete(obj.__class__,obj, **kwargs)

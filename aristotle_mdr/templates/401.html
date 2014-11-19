@@ -6,9 +6,9 @@
 <p>
 The page you have requested is not
 {% if anon %}
-publically visible. You can <a href="/accounts/login">log in</a> and see if your account has access
+publically visible. You can <a href="{% url 'django.contrib.auth.views.login' %}?next={{request.path}}">log in</a> and see if your account has access
 {% else %}
-accessible via your current account. You can <a href="/accounts/logout">log out</a> and try with a different account
+accessible via your current account. You can <a href="{% url 'django.contrib.auth.views.logout' %}">log out</a> and try with a different account
 {% endif %}
 or contact an administrator to see why you can't access this page.
 </p>
