@@ -15,7 +15,7 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
         self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')
         self.ra.giveRoleToUser('Registrar',self.registrar)
-        xmen = "wolverine cyclops professorX storm nightcrawler"
+        xmen = "professorX cyclops iceman angel beast phoenix wolverine storm nightcrawler"
         self.xmen_wg = models.Workgroup.objects.create(name="X Men")
         self.xmen_wg.registrationAuthorities.add(self.ra)
         self.xmen_wg.save()
@@ -52,7 +52,7 @@ class TestTokenSearch(TestCase):
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
         self.registrar = User.objects.create_user('stryker','william.styker@weaponx.mil','mutantsMustDie')
         self.ra.giveRoleToUser('registrar',self.registrar)
-        xmen = "wolverine cyclops professorX storm nightcrawler"
+        xmen = "professorX cyclops iceman angel beast phoenix wolverine storm nightcrawler"
         self.xmen_wg = models.Workgroup.objects.create(name="X Men")
         self.xmen_wg.registrationAuthorities.add(self.ra)
         self.xmen_wg.save()
