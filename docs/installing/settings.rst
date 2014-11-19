@@ -13,9 +13,10 @@ The following are required within a dictionary in the settings for the configure
 * ``SEPARATORS`` - A key:value set that describes the separators to be used for name suggestions in the
                     admin interface. These are set by specifying the key as the django model name for
                     a given model, and the value as the separator.
-                    When a value for a model isn't in this field it is a hyphen ``-``, however the the
-                    by default the settings specify the separator for "DataElements" as a comma ``,`` and
-                    the separator for "DataElementConcepts" as an em-dash ``–``.
+                    When a value for a model isn't stated in this field it defaults to a hyphen ``-``.
+                    The default settings in ``required_settings.py`` set additional defaults and
+                    specify the separator for "DataElements" as a comma with a single space ``, ``
+                    and the separator for "DataElementConcepts" as an em-dash ``–``.
 
 ``ARISTOTLE_DOWNLOADS``
 -----------------------
