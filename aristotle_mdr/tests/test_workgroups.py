@@ -133,3 +133,38 @@ class WorkgroupMemberTests(utils.LoggedInViewPages,TestCase):
         self.assertEqual(response.status_code,302)
         self.assertFalse(self.newuser in self.wg1.viewers.all())
 
+    def test_workgroup_members_can_view_pages(self):
+        self.logout()
+        # Anonymous user can't see workgroup pages
+        n = reverse('django.contrib.auth.views.login')+"?next="
+        response = self.client.get(reverse('aristotle:workgroup',args=[self.wg1.id]))
+        self.assertRedirects(response,n+reverse('aristotle:workgroup',args=[self.wg1.id]),302,200)
+        response = self.client.get(reverse('aristotle:workgroupMembers',args=[self.wg1.id]))
+        self.assertRedirects(response,n+reverse('aristotle:workgroupMembers',args=[self.wg1.id]),302,200)
+        response = self.client.get(reverse('aristotle:workgroupItems',args=[self.wg1.id]))
+        self.assertRedirects(response,n+reverse('aristotle:workgroupItems',args=[self.wg1.id]),302,200)
+
+        # Logged in non-member can't see workgroup pages
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'nathan', 'password': 'noobie'})
+        response = self.client.get(reverse('aristotle:workgroup',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:workgroupMembers',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,403)
+        response = self.client.get(reverse('aristotle:workgroupItems',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,403)
+
+        self.login_viewer()
+        response = self.client.get(reverse('aristotle:workgroup',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:workgroupMembers',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:workgroupItems',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)
+
+        self.login_manager()
+        response = self.client.get(reverse('aristotle:workgroup',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:workgroupMembers',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse('aristotle:workgroupItems',args=[self.wg1.id]))
+        self.assertEqual(response.status_code,200)

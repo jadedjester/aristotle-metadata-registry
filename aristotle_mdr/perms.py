@@ -26,7 +26,7 @@ def user_can_view(user,item):
         user_key = str(user.id)
 
     # If the item was modified in the last 15 seconds, don't use cache
-    if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently :
+    if hasattr(item, "was_modified_very_recently") and item.was_modified_very_recently() :
         can_use_cache = False
     else:
         can_use_cache = True

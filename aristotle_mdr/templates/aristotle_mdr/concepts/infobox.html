@@ -101,6 +101,10 @@
                 {% endif %}
             </li></ul>
             </dd>
+        {% if request.user|in_workgroup:item.workgroup %}
+            <dt>Workgroup</dt>
+            <dd><a href="{% url 'aristotle:workgroup' iid=item.workgroup.id %}">{{ item.workgroup.name }}</a></dd>
+        {% endif %}
         </dl>
         <div id="infobox_modal" class="modal fade">
           <div class="modal-dialog">

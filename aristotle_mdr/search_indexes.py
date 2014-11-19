@@ -43,16 +43,24 @@ class conceptIndex(baseObjectIndex):
     highest_state = indexes.IntegerField()
     ra_statuses = indexes.MultiValueField()
     registrationAuthorities = indexes.MultiValueField()
-    workgroup = indexes.CharField(model_attr="workgroup")
+    workgroup = indexes.IntegerField()
     is_public = indexes.BooleanField()
     version = indexes.CharField(model_attr="version")
 
     def prepare_registrationAuthorities (self, obj):
-        ras = [s.registrationAuthority.id for s in obj.statuses.all()]
+        ras = [str(s.registrationAuthority.id) for s in obj.statuses.all()]
+        if not ras and obj.readyToReview:
+            # We fake a registration authority only if an item is "ready to review".
+            # This allows registrars to search for flag items in their authority.
+            # But this item won't get a state.
+            ras = [str(r.id) for r in obj.workgroup.registrationAuthorities.all()]
         return ras
 
     def prepare_is_public(self,obj):
         return obj.is_public()
+
+    def prepare_workgroup(self,obj):
+        return int(obj.workgroup.id)
 
     def prepare_statuses(self, obj):
         # We don't remove duplicates as it should mean the more standard it is the higher it will rank
