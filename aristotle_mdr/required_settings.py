@@ -86,6 +86,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 ROOT_URLCONF = 'aristotle_mdr.urls'
 LOGIN_REDIRECT_URL = '/account/home'
+LOGIN_URL = '/login'
+LOGOUT_URL = '/logout'
 
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
