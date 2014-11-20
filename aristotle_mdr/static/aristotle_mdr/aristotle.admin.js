@@ -21,7 +21,7 @@ $( document ).ready( function() {
             if (i==0) {
                 name = field_name
             } else {
-                name = name +" "+ sep +" "+ field_name;
+                name = name + sep + field_name;
             }
         })
         $(this).siblings('input').val(name);
