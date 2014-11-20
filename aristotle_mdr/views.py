@@ -90,6 +90,25 @@ def download(request,downloadType,iid=None):
             }
         )
 
+    from django.conf import settings
+    downloadOpts = getattr(settings, 'ARISTOTLE_DOWNLOADS', "")
+    module_name = ""
+    for d in downloadOpts:
+        dt = d[0]
+        print d, dt, d[-1]
+        if dt == downloadType:
+            module_name = d[-1]
+    print "----------- ", module_name
+    if module_name:
+        #try:
+            downloader = None
+            # dangerous - we are really trusting the settings creators here.
+            # TODO: Make this safer
+            exec("import %s.downloader as downloader"%module_name)
+            return downloader.download(request,downloadType,item)
+        #except:
+            pass
+
     raise Http404
 
 
