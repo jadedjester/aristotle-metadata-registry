@@ -315,8 +315,17 @@ def downloadMenu(item):
     from django.template.loader import get_template
     from django.template import Context
     downloadOpts = getattr(settings, 'ARISTOTLE_DOWNLOADS', "")
+    from aristotle_mdr.utils import get_download_template_path_for_item
+    downloadsForItem = []
+    for d in downloadOpts:
+        downloadType = d[0]
+        try:
+            get_template(get_download_template_path_for_item(item,downloadType))
+            downloadsForItem.append(d)
+        except template.TemplateDoesNotExist:
+            pass
     return get_template("aristotle_mdr/helpers/downloadMenu.html").render(
-        Context({'item':item,'downloadOptions':downloadOpts,})
+        Context({'item':item,'downloadOptions':downloadsForItem,})
         )
 
 @register.simple_tag

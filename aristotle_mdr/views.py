@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 
 from aristotle_mdr.perms import user_can_view, user_can_edit, user_in_workgroup, user_is_workgroup_manager, user_can_change_status
 from aristotle_mdr import perms
-from aristotle_mdr.utils import cache_per_item_user
+from aristotle_mdr.utils import cache_per_item_user, get_download_template_path_for_item
 import aristotle_mdr.forms as MDRForms # Treble-one seven nine
 import aristotle_mdr.models as MDR # Treble-one seven nine
 
@@ -77,8 +77,7 @@ def download(request,downloadType,iid=None):
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
-    p,t = item.template.split("/",1)
-    template = "%s/%s/%s"%(p,downloadType,t)
+    template = get_download_template_path_for_item(item,downloadType)
 
     if downloadType=="pdf":
         subItems = item.getPdfItems
