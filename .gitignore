@@ -44,7 +44,6 @@ nosetests.xml
 *.sqlite3
 whoosh_index/
 
-/migrations/
 src/
 /static/
 /docs/_build
