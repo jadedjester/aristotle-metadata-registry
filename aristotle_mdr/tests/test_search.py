@@ -11,8 +11,8 @@ setup_test_environment()
 
 class TestSearch(utils.LoggedInViewPages,TestCase):
     def setUp(self):
-        from haystack.management.commands import clear_index
-        clear_index.Command().handle(interactive=False)
+        from haystack.management.commands import rebuild_index
+        rebuild_index.Command().handle(interactive=False)
 
         super(TestSearch, self).setUp()
 
