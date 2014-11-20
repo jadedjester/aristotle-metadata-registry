@@ -430,7 +430,7 @@ class Migration(SchemaMigration):
         db.create_unique(m2m_table_name, ['possumprofile_id', '_concept_id'])
 
 
-    def backwards(self, orm):
+    def backwards(self, orm): # pragma: no cover
         # Removing unique constraint on 'GlossaryAdditionalDefinition', fields ['glossaryItem', 'registrationAuthority']
         db.delete_unique(u'aristotle_mdr_glossaryadditionaldefinition', ['glossaryItem_id', 'registrationAuthority_id'])
 
