@@ -98,15 +98,14 @@ def download(request,downloadType,iid=None):
         print d, dt, d[-1]
         if dt == downloadType:
             module_name = d[-1]
-    print "----------- ", module_name
     if module_name:
-        #try:
+        try:
             downloader = None
             # dangerous - we are really trusting the settings creators here.
             # TODO: Make this safer
             exec("import %s.downloader as downloader"%module_name)
             return downloader.download(request,downloadType,item)
-        #except:
+        except:
             pass
 
     raise Http404
