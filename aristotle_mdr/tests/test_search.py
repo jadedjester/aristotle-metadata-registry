@@ -5,20 +5,19 @@ import aristotle_mdr.perms as perms
 import aristotle_mdr.tests.utils as utils
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.core.management import call_command
 
 from django.test.utils import setup_test_environment
 setup_test_environment()
 
 class TestSearch(utils.LoggedInViewPages,TestCase):
+    def tearDown(self):
+        call_command('clear_index', interactive=False, verbosity=0)
+
     def setUp(self):
-        from haystack.management.commands import update_index, clear_index
-        try:
-            clear_index.Command().handle(interactive=False)
-        except:
-            pass
-        update_index.Command().handle(interactive=False)
-        
         super(TestSearch, self).setUp()
+        import haystack
+        haystack.connections.reload('default')
 
         self.ra = models.RegistrationAuthority.objects.create(name="Kelly Act")
         self.ra1 = models.RegistrationAuthority.objects.create(name="Superhuman Registration Act") # Anti-registration!
@@ -82,7 +81,6 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
         dp.readyToReview = True
         dp.save()
         dp = models.ObjectClass.objects.get(pk=dp.pk) # Un-cache
-        print "second check"
         self.assertTrue(perms.user_can_view(self.registrar,dp))
 
         # Stryker should be able to find items that are "ready for review" in his RA only.
