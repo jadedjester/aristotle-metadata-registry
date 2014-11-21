@@ -367,7 +367,7 @@ msgstr "Inget"
 
 #: templates/aristotle_mdr/concepts/infobox.html:105
 msgid "Workgroup"
-msgstr "arbetsgrupp"
+msgstr "Arbetsgrupp"
 
 #: templates/aristotle_mdr/concepts/managedContent.html:40
 msgid "Admin editor"
