@@ -30,7 +30,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" id="searchText" name="q" accesskey="q"></input>
                     <span class="input-group-btn">
-                    <button class="btn btn-primary" type="submit" title="Search">
+                    <button class="btn btn-primary" type="submit" title="{% trans 'Search' %}">
                         {% bootstrap_icon "search" %}&nbsp;
                     </button>
                 </div>
@@ -42,7 +42,7 @@
             <li class="dropdown">
                 <a href="{% url 'aristotle:createList' %}" accesskey="o" class="dropdown-toggle" data-toggle="dropdown" title="Open create menu">
                         <i class="fa fa-angle-down fa-lg"></i>
-                Create
+                {% trans 'Create' %}
                 </a>
                 <ul class="dropdown-menu" role="menu" >
                     <li><a href="{% url 'admin:aristotle_mdr_objectclass_add' %}">Object Class</a></li>
@@ -73,12 +73,12 @@
                     {% endif %}
                     <li role="presentation" class="divider"></li>
                     <li>
-                        <a href="{% url 'admin:index' %}">See all...</a>
+                        <a href="{% url 'admin:index' %}">{% trans 'See all'%}...</a>
                     </li>
                 </ul>
             </li>
             <li class="dropdown">
-                <a href="{% url 'aristotle:userHome' %}" accesskey="u" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="Open user menu">
+                <a href="{% url 'aristotle:userHome' %}" accesskey="u" class="dropdown-toggle" role="menu" data-toggle="dropdown" title="{% trans 'Open user menu' %}">
                     {% if user.is_superuser %}
                         <i class="fa fa-user-md fa-lg"></i>
                     {% else %}
@@ -87,9 +87,9 @@
                     {% firstof user.get_short_name user.get_username %}
                     {% if user.is_active %}
                         {% if user.notifications.unread %}
-                        <span class="notify" title="New notifications"></span>
+                        <span class="notify" title="{% trans 'New notifications' %}"></span>
                         {% else %}
-                        <span class="no-notify" title="No unread notifications"></span>
+                        <span class="no-notify" title="{% trans 'No unread notifications' %}"></span>
                         {% endif %}
                     {% endif %}
                 </a>
@@ -111,7 +111,7 @@
                         <i class="fa fa-comments fa-fw"></i> {% trans 'Discussions'%}
                     </a></li>
                     <li><a href="{% url 'aristotle:userWorkgroups' %}">
-                        <i class="fa fa-users fa-fw"></i> Workgroups
+                        <i class="fa fa-users fa-fw"></i> {% trans 'Workgroups'%}
                     </a></li>
                     {% if user.has_usable_password %}
                         <li><a href="{% url 'admin:password_change' %}">

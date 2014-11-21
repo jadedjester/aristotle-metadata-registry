@@ -24,10 +24,10 @@ class BootstrapChoiceInput(ChoiceInput):
         value = value or self.value
         attrs = attrs or self.attrs
         if 'id' in self.attrs:
-            label_for = format_html(' for="{0}_{1}"', self.attrs['id'], self.index)
+            label_for = format_html(u' for="{0}_{1}"', self.attrs['id'], self.index)
         else:
             label_for = ''
-        return format_html('{1}<label{0} role="menuitem" tabindex="-1"> <span>{2}</span></label>', label_for, self.tag(), self.choice_label)
+        return format_html(u'{1}<label{0} role="menuitem" tabindex="-1"> <span>{2}</span></label>', label_for, self.tag(), self.choice_label)
     def tag(self):
         self.attrs['tabindex'] = -1
         return super(BootstrapChoiceInput,self).tag()
@@ -48,11 +48,11 @@ class BootstrapChoiceFieldRenderer(ChoiceFieldRenderer):
         id_ = self.attrs.get('id', None)
         output=[]
         for widget in self:
-            output.append(format_html('<li role="presentation">{0}</li>', force_text(widget)))
+            output.append(format_html(u'<li role="presentation">{0}</li>', force_text(widget)))
         if self.wrap:
-            start_tag = format_html('<ul id="{0}" class="dropdown-menu" role="menu">', id_) if id_ else '<ul class="dropdown-menu" role="menu">'
+            start_tag = format_html(u'<ul id="{0}" class="dropdown-menu" role="menu">', id_) if id_ else '<ul class="dropdown-menu" role="menu">'
             output = [start_tag]+output
-            output.append('</ul>')
+            output.append(u'</ul>')
         return mark_safe('\n'.join(output))
 
 class BootstrapCheckboxFieldRenderer(BootstrapChoiceFieldRenderer):

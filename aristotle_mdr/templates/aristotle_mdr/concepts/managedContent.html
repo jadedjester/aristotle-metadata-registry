@@ -1,5 +1,5 @@
 {% extends 'aristotle_mdr/base.html' %}
-{% load humanize %}
+{% load humanize i18n %}
 {% load inplace_edit compile_static %}
 {% load aristotle_tags %}
 
@@ -30,14 +30,14 @@
         {% endif %}
         <a href="#">{% inplace_edit 'item.name' %}</a>
         {% if item.version %}
-        <em class="version" title="Version {{ item.version }}">
+        <em class="version" title="{% trans 'Version'%} {{ item.version }}">
             {% inplace_edit 'item.version' %}
         </em>
         {% endif %}
         <small>({{ item.get_verbose_name }})</small>
         {% if item|can_edit:request.user %}
         <a class="sr-only" accesskey="p" href="{% adminEdit item %}">
-            <i class="fa fa-sliders"></i> Admin editor
+            <i class="fa fa-sliders"></i> {% trans 'Admin editor'%}
         </a>
         {% endif %}
     </h1>
@@ -45,29 +45,29 @@
         {% if item|can_edit:request.user %}
             <div class="btn-group">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                Edit menu <span class="caret"></span>
+                {% trans 'Edit menu'%} <span class="caret"></span>
               </button>
               <ul class="dropdown-menu" role="menu">
                 <li><a id="ActivateInplaceEdit" class=""></a></li>
                 <li><a class="" href="{% adminEdit item %}">
-                    <i class="fa fa-sliders"></i> Advanced editor
+                    <i class="fa fa-sliders"></i> {% trans 'Advanced editor'%}
                 </a></li>
 
                 <li class="divider"></li>
                 <li><a class="" href="{% clone item %}">
-                    <i class="fa fa-code-fork"></i> Clone this item
+                    <i class="fa fa-code-fork"></i> {% trans 'Clone this item'%}
                 </a></li>
               </ul>
             </div>
         {% endif %}
         {% if view == "technical" %}
-            <a href="?view=simple" id="viewChange" class="btn btn-default"><i class="fa fa-minus-square"></i> Simple View</a>
+            <a href="?view=simple" id="viewChange" class="btn btn-default"><i class="fa fa-minus-square"></i> {% trans 'Simple View'%}</a>
         {% else %}
-            <a href="?view=technical" id="viewChange" class="btn btn-default"><i class="fa fa-graduation-cap"></i> Technical View</a>
+            <a href="?view=technical" id="viewChange" class="btn btn-default"><i class="fa fa-graduation-cap"></i> {% trans 'Technical View'%}</a>
         {% endif %}
         <div class="btn-group">
             <button accesskey="d" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-download"></i> Download <span class="caret"></span>
+            <i class="fa fa-download"></i> {% trans 'Download'%} <span class="caret"></span>
             </button>
             {% downloadMenu item %}
         </div>
@@ -77,39 +77,37 @@
     {% include "aristotle_mdr/concepts/infobox.html" %}
     {% if item.is_superseded  %}
         <div id="progress" class=" alert alert-info">
-            This item has been superseded by the newer version,
+            {% trans 'This item has been superseded by the newer version,'%}
             <em>{% include "aristotle_mdr/helpers/itemLink.html" with item=item.superseded_by %}</em>.
         </div>
     {% elif item.is_retired %}
         <div id="progress" class=" alert alert-warning">
-            This item has been retired and is not recommended for use by any
-            registration authority.
+            {% trans 'This item has been retired and is not recommended for use by any registration authority.'%}
         </div>
     {% elif item.is_public %}
         {# split the if condition as if its public and not technical, we want nothing not one of the lower alerts #}
         <div id="progress" class='alert alert-success hidden'>
-            This item is currently public.
+            {% trans 'This item is currently public.'%}
         </div>
     {% elif item.is_locked %}
         <div id="progress" class=" alert alert-info">
-            This item is currently under development.
+            {% trans 'This item is currently under development.'%}
         </div>
     {% else %}
         <div id="progress" class=" alert alert-warning">
-            This item is under review and active development. Content may change frequently.
+            {% trans 'This item is under review and active development. Content may change frequently.'%}
         </div>
     {% endif %}
     {% if not item.is_registered %}
     <div id="review" class=" alert alert-info">
         <strong>{% if item.readyToReview %}
-        This item has been marked as ready to review, but has not yet been registered in an authority.
+        {% trans 'This item has been marked as ready to review, but has not yet been registered in an authority.'%}
         {% else %}
-        The visibility of this item is still restricted to your current workgroup.
+        {% trans 'The visibility of this item is still restricted to your current workgroup.'%}
         {% endif %}</strong><br>
 
         <p>You can control the visibility of this item by indicating its review status.
-        If an item is marked "ready for review", registrars will be able to see this
-        item and begin the standardisation process according to their registration authority.
+        {% trans 'If an item is marked "ready for review", registrars will be able to see this item and begin the standardisation process according to their registration authority.'%}
 
         <p><label>Is this item {% ternary item.readyToReview "still" "" %} ready for review?</label>
         {% inplace_edit 'item.readyToReview' adaptor='booleanYesNo' %}
@@ -117,16 +115,16 @@
     {% endif %}
     <dl id="alternate_names" class="hidden-xs">
         {% if item.shortName %}
-        <dt>Short name</dt><dd>{% inplace_edit 'item.shortName' %}</dd>
+        <dt>{% trans 'Short name'%}</dt><dd>{% inplace_edit 'item.shortName' %}</dd>
         {% endif %}
         {% if item.version %}
-        <dt class="visible-xs">Version</dt><dd class="visible-xs">{{ item.version }}</dd>
+        <dt class="visible-xs">{% trans 'Version'%}</dt><dd class="visible-xs">{{ item.version }}</dd>
         {% endif %}
         {% if item.synonyms %}
-        <dt>Synonyms</dt><dd>{% inplace_edit 'item.synonyms' %}</dd>
+        <dt>{% trans 'Synonyms'%}</dt><dd>{% inplace_edit 'item.synonyms' %}</dd>
         {% endif %}
     </dl>
-    <h2>Definition</h2>
+    <h2>{% trans 'Definition'%}</h2>
     <div id="description" class="description">
         {% inplace_edit 'item.description' adaptor='aristotle' %}
     </div>

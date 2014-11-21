@@ -1,5 +1,5 @@
 {% load aristotle_tags %}
-{% load humanize %}
+{% load humanize i18n %}
 
 <aside id="infobox-wrap" class="col-xs-12 col-sm-4 pull-right navbar navbar-default">
     <div class="navbar-header">
@@ -18,7 +18,7 @@
     <div id="infobox" class="collapse navbar-collapse" >
         <header class="hidden-xs">{{ item.name }}</header>
         <dl>
-            <dt>Type</dt>
+            <dt>{% trans 'Type' context "Object Type" %}</dt>
             <dd>
                 <a href="{% aboutLink item %}"
                     data-toggle="modal" data-target="#infobox_modal"
@@ -26,29 +26,29 @@
             </dd>
             <dt>Aristotle ID</dt><dd>{{ item.id }}</dd>
             {% if item.shortName %}
-            <dt class="visible-xs">Short name</dt><dd class="visible-xs">{{ item.shortName }}</dd>
+            <dt class="visible-xs">{% trans 'Short name'%}</dt><dd class="visible-xs">{{ item.shortName }}</dd>
             {% endif %}
             {% if item.version %}
-            <dt class="visible-xs">Version</dt><dd class="visible-xs">{{ item.version }}</dd>
+            <dt class="visible-xs">{% trans 'Version'%}</dt><dd class="visible-xs">{{ item.version }}</dd>
             {% endif %}
             {% if item.synonyms %}
-            <dt class="visible-xs">Synonyms</dt><dd class="visible-xs">{{ item.synonyms }}</dd>
+            <dt class="visible-xs">{% trans 'Synonyms'%}</dt><dd class="visible-xs">{{ item.synonyms }}</dd>
             {% endif %}
             {% if item.originURI %}
-            <dt title="{{ item.originURI.help_text }}">Origin URI</dt><dd><a title="This link will exit this site" href="{{ item.originURI }}">Jump to original <i class="fa fa-external-link"></i></a></dd>
+            <dt title="{{ item.originURI.help_text }}">{% trans 'Origin URI'%}</dt><dd><a title="This link will exit this site" href="{{ item.originURI }}">Jump to original <i class="fa fa-external-link"></i></a></dd>
             {% endif %}
             <dt>Included in</dt>
             <dd>
                 {% with total=item.packages.count %}
                 {% if total > 0 %}<a href="{{ request.path }}/packages">{% endif %}
-                {{ total }} Package{{ total|pluralize }}
+                {{ total }} {% trans 'Package' context "Aristotle Package" %}{{ total|pluralize }}
                 {% if total > 0 %}</a>{% endif %}
                 {% endwith %}
             </dd>
             {% block includes %}{% endblock %}
 
             {% include "aristotle_mdr/statuses.html" with statuses=item.statuses infoBox=True %}
-            <dt>Last updated</dt>
+            <dt>{% trans 'Last updated'%}</dt>
             <dd>
                 {% if request.user.is_superuser or item.workgroup in request.user.workgroups %}
                     <a title ="{{item.modified}}"
@@ -58,17 +58,17 @@
                 {% endif %}
                 {% if request.user.is_active %}
                 <span style="display:inline-block">By {% with name=last_edit.revision.user.get_username %}
-                        {% if name %}{{ name }}{% else %}<em title="This may have been added during an import.">Unknown</em>{% endif %}
+                        {% if name %}{{ name }}{% else %}<em title="{% trans 'This may have been added during an import.'%}">{% trans 'Unknown' context "Unknown import user"%}</em>{% endif %}
                         {% endwith %}
                 </span>
                 {% endif %}
             </dd>
-            <dt>Created</dt><dd title="{{ item.created }}">{{item.created|date}}</dd>
+            <dt>{% trans 'Created'%}</dt><dd title="{{ item.created }}">{{item.created|date}}</dd>
 
         {% block asideContent %}{% endblock %}
 
         {% with total=item.supersedes.count %}
-            <dt class="large">Supersedes
+            <dt class="large">{% trans 'Supersedes'%}
             {% if item|can_edit:request.user %}
                 <a class="inline_action" href="{% url 'aristotle:deprecate' iid=item.id %}"
                     data-toggle="modal" data-target="#infobox_modal">{% ternary total 'Change' 'Add'%}</a>
@@ -82,12 +82,12 @@
                       </a>
                     </li>
                 {% empty %}
-                    <li><em>None</em></li>
+                    <li><em>{% trans 'None' context 'No older objects' %}</em></li>
                 {% endfor %}
             </ul>
             </dd>
         {% endwith %}
-            <dt class="large">Superseded by
+            <dt class="large">{% trans 'Superseded by'%}
                 {% if item|can_edit:request.user %}
                     <a class="inline_action" href="{% url 'aristotle:supersede' iid=item.id %}"
                        data-toggle="modal" data-target="#infobox_modal">{% ternary item.superseded_by 'Change' 'Add'%}</a>
@@ -97,12 +97,12 @@
                 {% if item.superseded_by %}
                     <a href="{% url 'aristotle:item' iid=item.superseded_by.id %}">{{ item.superseded_by }}</a>
                 {% else %}
-                    <em>None</em>
+                    <em>{% trans 'None' context 'No newer objects'%}</em>
                 {% endif %}
             </li></ul>
             </dd>
         {% if request.user|in_workgroup:item.workgroup %}
-            <dt>Workgroup</dt>
+            <dt>{% trans 'Workgroup' %}</dt>
             <dd><a href="{% url 'aristotle:workgroup' iid=item.workgroup.id %}">{{ item.workgroup.name }}</a></dd>
         {% endif %}
         </dl>
