@@ -14,17 +14,14 @@ from django.contrib.auth.models import User
 
 from aristotle_mdr.perms import user_can_view, user_can_edit, user_in_workgroup, user_is_workgroup_manager, user_can_change_status
 from aristotle_mdr import perms
-from aristotle_mdr.utils import cache_per_item_user, get_download_template_path_for_item
-import aristotle_mdr.forms as MDRForms # Treble-one seven nine
-import aristotle_mdr.models as MDR # Treble-one seven nine
+from aristotle_mdr.utils import cache_per_item_user
+#import aristotle_mdr.forms as MDRForms
+#import aristotle_mdr.models as MDR
+from aristotle_mdr import forms as MDRForms
+from aristotle_mdr import models as MDR
 
 from haystack.views import SearchView
 
-import cStringIO as StringIO
-import xhtml2pdf.pisa as pisa
-from django.template.loader import get_template
-from django.template import Context
-import cgi
 
 PAGES_PER_RELATED_ITEM = 15
 
@@ -34,16 +31,6 @@ paginate_sort_opts = {  "mod_asc":"modified",
                         "name_desc":"-name",
                     }
 
-
-def render_to_pdf(template_src, context_dict):
-    template = get_template(template_src)
-    context = Context(context_dict)
-    html  = template.render(context)
-    result = StringIO.StringIO()
-    pdf = pisa.pisaDocument(StringIO.StringIO(html.encode("UTF-8")), result,encoding='UTF-8')
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), mimetype='application/pdf')
-    return HttpResponse('We had some errors<pre>%s</pre>' % cgi.escape(html))
 
 class DynamicTemplateView(TemplateView):
     def get_template_names(self):
@@ -70,6 +57,44 @@ def render_if_user_can_edit(item_type, request, *args, **kwargs):
     return render_if_condition_met(request, user_can_edit, item_type, *args,**kwargs)
 
 def download(request,downloadType,iid=None):
+    """
+    By default, ``aristotle_mdr.views.download`` is called whenever a URL matches
+    the pattern defined in ``aristotle_mdr.urls_aristotle``::
+
+        download/(?P<downloadType>[a-zA-Z0-9\-\.]+)/(?P<iid>\d+)/?
+
+    This is passed into ``download`` which resolves the item id (``iid``), and
+    determins if a user has permission to view the request item with that id. If
+    a user is allowed to download this file, ``download`` iterates through each
+    download type defined in ``ARISTOTLE_DOWNLOADS``.
+
+    A download option tuple takes the following form form::
+
+        ('file_type','display_name','font_awesome_icon_name','module_name'),
+
+    With ``file_type`` allowing only ASCII alphanumeric and underscores,
+    ``display_name`` can be any valid python string,
+    ``font_awesome_icon_name`` can be any Font Awesome icon and
+    ``module_name`` is the name of the python module that provides a downloader
+    for this file type.
+
+    For example, included with Aristotle-MDR is a PDF downloader which has the
+    download definition tuple::
+
+            ('pdf','PDF','fa-file-pdf-o','aristotle_mdr'),
+
+    Where a ``file_type`` multiple is defined multiple times, **the last matching
+    instance in the tuple is used**.
+
+    Next, the module that is defined for a ``file_type`` is dynamically imported using
+    ``exec``, and is wrapped in a ``try: except`` block to catch any exceptions. If
+    the ``module_name`` does not match the regex ``^[a-zA-Z0-9\_]+$`` ``download``
+    raises an exception.
+
+    If the module is able to be imported, ``downloader.py`` from the given module
+    is imported, this file **MUST** have a ``download`` function defined which returns
+    a Django ``HttpResponse`` object of some form.
+    """
     item = MDR._concept.objects.get_subclass(pk=iid)
     item = get_if_user_can_view(item.__class__,request.user, iid)
     if not item:
@@ -77,18 +102,6 @@ def download(request,downloadType,iid=None):
             return redirect(reverse('django.contrib.auth.views.login')+'?next=%s' % request.path)
         else:
             raise PermissionDenied
-    template = get_download_template_path_for_item(item,downloadType)
-
-    if downloadType=="pdf":
-        subItems = item.getPdfItems
-        return render_to_pdf(template,
-            {'item':item,
-             'items':subItems,
-             'tableOfContents':len(subItems)>0,
-             'view':request.GET.get('view','').lower(),
-             'pagesize':request.GET.get('pagesize','A4'),
-            }
-        )
 
     from django.conf import settings
     downloadOpts = getattr(settings, 'ARISTOTLE_DOWNLOADS', "")
@@ -99,6 +112,13 @@ def download(request,downloadType,iid=None):
         if dt == downloadType:
             module_name = d[-1]
     if module_name:
+        import re
+        if not re.search('^[a-zA-Z0-9\-\.]+$',downloadType): # pragma: no cover
+            # Invalid downloadType
+            raise Exception
+        elif not re.search('^[a-zA-Z0-9\_]+$',module_name): # pragma: no cover
+            # bad module_name
+            raise Exception
         try:
             downloader = None
             # dangerous - we are really trusting the settings creators here.

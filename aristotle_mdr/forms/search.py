@@ -193,9 +193,9 @@ class PermissionSearchForm(TokenSearchForm):
         )
 
     # Use short singular names
-    ras = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
+    #ras = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
     ra = forms.MultipleChoiceField(required=False,
-        choices=ras,widget=BootstrapDropdownSelectMultiple)
+        choices=[],widget=BootstrapDropdownSelectMultiple)
 
     sort = forms.ChoiceField(required=False,initial=SORT_OPTIONS.natural,
         choices=SORT_OPTIONS,widget=BootstrapDropdownSelect)
@@ -216,6 +216,8 @@ class PermissionSearchForm(TokenSearchForm):
     def __init__(self,*args, **kwargs):
         kwargs['searchqueryset'] = PermissionSearchQuerySet()
         super(PermissionSearchForm, self).__init__(*args, **kwargs)
+
+        self.fields['ra'].choices = [(ra.id, ra.name) for ra in MDR.RegistrationAuthority.objects.all()]
 
     def get_models(self):
         """Return an alphabetical list of model classes in the index."""
