@@ -24,6 +24,11 @@ def concept_to_clone_dict(obj):
     clone_dict['name'] = clone_dict['name'] + ugettext(u" (clone)")
     return clone_dict
 
+def get_download_template_path_for_item(item,downloadType):
+    p,t = item.template.split("/",1)
+    template = "%s/%s/%s"%(p,downloadType,t)
+    return template
+
 '''
 Modified from: https://djangosnippets.org/snippets/2524/
 '''

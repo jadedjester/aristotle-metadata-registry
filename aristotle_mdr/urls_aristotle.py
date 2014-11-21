@@ -63,7 +63,7 @@ urlpatterns = patterns('aristotle_mdr.views',
 #    url(r'^create/dataelement$', views.createDataElement, name='createDataElement'),
 #    url(r'^create/dataelementconcept$', views.DataElementConceptWizard.as_view()),
 
-    url(r'^download/(?P<downloadType>[a-zA-Z0-9\-]+)/(?P<iid>\d+)/?$', views.download, name='download'),
+    url(r'^download/(?P<downloadType>[a-zA-Z0-9\-\.]+)/(?P<iid>\d+)/?$', views.download, name='download'),
 
     url(r'^action/supersede/(?P<iid>\d+)$', views.supersede, name='supersede'),
     url(r'^action/deprecate/(?P<iid>\d+)$', views.deprecate, name='deprecate'),

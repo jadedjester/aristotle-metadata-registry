@@ -28,7 +28,7 @@ class Migration(SchemaMigration):
         # Changing field '_concept.name'
         db.alter_column(u'aristotle_mdr__concept', 'name', self.gf('django.db.models.fields.TextField')())
 
-    def backwards(self, orm):
+    def backwards(self, orm): # pragma: no cover
 
         # Changing field 'Measure.name'
         db.alter_column(u'aristotle_mdr_measure', 'name', self.gf('django.db.models.fields.CharField')(max_length=100))
