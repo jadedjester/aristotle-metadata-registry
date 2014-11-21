@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block search %}{% endblock %}
-{% block title %}Search{% if query %} results{% endif %}{% endblock %}
+{% block title %}{% trans "Search" %}{% if query %} {% trans "results" context 'Search results' %}{% endif %}{% endblock %}
 {% block content %}
     <form method="get">
         <div id="searchbar" class="row">
@@ -25,7 +25,7 @@
                     <input type="text" class="form-control" value="{% ternary form.q.value form.q.value "" %}" name="q" accesskey="q"></input>
                     <span class="input-group-btn">
                     <button class="btn btn-primary" type="submit">
-                        Search {% bootstrap_icon "search" %}
+                        {% trans "Search" %} {% bootstrap_icon "search" %}
                     </button>
                     </span>
                 </div>
@@ -54,12 +54,12 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#advSearch">
-                <span class="sr-only">Toggle navigation</span>
+                <span class="sr-only">{% trans 'Toggle navigation' %}</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" accesskey="a" id="advanced_nav_link" href="#"><small id="advanced_label">Advanced:</small><small id="clear_filters">Clear filters</small></a>
+              <a class="navbar-brand" accesskey="a" id="advanced_nav_link" href="#"><small id="advanced_label">{% trans 'Advanced' context "Advanced search"%}:</small><small id="clear_filters">{% trans 'Clear filters' context "Clear search filters" %}</small></a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="advSearch">
@@ -68,7 +68,7 @@
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
                             <i class="fa fa-puzzle-piece fa-fw"></i>
-                            Item type <span class="badge"></span><span class="caret"></span>
+                            {% trans 'Item type' context 'Metadata item type' %}  <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.models }}
                     </li>
@@ -76,7 +76,7 @@
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
                             <i class="fa fa-unlock-alt fa-fw"></i>
-                            Status <span class="badge"></span><span class="caret"></span>
+                            {% trans 'Status' context 'Registration Status' %} <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.state }}
                     </li>
@@ -84,7 +84,7 @@
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
                             <i class="fa fa-university fa-fw"></i>
-                            Authority <span class="badge"></span><span class="caret"></span>
+                            {% trans 'Authority' context 'Registration Authority' %} <span class="badge"></span><span class="caret"></span>
                         </a>
                         {{ form.ra }}
                     </li>
@@ -92,7 +92,7 @@
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
                             <i class="fa fa-calendar fa-fw"></i>
-                            Modified <span class="caret"></span>
+                            {% trans 'Modified' context 'Modified date' %} <span class="caret"></span>
                             <small class="details"></small>
                         </a>
                         <ul class="dropdown-menu" role="menu">
@@ -112,7 +112,7 @@
                         <a href="#" type="button" class="dropdown-toggle"
                         data-toggle="dropdown">
                             <i class="fa fa-calendar fa-fw"></i>
-                            Created <span class="caret"></span>
+                            {% trans 'Created' context 'Created date' %} <span class="caret"></span>
                             <small class="details"></small>
                         </a>
                         <ul class="dropdown-menu" role="menu">
