@@ -84,7 +84,6 @@ class ManagedObjectVisibility(object):
 
         self.assertEqual(perms.user_can_view(r1,self.item),True)
 
-
     def test_object_submitter_can_view(self):
         # set up
         ra = models.RegistrationAuthority.objects.create(name="Test RA")
@@ -397,6 +396,54 @@ class LoggedInViewPages(utils.LoggedInViewPages):
         response = self.client.get(reverse('aristotle:registrationHistory',args=[self.item2.id]))
         self.assertEqual(response.status_code,302)
 
+    def test_viewer_can_favourite(self):
+        self.login_viewer()
+        self.assertTrue(perms.user_can_view(self.viewer,self.item1))
+
+        response = self.client.post(reverse('django.contrib.auth.views.login'), {'username': 'vicky', 'password': 'viewer'})
+        self.assertEqual(response.status_code,302)
+        self.assertEqual(self.viewer.profile.favourites.count(),0)
+
+        response = self.client.get(reverse('aristotle:toggleFavourite', args=[self.item1.id]))
+        self.assertRedirects(response,reverse("aristotle:item", args=[self.item1.id]))
+        self.assertEqual(self.viewer.profile.favourites.count(),1)
+        self.assertEqual(self.viewer.profile.favourites.first().item,self.item1)
+
+        response = self.client.get(reverse('aristotle:toggleFavourite', args=[self.item1.id]))
+        self.assertRedirects(response,reverse("aristotle:item", args=[self.item1.id]))
+        self.assertEqual(self.viewer.profile.favourites.count(),0)
+
+    def test_registrar_can_change_status(self):
+        self.logout()
+        self.login_registrar()
+
+        self.assertFalse(perms.user_can_view(self.registrar,self.item1))
+        self.item1.readyToReview = True
+        self.item1.save()
+        self.item1 = self.itemType.objects.get(pk=self.item1.pk)
+
+        self.assertTrue(perms.user_can_view(self.registrar,self.item1))
+        self.assertTrue(perms.user_can_change_status(self.registrar,self.item1))
+
+        response = self.client.get(reverse('aristotle:changeStatus',args=[self.item1.id]))
+        self.assertEqual(response.status_code,200)
+
+        self.assertEqual(self.item1.statuses.count(),0)
+        response = self.client.post(reverse('aristotle:changeStatus',args=[self.item1.id]),
+                    {   'registrationAuthorities': [str(self.ra.id)],
+                        'state': self.ra.public_state,
+                        'changeDetails': "testing",
+                        'cascadeRegistration': 0, #no
+                    }
+                )
+        self.assertRedirects(response,reverse("aristotle:%s"%self.item1.url_name, args=[self.item1.id]))
+
+        self.assertEqual(self.item1.statuses.count(),1)
+        self.item1 = self.itemType.objects.get(pk=self.item1.pk)
+        self.assertTrue(self.item1.is_public())
+
+
+
 class ObjectClassViewPage(LoggedInViewPages,TestCase):
     url_name='objectClass'
     itemType=models.ObjectClass
@@ -410,7 +457,26 @@ class GlossaryViewPage(LoggedInViewPages,TestCase):
     url_name='glossary'
     itemType=models.GlossaryItem
 
+    def test_glossary_ajax_list(self):
+        import json
+        gitem = models.GlossaryItem(name="Glossary item",workgroup=self.wg1)
+        response = self.client.get(reverse('aristotle:glossaryAjaxlist'))
+        data = json.loads(str(response.content))
+        self.assertEqual(data,[])
 
+        gitem.readyToReview = True
+        gitem.save()
+
+        self.assertTrue(perms.user_can_change_status(self.registrar,gitem))
+
+        self.ra.register(gitem,models.STATES.standard,self.registrar)
+
+        self.assertTrue(gitem.is_public())
+
+        response = self.client.get(reverse('aristotle:glossaryAjaxlist'))
+        data = json.loads(str(response.content))
+        self.assertEqual(len(data),1)
+        self.assertEqual(data[0]['id'],gitem.id)
 
 class CustomConceptQuerySetTest(TestCase):
     def test_is_public(self):

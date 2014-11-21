@@ -48,9 +48,9 @@
             {{ notice.verb }}
             {% if notice.target %} :
                 {% if 'item' in notice.verb %}
-                    <a href="{% url 'aristotle:item' notice.target.id }}">{{ notice.target.name }}</a>
+                    <a href="{% url 'aristotle:item' notice.target.id %}">{{ notice.target.name }}</a>
                 {% elif 'comment' in notice.verb %}
-                    <a href="{% url 'aristotle:discussionsPost' notice.target.id }}">{{ notice.target.title }}</a>
+                    <a href="{% url 'aristotle:discussionsPost' notice.target.id %}">{{ notice.target.title }}</a>
                 {% endif %}
             {% endif %}
             {% if notice.description %}

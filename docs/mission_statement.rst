@@ -17,5 +17,5 @@ is a matter for each party installing Aristotle to tackle.
 There are some simple url hooks available in Aristotle for including extra pages using the
 django template system, alternatively `Django Packages <https://www.djangopackages.com/>`_ has a
 list of a number of `excellent CMS packages for Django <https://www.djangopackages.com/grids/g/cms/>`_.
-Any of these should quite easily slot in besides the Aristotle app in a custom site,
+Many of these should be able slot in besides the Aristotle-MDR app in a custom site,
 without having to alter the code or compromise the core principles of Aristotle.
