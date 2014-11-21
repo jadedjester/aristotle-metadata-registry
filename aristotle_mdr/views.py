@@ -498,7 +498,7 @@ def glossary(request):
 
 def glossaryAjaxlist(request):
     import json
-    results = [g.json_link_list() for g in MDR.GlossaryItem.objects.all()] #visible(request.user).all()]
+    results = [g.json_link_list() for g in MDR.GlossaryItem.objects.visible(request.user).all()]
     return HttpResponse(json.dumps(results), content_type="application/json")
 
 def glossaryById(*args,**kwargs):
@@ -509,9 +509,6 @@ def glossaryById(*args,**kwargs):
 
 def aboutThisSite(request):
     return render(request,"aristotle_mdr/about_this_site.html")
-
-def aboutExtensions(request):
-    return render(request,"aristotle_mdr/extensions.html",{'extensions':extensions})
 
 # creation tools
 

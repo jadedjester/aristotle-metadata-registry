@@ -46,6 +46,13 @@ class SupersedePage(utils.LoggedInViewPages,TestCase):
         self.item4 = models.Property.objects.create(name="Prop4",workgroup=self.wg1)
 
     def test_supersede(self):
+        self.logout()
+        response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))
+        self.assertRedirects(response,
+            reverse("django.contrib.auth.views.login",)+"?next="+
+            reverse('aristotle:supersede',args=[self.item1.id])
+            )
+
         self.login_editor()
         response = self.client.get(reverse('aristotle:supersede',args=[self.item1.id]))
         self.assertEqual(response.status_code,200)
@@ -86,6 +93,13 @@ class DeprecatePage(utils.LoggedInViewPages,TestCase):
         self.item4 = models.Property.objects.create(name="Prop4",workgroup=self.wg1)
 
     def test_deprecate(self):
+        self.logout()
+        response = self.client.get(reverse('aristotle:deprecate',args=[self.item1.id]))
+        self.assertRedirects(response,
+            reverse("django.contrib.auth.views.login",)+"?next="+
+            reverse('aristotle:deprecate',args=[self.item1.id])
+            )
+
         self.login_editor()
         response = self.client.get(reverse('aristotle:deprecate',args=[self.item1.id]))
         self.assertEqual(response.status_code,200)
