@@ -1,0 +1,4 @@
+{% include "search/indexes/aristotle_mdr/managedobject_text.txt" %}
+{% for alt in object.alternate_definitions.all %}
+    {{ alt.description }}
+{% endfor %}
