@@ -1,0 +1,28 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %} 
+{% block title %}About: Data Element Concept{% endblock %}
+{% block item_name %}Data Element Concept{% endblock %} 
+
+{% block breadcrumbs %}
+<li><a href="{% url 'aristotle:about' 'dataelementconcept' %}"Data Element Concept"</a></li> 
+{% endblock %} 
+
+{% block iso_quote %} 
+A data element concept is implicitly associated with both the property and the object class whose combination it expresses.
+{% end block %} 
+
+{% block description %}
+
+<P>A data element concept represents the union of an object class and a property. Examples of data element concepts include
+demographic concepts relating to a person such as, <em>Person</em> &mdash; <em>date of birth</em>, <em>Person</em> &mdash; 
+<em>country of birth</em>, and <em>Person</em> &mdash; <em>religious affiliation</em>.</P>
+
+<P>A data element concept is soley a conceptual description and does not include values for measurement or collection. Values 
+are described by a value domain, which in combination with the data element concept forms a data element.</P>
+
+
+<P>A conceptual domain may also be associated with a data element concept, thereby providing meaning to the values 
+associated with the concept. A one-to-many relationship may be formed between a data element concept and suitable 
+conceptual domains.</P> 
+
+{% endblock %} 
+ 
