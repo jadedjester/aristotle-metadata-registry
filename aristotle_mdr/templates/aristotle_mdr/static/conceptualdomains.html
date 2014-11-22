@@ -1,0 +1,27 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %} 
+{% block title %}About: Conceptual Domain{% endblock %}
+{% block item_name %}Conceptual Domain{% endblock %} 
+
+{% block breadcrumbs %}
+<li><a href="{% url 'aristotle:about' 'conceptualdomain' %}"Conceptual Domain"</a></li> 
+{% endblock %} 
+
+{% block iso_quote %} 
+A concept that expresses its description or valid instance meanings.
+{% end block %} 
+
+{% block description %}
+
+<P>A conceptual domain may be associated with either a data element concept or a value domain. A conceptual domain is not a 
+mandatory association, and there may be a one-to-many relationship between a data element concept and a conceptual domain, or 
+a value domain and a conceptual domain.</P>
+
+<P>Countries of the world can be expressed as a conceptual domain. The concept of countries can be measured by both enumerated 
+and non-enumerated value domains. An enumerated value domain may reference the Australian Standard Classification of Countries 
+(2011) and provide a four digit code (i.e. NNNN). A non-enumerated value domain may still reference the same classification, 
+but collect country names using a textual field instead (i.e Text X[X(99)]. Both the enumerated and non-enumerated value domains could be 
+associated with the conceptual domain for countries. The conceptual domain might also be associated with several data element 
+concepts which incorporate country as a central theme, such as <em>Person</em> &mdash;<em>country of birth</em>, 
+<em>Person</em> &mdash; <em>country of residence</em>, or <em>Person</em> &mdash; <em>country of citizenship</em>.</P>
+
+{% endblock %}
