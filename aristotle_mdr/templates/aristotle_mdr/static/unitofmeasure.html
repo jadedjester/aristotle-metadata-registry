@@ -1,0 +1,22 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %} 
+{% block title %}About: Unit Of Measure{% endblock %}
+{% block item_name %}Unit Of Measure{% endblock %} 
+
+{% block breadcrumbs %}
+<li><a href="{% url 'aristotle:about' 'unitofmeasure' %}"Unit Of Measure"</a></li> 
+{% endblock %} 
+
+{% block iso_quote %} 
+The actual units in which the associated values are measured.
+{% end block %} 
+
+{% block description %}
+
+<P>The units in which the values in a value domain are measured. Adding unit of measure information makes the value more 
+meaningful, especially in instances where a concept can be measured using various units of measure. For example, distance may 
+be measured in kilometres or miles, while length may be measured in millimetres, centimetres, inches, metres, feet etc.</P>
+
+<P>While units of measure are specifically related to value domains, they are impertive to the formation of successful 
+data elements.</P>
+ 
+{% endblock %}
