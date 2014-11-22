@@ -8,7 +8,7 @@ from model_utils import Choices
 from haystack import connections
 from haystack.constants import DEFAULT_ALIAS
 from haystack.forms import SearchForm, model_choices
-from haystack.query import SearchQuerySet, SQ
+from haystack.query import EmptySearchQuerySet, SearchQuerySet, SQ
 
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -91,6 +91,12 @@ DELTA ={QUICK_DATES.hour : datetime.timedelta(hours=1),
         }
 
 
+class EmptyPermissionSearchQuerySet(EmptySearchQuerySet):
+    # Just like a Haystack EmptySearchQuerySet, this behaves like a PermissionsSearchQuerySet
+    # But returns nothing all the time.
+    def apply_permission_checks(self,user=None,public_only=False,user_workgroups_only=False):
+        return self
+
 class PermissionSearchQuerySet(SearchQuerySet):
     def apply_permission_checks(self,user=None,public_only=False,user_workgroups_only=False):
         sqs = self
@@ -156,6 +162,9 @@ class TokenSearchForm(SearchForm):
 
         return sqs
 
+    def no_query_found(self):
+        return EmptyPermissionSearchQuerySet()
+
 datePickerOptions={
     "format": "YYYY-MM-DD",
     "pickTime": False,
@@ -163,7 +172,6 @@ datePickerOptions={
     "defaultDate":"",
     "useCurrent": False,
 }
-
 
 class PermissionSearchForm(TokenSearchForm):
     """
@@ -243,7 +251,7 @@ class PermissionSearchForm(TokenSearchForm):
         has_filter = any([self.cleaned_data.get(f,False) for f in filters])
         if has_filter and not self.query_text and not self.kwargs:
             # If there is a filter, but no query then we'll force some results.
-            sqs = SearchQuerySet().order_by('-modified')
+            sqs = self.searchqueryset.order_by('-modified')
             self.filter_search = True
             self.attempted_filter_search = True
 
@@ -286,7 +294,7 @@ class PermissionSearchForm(TokenSearchForm):
             suggested_query = []
             for token in self.cleaned_data.get('q',"").split(" "):
                 if token: # remove blanks
-                    suggestion = SearchQuerySet().spelling_suggestion(token)
+                    suggestion = self.searchqueryset.spelling_suggestion(token)
                     if suggestion:
                         suggested_query.append(suggestion)
                         has_suggestions = True

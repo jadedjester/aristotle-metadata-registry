@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-21 12:44+0000\n"
+"POT-Creation-Date: 2014-11-22 00:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -227,7 +227,8 @@ msgstr ""
 msgid "Save and continue editing"
 msgstr ""
 
-#: templates/aristotle_mdr/header.html:34 templates/search/search.html:19
+#: templates/aristotle_mdr/header.html:34
+#: templates/aristotle_mdr/static/home.html:14 templates/search/search.html:19
 #: templates/search/search.html.py:28
 msgid "Search"
 msgstr ""
@@ -296,6 +297,18 @@ msgstr ""
 
 #: templates/aristotle_mdr/header.html:152
 msgid "Log in"
+msgstr ""
+
+#: templates/aristotle_mdr/statuses.html:2
+msgid "Registration status"
+msgstr ""
+
+#: templates/aristotle_mdr/statuses.html:16
+msgid "View registration history"
+msgstr ""
+
+#: templates/aristotle_mdr/statuses.html:24
+msgid "Not registered"
 msgstr ""
 
 #: templates/aristotle_mdr/actions/autocompleteItem.html:10
@@ -454,6 +467,15 @@ msgstr ""
 #: templates/aristotle_mdr/create/dec_template_wrapper.html:26
 msgid "submit"
 msgstr ""
+
+#: templates/aristotle_mdr/static/home.html:3
+msgid "Home"
+msgstr ""
+
+#: templates/aristotle_mdr/static/home.html:12
+msgctxt "Front page search options"
+msgid "More options"
+msgstr "Fler alternativ"
 
 #: templates/aristotle_mdr/user/userSideBar.html:24
 msgid "All messages"

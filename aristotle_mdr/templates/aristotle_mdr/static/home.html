@@ -1,6 +1,7 @@
 {% extends "aristotle_mdr/base.html" %}
+{% load i18n %}
 
-{% block title %}Home{% endblock %}
+{% block title %}{% trans 'Home'%}{% endblock %}
 {% block search %} {% endblock %}
 {% block content %}
 
@@ -9,9 +10,9 @@
 <form id="homeSearch" action="{% url 'aristotle:search' %}" method="get" >
         <input type="text" class="form-control" id="searchText" name="q" accesskey="q"></input>
         <div class="text-center" style="margin-top:5px;">
-            <a href="/search" class="btn btn-default">More options...</a>
+            <a href="/search" class="btn btn-default">{% trans 'More options' context "Front page search options" %}...</a>
             <button class="btn btn-primary" type="submit">
-                Search <i class="fa fa-search"></i>
+                {% trans 'Search' %} <i class="fa fa-search"></i>
             </button>
         </div>
 </form>
