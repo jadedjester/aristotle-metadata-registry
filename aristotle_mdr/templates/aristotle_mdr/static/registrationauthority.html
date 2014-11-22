@@ -1,0 +1,20 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %} 
+{% block title %}About: Registration Authority{% endblock %}
+{% block item_name %}Registration Authority{% endblock %} 
+
+{% block breadcrumbs %}
+<li><a href="{% url 'aristotle:about' 'registrationauthority' %}"Registration Authority"</a></li> 
+{% endblock %} 
+
+{% block iso_quote %} 
+An organization responsible for maintaining a register.
+{% end block %} 
+
+{% block description %}
+
+<P>An autonomous body that operates and manages a Metadata Registry based upon the ISO/IEC 11179 Metadata Registry standard, 
+for the purpose of registering metadata items. A Registration Authority should develop and disseminate procedures for the 
+operation of the Metadata Registry. A Registration Authority should also faciliate the process of registration, through the 
+receiving and processing metadata item submissions from Submitting Organisations which fall within its domain of responsibility.</P> 
+
+{% endblock %}
