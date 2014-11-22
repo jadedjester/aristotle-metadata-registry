@@ -16,7 +16,7 @@ A data element concept is implicitly associated with both the property and the o
 demographic concepts relating to a person such as, <em>Person</em> &mdash; <em>date of birth</em>, <em>Person</em> &mdash; 
 <em>country of birth</em>, and <em>Person</em> &mdash; <em>religious affiliation</em>.</P>
 
-<P>A data element concept is soley a conceptual description and does not include values for measurement or collection. Values 
+<P>A data element concept is solely a conceptual description and does not include values for measurement or collection. Values 
 are described by a value domain, which in combination with the data element concept forms a data element.</P>
 
 
