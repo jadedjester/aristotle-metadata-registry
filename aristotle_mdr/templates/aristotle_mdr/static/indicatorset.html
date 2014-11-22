@@ -1,0 +1,21 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %}
+
+{% block title %}About: Indicator Set{% endblock %}
+{% block item_name %}Indicator Set{% endblock %}
+
+{% block breadcrumbs %}
+    <li><a href="{% url 'aristotle:about' 'indicatorset' %}">Indicator Set</a></li>
+{% endblock %}
+
+{% block iso_quote %}
+Not defined by ISO
+{% endblock %}
+
+{% block description %}
+    <p>An indicator set provides scope and purpose to a collection of indicators. 
+    Examples of indicator sets include the Report on Government Services (RoGS),
+    Council of Australian Government, World Health Organization and Organisation for Economic Co-operation and Development.</P>
+    
+    <P>An indicator set may only be associated with indicators.</P> 
+  
+{% endblock %}
