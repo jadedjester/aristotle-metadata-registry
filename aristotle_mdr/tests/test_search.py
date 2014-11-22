@@ -46,6 +46,12 @@ class TestSearch(utils.LoggedInViewPages,TestCase):
             models.ObjectClass.objects.create(name=t,workgroup=self.avengers_wg)
             for t in avengers.split() ]
 
+    def test_empty_search(self):
+        self.logout()
+        response = self.client.get(reverse('aristotle:search')+"?q=")
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(len(response.context['page'].object_list),0)
+
     def test_public_search(self):
         self.logout()
         response = self.client.get(reverse('aristotle:search')+"?q=xman")
