@@ -84,6 +84,9 @@ $( document ).ready( function() {
         updateCheckboxBadge(this);
     });
 
+    $('.dropdown-menu-date input[type=text]').on('click', function(e) {
+        e.stopPropagation();
+    });
     $('.dropdown-menu-date .dropdown-menu').on('click', function(e) {
         updateDateRadioDetails(this);
         clearCustomDates(this);
