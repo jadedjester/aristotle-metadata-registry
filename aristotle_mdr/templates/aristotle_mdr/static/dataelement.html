@@ -1,0 +1,28 @@
+{% extends "aristotle_mdr/static/about_item_base.html" %} 
+{% block title %}About: Data Element{% endblock %}
+{% block item_name %}Data Element{% endblock %} 
+
+{% block breadcrumbs %}
+<li><a href="{% url 'aristotle:about' 'dataelement' %}"Data Element"</a></li> 
+{% endblock %} 
+
+{% block iso_quote %} 
+A unit of data that is considered in context to be indivisible.
+{% end block %} 
+
+{% block description %}
+
+<P>A data element represents the union of a data element concept and a value domain. The following examples demonstrate 
+how a concept can be paired with values to capture detailed information, e.g. <em>Person</em> &mdash; <em>date of birth</em>, 
+<em>DDMMYYYY</em>, <em>Person</em> &mdash; <em>country of birth</em>, <em> code Australian Standard Classification of 
+Countries NNNN</em> and <em>Person</em> &mdash; <em>religious affiliation</em>, <em>code Religious Affiliation Standard
+2012 NNNN</em>.</P>
+
+<p>The same data element concept may be paired with various sets of values to form different data elements and thereby customising
+the way information is specified for collection. For example the concept of Occupation may be associated with a 
+value domain which references the Australian and New Zealand Standard Classification of Occupations and be 
+collected at different digit levels representing the Major Group, Sub-Major Group, Minor Group, Unit Group or Occupation.<p>
+
+<P>Data elements may stand alone or be associated with other item types such as data set specifications or indicators.</P>   
+
+{% endblock %}
